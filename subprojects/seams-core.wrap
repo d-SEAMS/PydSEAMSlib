@@ -1,0 +1,8 @@
+[wrap-git]
+directory=seams-core
+url=https://github.com/d-SEAMS/seams-core
+revision=1b52b69b34041c15b266d35b4b653bea636810f1
+
+[provide]
+seams-core=git
+
