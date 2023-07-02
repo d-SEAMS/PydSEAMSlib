@@ -2,7 +2,6 @@
 #include <pybind11/stl.h>
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
-#include "../subprojects/seams-core/src/include/internal/seams_output.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -50,4 +49,14 @@ PYBIND11_MODULE(cyoda, m) {
         .def_readwrite("boxLow", &molSys::PointCloud<molSys::Point<double>, double>::boxLow)
         .def_readwrite("idIndexMap", &molSys::PointCloud<molSys::Point<double>, double>::idIndexMap);
 
+      m.def("readXYZ", &sinp::readXYZ,
+        "A function to populate a PointCloudDouble with data from a file",
+        py::arg("filename") /* std::string */,
+        "yCloud"_a /*  molSys::PointCloud<molSys::Point<double>, double>* */
+        );
+
+      m.def("clearPointCloud", &molSys::clearPointCloud,
+        "A function to populate a PointCloudDouble with data from a file",
+        py::arg("yCloud") /*  molSys::PointCloud<molSys::Point<double>, double>* */
+        );
 }
