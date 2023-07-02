@@ -13,9 +13,13 @@ host_system = host_machine.system()
 
 # ---------------------- Library Dependencies
 seams_core_deps = subproject('seams-core', version: '1.0.1').get_variable('_deps')
-seams_core = subproject('seams-core', version: '1.0.1').get_variable('_linkto')
-_deps += seams_core_deps
-_linkto += seams_core
+seams_core_inc = subproject('seams-core', version: '1.0.1').get_variable('_incdirs')
+seams_core_linkto = subproject('seams-core', version: '1.0.1').get_variable('_linkto')
+ydslib = subproject('seams-core', version: '1.0.1').get_variable('ydslib')
+seams_core_dep = declare_dependency(link_with: [seams_core_linkto, ydslib],
+                                    dependencies: seams_core_deps,
+                                    include_directories: seams_core_inc)
+_deps += seams_core_dep
 
 # ---------------------- Bindings
 py_mod = import('python')
