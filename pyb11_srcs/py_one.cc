@@ -51,12 +51,18 @@ PYBIND11_MODULE(cyoda, m) {
 
       m.def("readXYZ", &sinp::readXYZ,
         "A function to populate a PointCloudDouble with data from a file",
-        py::arg("filename") /* std::string */,
-        "yCloud"_a /*  molSys::PointCloud<molSys::Point<double>, double>* */
-        );
-
-      m.def("clearPointCloud", &molSys::clearPointCloud,
-        "A function to populate a PointCloudDouble with data from a file",
-        py::arg("yCloud") /*  molSys::PointCloud<molSys::Point<double>, double>* */
-        );
+        py::arg("filename")); /* std::string */
+      // "yCloud"_a /*  molSys::PointCloud<molSys::Point<double>, double>* */
+        //m.def("clearPointCloud", &molSys::clearPointCloud,
+        //"A function to populate a PointCloudDouble with data from a file",
+        //py::arg("yCloud") /*  molSys::PointCloud<molSys::Point<double>, double>* */
+        //);
+    m.def("readLammpsTrjreduced", &sinp::readLammpsTrjreduced, 
+        py::arg("filename"), 
+                "targetFrame"_a,
+                "typeI"_a,
+                "isSlice"_a, 
+                "coordLow"_a,
+                "coordHigh"_a);
+      
 }
