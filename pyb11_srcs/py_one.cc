@@ -7,7 +7,11 @@
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/neighbours.hpp"
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bond.hpp"
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/franzblau.hpp"
-
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/ring.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bulkTUM.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/selection.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -209,12 +213,12 @@ PYBIND11_MODULE(cyoda, m) {
         &primitive::clearGraph,
         "Function for clearing vectors in Graph after multiple usage",
         py::arg("currentGraph"));
-        
+
     m.def("countAllRingsFromIndex",
         &primitive::countAllRingsFromIndex,
         "Creates a vector of vectors of all possible rings",
         py::arg("neighHbondList"),
-        "maxDepth"_a);
+        "maxDepth"_a); 
 
     m.def("findRings",
           &primitive::findRings,
@@ -264,4 +268,282 @@ PYBIND11_MODULE(cyoda, m) {
           "depth"_a,
           "path"_a,
           "goal"_a);
+
+    m.def("assignPolygonType",
+        &ring::assignPolygonType,
+        "Assign an atomType (equal to the number of nodes in the ring) given n-membered rings",
+        py::arg("rings"),
+        "atomTypes"_a,
+        "nRings"_a);
+
+    m.def("assignPrismType",
+          &ring::assignPrismType,
+          "Assign an atomType (equal to the number of nodes in the ring) given a vector with a list of indices of rings comprising the prisms",
+          py::arg("rings"),
+          "listPrism"_a,
+          "ringSize"_a,
+          "ringType"_a,
+          "atomTypes"_a,
+          "atomState"_a);
+
+    m.def("atomsFromCages",
+        &tum3::atomsFromCages,
+        "Gets the atoms in the cages of a given cluster",
+        py::arg("rings"),
+        "cageList"_a,
+        "clusterCages"_a);
+
+    m.def("atomsInSingleSlice",
+          &gen::atomsInSingleSlice,
+          "Given a pointCloud set the inSlice bool for every atom, if the atoms are inside the specified (single) region",
+          py::arg("yCloud"),
+          "clearPreviousSliceSelection"_a,
+          "coordLow"_a,
+          "coordHigh"_a);
+
+    m.def("averageRMSDatom",
+        &tum3::averageRMSDatom,
+        "Average the RMSD per atom",
+        py::arg("rmsdPerAtom"),
+        "noOfCommonAtoms"_a);
+ 
+    m.def("basalPrismConditions",
+        &ring::basalPrismConditions,
+        "Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion",
+        py::arg("nList"),
+        "basal1"_a,
+        "basal2"_a);
+
+    m.def("buildRefDDC",
+        &tum3::buildRefDDC,
+        "Build a reference Double-Diamond cage, reading in from a template XYZ file",
+        py::arg("fileName"));
+
+    m.def("buildRefHC",
+        &tum3::buildRefHC,
+        "Build a reference Hexagonal cage, reading in from a template XYZ file",
+        py::arg("fileName"));
+
+    m.def("clearRingList",
+        &ring::clearRingList,
+        "Erases memory for a vector of vectors for a list of rings",
+        py::arg("rings"));
+
+    m.def("clusterCages",
+          &tum3::clusterCages,
+          "Clustering Clusters cages using the Stillinger algorithm and prints out individual XYZ files of clusters.",
+          py::arg("yCloud"),
+          "path"_a,
+          "rings"_a,
+          "cageList"_a,
+          "numHC"_a,
+          "numDDC"_a);
+ 
+    m.def("commonElementsInThreeRings",
+        &ring::commonElementsInThreeRings,
+        "Common elements in 3 rings",
+        py::arg("ring1"),
+        "ring2"_a,
+        "ring3"_a);
+
+    m.def("compareRings",
+        &ring::compareRings,
+        "Compares two disordered vectors and checks to see if they contain the same elements",
+        py::arg("ring1"),
+        "ring2"_a);
+
+    m.def("deformedPrismTypes",
+        &ring::deformedPrismTypes,
+        "Get the atom type values for deformed prisms",
+        py::arg("atomState"),
+        "atomTypes"_a,
+        "maxDepth"_a);
+
+    m.def("discardExtraTetragonBlocks",
+        &ring::discardExtraTetragonBlocks,
+        "Checks whether two 4-membered rings are parallel in one dimension or not to prevent overcounting",
+        py::arg("basal1"),
+        "basal2"_a,
+        "yCloud"_a);
+
+    m.def("findPrisms",
+        &ring::findPrisms,
+        "Find out which rings are prisms. Returns a vector containing all the ring IDs which are prisms",
+        py::arg("rings"),
+        "ringType"_a,
+        "nPerfectPrisms"_a,
+        "nImperfectPrisms"_a,
+        "nList"_a,
+        "rmsdPerAtom"_a,
+        "doShapeMatching"_a,
+        "yCloud"_a);
+
+    m.def("findsCommonElements",
+        &ring::findsCommonElements,
+        "Returns the common elements of two rings",
+        py::arg("ring1"),
+        "ring2"_a);
+
+    m.def("findTripletInRing",
+        &ring::findTripletInRing,
+        "Searches a particular ring for a triplet",
+        py::arg("ring"),
+        "triplet"_a);
+
+    m.def("getEdgeMoleculesInRings",
+        &ring::getEdgeMoleculesInRings,
+        py::arg("rings"),
+        "oCloud"_a,
+        "yCloud"_a,
+        "identicalCloud"_a,
+        "coordLow"_a,
+        "coordHigh"_a);
+
+    m.def("getPointCloudOneAtomType",
+        &gen::getPointCloudOneAtomType,
+        "Given a pointCloud containing certain atom types, this returns a pointCloud containing atoms of only the desired type",
+        py::arg("yCloud"),
+        "outCloud"_a,
+        "atomTypeI"_a,
+        "isSlice"_a,
+        "coordLow"_a,
+        "coordHigh"_a);
+
+    m.def("getSingleRingSize",
+        &ring::getSingleRingSize,
+        "Returns a vector of vectors of rings of a single size.",
+        py::arg("rings"),
+        "ringSize"_a);
+
+    m.def("hasCommonElements",
+        &ring::hasCommonElements,
+        "Check to see if two vectors have common elements or not True, if common elements are present and false if there are no common element",
+        py::arg("ring1"),
+        "ring2"_a);
+
+    m.def("keepAxialRingsOnly",
+        &ring::keepAxialRingsOnly,
+        "Saves only axial rings out of all possible rings",
+        py::arg("rings"),
+        "yCloud"_a);
+
+    m.def("moleculesInSingleSlice",
+        &gen::moleculesInSingleSlice,
+        "Given a pointCloud set the inSlice bool for every atom, if the molecules are inside the specified (single) region. If even one atom of a molecule is inside the region, then all atoms of that molecule will be inside the region (irrespective of type)",
+        py::arg("yCloud"),
+        "clearPreviousSliceSelection"_a,
+        "coordLow"_a,
+        "coordHigh"_a);
+  
+    m.def("polygonRingAnalysis",
+        &ring::polygonRingAnalysis,
+        "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "maxDepth"_a,
+        "sheetArea"_a,
+        "firstFrame"_a);
+
+    m.def("printSliceGetEdgeMoleculesInRings",
+        &ring::printSliceGetEdgeMoleculesInRings,
+        py::arg("path"),
+        "rings"_a,
+        "oCloud"_a,
+        "yCloud"_a,
+        "coordLow"_a,
+        "coordHigh"_a,
+        "identicalCloud"_a);
+
+    m.def("prismAnalysis",
+        &ring::prismAnalysis,
+        "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "maxDepth"_a,
+        "atomID"_a,
+        "firstFrame"_a,
+        "currentFrame"_a,
+        "doShapeMatching"_a);
+
+    m.def("relaxedPrismConditions",
+        &ring::relaxedPrismConditions,
+        "Two candidate basal rings of a prism block should have at least one bond between them",
+        py::arg("nList"),
+        "basal1"_a,
+        "basal2"_a);
+
+    m.def("rmAxialTranslations",
+        &ring::rmAxialTranslations,
+        "Shift the entire ice nanotube and remove axial translations",
+        py::arg("yCloud"),
+        "atomID"_a,
+        "firstFrame"_a,
+        "currentFrame"_a);
+
+    m.def("setAtomsWithSameMolID",
+        &gen::setAtomsWithSameMolID,
+        "Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms, with that molecule ID",
+        py::arg("yCloud"),
+        "molIDAtomIDmap"_a,
+        "molID"_a,
+        "inSliceValue"_a);
+ 
+    m.def("shapeMatchDDC",
+        &tum3::shapeMatchDDC,
+        "Shape-matching for a target DDC",
+        py::arg("yCloud"),
+        "refPoints"_a,
+        "cageList"_a,
+        "cageIndex"_a,
+        "rings"_a,
+        "quat"_a,
+        "rmsd"_a);
+
+    m.def("shapeMatchHC",
+        &tum3::shapeMatchHC,
+        "Shape-matching for a target HC",
+        py::arg("yCloud"),
+        "refPoints"_a,
+        "cageUnit"_a,
+        "rings"_a,
+        "nList"_a,
+        "quat"_a,
+        "rmsd"_a);
+
+    m.def("topoBulkCriteria",
+        &tum3::topoBulkCriteria,
+        "Topological network methods Finds the HCs and DDCs for the system",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "firstFrame"_a,
+        "numHC"_a,
+        "numDDC"_a,
+        "ringType"_a);
+
+    m.def("topoUnitMatchingBulk",
+        &tum3::topoUnitMatchingBulk,
+        "Topological unit matching for bulk water. If printClusters is true, individual clusters of connected cages are printed",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "firstFrame"_a,
+        "printClusters"_a,
+        "onlyTetrahedral"_a);
+
+    m.def("updateRMSDatom",
+        &tum3::updateRMSDatom,
+        "Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the shape-matching of each cage",
+        py::arg("rings"),
+        "cageUnit"_a,
+        "rmsd"_a,
+        "rmsdPerAtom"_a,
+        "noOfCommonAtoms"_a,
+        "atomTypes"_a);
 }
