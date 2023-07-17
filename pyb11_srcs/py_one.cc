@@ -1,12 +1,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <fmt/core.h>
 
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/neighbours.hpp"
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bond.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/franzblau.hpp"
 
-#include <fmt/core.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -203,4 +204,64 @@ PYBIND11_MODULE(cyoda, m) {
         &bond::trimBonds,
         "Remove duplicate bonds",
         py::arg("bonds"));
+
+    m.def("clearGraph",
+        &primitive::clearGraph,
+        "Function for clearing vectors in Graph after multiple usage",
+        py::arg("currentGraph"));
+        
+    m.def("countAllRingsFromIndex",
+        &primitive::countAllRingsFromIndex,
+        "Creates a vector of vectors of all possible rings",
+        py::arg("neighHbondList"),
+        "maxDepth"_a);
+
+    m.def("findRings",
+          &primitive::findRings,
+          "Main function that searches for all rings",
+          py::arg("fullGraph"),
+          "v"_a,
+          "visited"_a,
+          "maxDepth"_a,
+          "depth"_a,
+          "root"_a);
+
+    m.def("populateGraphFromIndices",
+        &primitive::populateGraphFromIndices,
+        "Creates a graph object and fills it with the information from a neighbour list of INDICES NOT ATOM IDs created before",
+        py::arg("nList"));
+
+    m.def("populateGraphFromNListID",
+        &primitive::populateGraphFromNListID,
+        "Creates a graph object and fills it with the information from a neighbour list and pointCloud created before",
+        py::arg("yCloud"),
+        "neighHbondList"_a);
+
+    m.def("removeNonSPrings",
+        &primitive::removeNonSPrings,
+        "Removes the non-SP rings, using the Franzblau shortest path criterion",
+        py::arg("fullGraph"));
+
+    m.def("restoreEdgesFromIndices",
+        &primitive::restoreEdgesFromIndices,
+        "Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT ATOM IDs created before",
+        py::arg("fullGraph"),
+        "nList"_a);
+
+    m.def("ringNetwork",
+        &primitive::ringNetwork,
+        "Returns a vector of vectors containing the rings",
+        py::arg("maxDepth"),
+        "nList"_a);
+
+    m.def("shortestPath",
+          &primitive::shortestPath,
+          "Calculates the shortest path",
+          py::arg("fullGraph"),
+          "v"_a,
+          "visited"_a,
+          "maxDepth"_a,
+          "depth"_a,
+          "path"_a,
+          "goal"_a);
 }
