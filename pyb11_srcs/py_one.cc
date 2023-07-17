@@ -4,6 +4,7 @@
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
 #include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/neighbours.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bond.hpp"
 
 #include <fmt/core.h>
 
@@ -165,4 +166,41 @@ PYBIND11_MODULE(cyoda, m) {
         py::arg("yCloud"),
         "rcutoff"_a,
         "typeI"_a);
+
+    m.def("createBondsFromCages",
+          &bond::createBondsFromCages,
+          "Creates a vector of vectors containing bond connectivity information from the rings vector of vectors and cage information",
+          py::arg("rings"),
+          "cageList"_a,
+          "type"_a,
+          "nRings"_a);
+
+    m.def("getHbondDistanceOH",
+          &bond::getHbondDistanceOH,
+          "Calculates the distance of the hydrogen bond between O and H (of different atoms)",
+          py::arg("oCloud"),
+          "hCloud"_a,
+          "oAtomIndex"_a,
+          "hAtomIndex"_a);
+
+    m.def("populateHbonds",
+          &bond::populateHbonds,
+          "Create a vector of vectors containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed",
+          py::arg("yCloud"),
+          "filename"_a,
+          "targetFrame"_a,
+          "Htype"_a,
+          "nList"_a);
+
+    m.def("populateHbondsWithInputClouds",
+        &bond::populateHbondsWithInputClouds,
+        "Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed, taking a PointCloud for the H atoms as input",
+        py::arg("yCloud"),
+        "hCloud"_a,
+        "nList"_a);
+
+    m.def("trimBonds",
+        &bond::trimBonds,
+        "Remove duplicate bonds",
+        py::arg("bonds"));
 }
