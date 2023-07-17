@@ -3,6 +3,7 @@
 
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
+#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/neighbours.hpp"
 
 #include <fmt/core.h>
 
@@ -125,4 +126,43 @@ PYBIND11_MODULE(cyoda, m) {
           "z"_a,
           "coordLow"_a,
           "coordHigh"_a);
+
+    m.def("clearNeighbourList",
+        &nneigh::clearNeighbourList,
+        "Erases memory for a vector of vectors for the neighbour list",
+        py::arg("nList"));
+
+    m.def("getNewNeighbourListByIndex",
+        &nneigh::getNewNeighbourListByIndex,
+        "Gets a neighbour list by index, according to a pointCloud given as the input",
+        py::arg("yCloud"),
+        "cutoff"_a);
+
+    m.def("halfNeighList",
+        &nneigh::halfNeighList,
+        "Inefficient O(n^2) implementation of neighbour lists ",
+        py::arg("yCloud"),
+        "rcutoff"_a,
+        "typeI"_a);
+
+    m.def("neighbourListByIndex",
+        &nneigh::neighbourListByIndex,
+        "Converts the neighbour list build with atom IDs into a neighbour list of atom indices, according to the pointCloud",
+        py::arg("yCloud"),
+        "nList"_a);
+
+    m.def("neighList",
+          &nneigh::neighList,
+          "All these functions use atom IDs and not indices",
+          py::arg("yCloud"),
+          "rcutoff"_a,
+          "typeI"_a,
+          "typeJ"_a);
+
+    m.def("neighListO",
+        &nneigh::neighListO,
+        "Inefficient O(n^2) implementation of neighbour lists ",
+        py::arg("yCloud"),
+        "rcutoff"_a,
+        "typeI"_a);
 }
