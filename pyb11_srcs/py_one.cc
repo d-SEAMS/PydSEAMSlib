@@ -4,14 +4,14 @@
 
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/neighbours.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bond.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/franzblau.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/ring.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/bulkTUM.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/selection.hpp"
-#include "/users/home/ruhila/Git/Github/dSEAMS/pyseams/subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
+#include "../subprojects/seams-core/src/include/internal/neighbours.hpp"
+#include "../subprojects/seams-core/src/include/internal/bond.hpp"
+#include "../subprojects/seams-core/src/include/internal/franzblau.hpp"
+#include "../subprojects/seams-core/src/include/internal/ring.hpp"
+#include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
+#include "../subprojects/seams-core/src/include/internal/bulkTUM.hpp"
+#include "../subprojects/seams-core/src/include/internal/selection.hpp"
+#include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
