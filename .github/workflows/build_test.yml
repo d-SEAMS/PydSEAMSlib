@@ -1,0 +1,26 @@
+name: "Build pyseams and test"
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Conda environment from environment.yml
+        uses: mamba-org/provision-with-micromamba@main
+
+      - name: Build pyseams
+        shell: bash -l {0}
+        run: |
+          meson compile -C bbdir
+
+      - name: Run a test
+        shell: bash -l {0}
+        run: |
+          python -c 'import bbdir.cyoda'
