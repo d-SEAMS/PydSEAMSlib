@@ -2,6 +2,7 @@
 directory=seams-core
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 url=https://github.com/RuhiRG/seams-core
 revision=2196bc2b9c04c9ec8876c87a764a6fdf226e2272
 =======
@@ -10,6 +11,9 @@ url=https://github.com/d-SEAMS/seams-core
 >>>>>>> f26ea24 (ENH: regarding seams-core version and keepAxialRingsOnly function)
 =======
 url=https://github.com/ruhirg/seams-core/tree/fixup
+=======
+url=https://github.com/ruhirg/seams-core/
+>>>>>>> d11a719 (ENH: once more)
 revision=e1b87f431b11c3a20601b934365271350c04dc36
 >>>>>>> 586b4bd (ENH: revised revision key)
 [provide]
