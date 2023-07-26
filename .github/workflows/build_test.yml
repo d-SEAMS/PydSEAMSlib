@@ -18,6 +18,7 @@ jobs:
       - name: Build pyseams
         shell: bash -l {0}
         run: |
+          meson setup bbdir
           meson compile -C bbdir
 
       - name: Run a test
