@@ -1,7 +1,12 @@
 [wrap-git]
 directory=seams-core
+<<<<<<< HEAD
 url=https://github.com/RuhiRG/seams-core
 revision=2196bc2b9c04c9ec8876c87a764a6fdf226e2272
+=======
+url=https://github.com/d-SEAMS/seams-core
+
+>>>>>>> f26ea24 (ENH: regarding seams-core version and keepAxialRingsOnly function)
 [provide]
 seams-core=git
 
