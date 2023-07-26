@@ -20,7 +20,11 @@ dependencies:
   # Python
   - pdm
 <<<<<<< HEAD
+<<<<<<< HEAD
   - pybind11
 =======
   - fmt=="9.1.0"
 >>>>>>> 3167f69 (ENH: added fmt as a dependency)
+=======
+  - "fmt==9.1.0"
+>>>>>>> 1b36832 (ENH: once more)
