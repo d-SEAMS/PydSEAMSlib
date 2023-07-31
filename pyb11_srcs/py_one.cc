@@ -1,4 +1,3 @@
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/core.h>
 
@@ -12,6 +11,7 @@
 #include "../subprojects/seams-core/src/include/internal/bulkTUM.hpp"
 #include "../subprojects/seams-core/src/include/internal/selection.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
+#include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -168,8 +168,8 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("neighListO",
         &nneigh::neighListO,
         "Inefficient O(n^2) implementation of neighbour lists ",
-        py::arg("yCloud"),
-        "rcutoff"_a,
+        py::arg("rcutoff"),
+        "yCloud"_a,
         "typeI"_a);
 
     m.def("createBondsFromCages",
@@ -191,11 +191,11 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("populateHbonds",
           &bond::populateHbonds,
           "Create a vector of vectors containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed",
-          py::arg("yCloud"),
-          "filename"_a,
+          py::arg("filename"),
+          "yCloud"_a,
+          "nList"_a,
           "targetFrame"_a,
-          "Htype"_a,
-          "nList"_a);
+          "Htype"_a);
 
     m.def("populateHbondsWithInputClouds",
         &bond::populateHbondsWithInputClouds,
@@ -255,8 +255,8 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("ringNetwork",
         &primitive::ringNetwork,
         "Returns a vector of vectors containing the rings",
-        py::arg("maxDepth"),
-        "nList"_a);
+        py::arg("nList"),
+        "maxDepth"_a);
 
     m.def("shortestPath",
           &primitive::shortestPath,
@@ -547,4 +547,22 @@ PYBIND11_MODULE(cyoda, m) {
         "rmsdPerAtom"_a,
         "noOfCommonAtoms"_a,
         "atomTypes"_a);
+
+    m.def("rdf2Danalysis_AA",
+        &rdf2::rdf2Danalysis_AA,
+        "calls other functions for initializing, sampling and normalizing the RDF",
+        py::arg("path"),
+        "rdfValues"_a,
+        "yCloud"_a,
+        "cutoff"_a,
+        "binwidth"_a,
+        "firstFrame"_a,
+        "finalFrame"_a);   
+
+
+
+
+
+
 }
+
