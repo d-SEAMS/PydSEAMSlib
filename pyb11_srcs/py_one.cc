@@ -12,7 +12,7 @@
 #include "../subprojects/seams-core/src/include/internal/selection.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
-
+#include "../subprojects/seams-core/src/include/internal/cluster.hpp"
 namespace py = pybind11;
 using namespace pybind11::literals;
 
@@ -559,8 +559,27 @@ PYBIND11_MODULE(cyoda, m) {
         "firstFrame"_a,
         "finalFrame"_a);   
 
+    m.def("bulkPolygonRingAnalysis",
+        &ring::bulkPolygonRingAnalysis,
+        "Find out rings in the bulk, looping through all ring sizes upto the maxDepth",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "maxDepth"_a,
+        "firstFrame"_a);
 
-
+    m.def("clusterAnalysis",
+        &clump::clusterAnalysis,
+        "Does the cluster analysis of ice particles in the system.",
+        py::arg("path"),
+        "iceCloud"_a,
+        "yCloud"_a,
+        "nList"_a,
+        "iceNeighbourList"_a,
+        "cutoff"_a,
+        "firstFrame"_a,
+        "bopAnalysis"_a);
 
 
 
