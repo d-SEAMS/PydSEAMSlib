@@ -1,8 +1,12 @@
 # Manual additions
 *.swp
 tmp.py
+<<<<<<< HEAD
 .vscode/settings.json
 subprojects/*.wrap
+=======
+*.wrap
+>>>>>>> f8302a3 (ENH: To allign the cpp standard in pyseams and seams-core to 14.)
 # Created by https://www.toptal.com/developers/gitignore/api/python,c++,meson,visualstudiocode,macos,windows,linux,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,c++,meson,visualstudiocode,macos,windows,linux,cmake
 

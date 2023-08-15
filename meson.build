@@ -1,6 +1,6 @@
 project('pyseams', 'cpp',
        version: '1.0.1',
-    default_options: ['warning_level=3', 'cpp_std=c++17'])
+    default_options: ['warning_level=1', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
 
@@ -12,14 +12,8 @@ host_system = host_machine.system()
    _incdirs = [] # All the includes
 
 # ---------------------- Library Dependencies
-seams_core_deps = subproject('seams-core').get_variable('_deps')
-seams_core_inc = subproject('seams-core').get_variable('_incdirs')
-seams_core_linkto = subproject('seams-core').get_variable('_linkto')
-ydslib = subproject('seams-core').get_variable('ydslib')
-seams_core_dep = declare_dependency(link_with: [seams_core_linkto, ydslib],
-                                    dependencies: seams_core_deps,
-                                    include_directories: seams_core_inc)
-_deps += seams_core_dep
+ydslib = subproject('seams-core').get_variable('yds_dep')
+_deps += ydslib
 
 # ---------------------- Bindings
 py_mod = import('python')
