@@ -13,6 +13,9 @@
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
 #include "../subprojects/seams-core/src/include/internal/cluster.hpp"
+#include "../subprojects/seams-core/src/include/internal/bop.hpp"
+#include "../subprojects/seams-core/src/include/internal/seams_output.hpp"
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
@@ -581,7 +584,54 @@ PYBIND11_MODULE(cyoda, m) {
         "firstFrame"_a,
         "bopAnalysis"_a);
 
+    m.def("getCorrelPlus",
+        &chill::getCorrelPlus,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "isSlice"_a);
 
+    m.def("getIceTypePlus",
+        &chill::getIceTypePlus,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "path"_a,
+        "firstFrame"_a,
+        "isSlice"_a,
+        "outputFileName"_a);
 
+    m.def("writeDump",
+        &sout::writeDump,
+        "Generic function for writing out to a dump file.",
+        py::arg("yCloud"),
+        "path"_a,
+        "outFile"_a);
+
+    m.def("getq6",
+        &chill::getq6,
+        "q6 can distinguish between water and ice. Use this for the largest ice cluster.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "isSlice"_a);
+
+    m.def("reclassifyWater",
+        &chill::reclassifyWater,
+        py::arg("yCloud"),
+        "q6"_a);
+
+    m.def("printIceType",
+        &chill::printIceType,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "path"_a,
+        "firstFrame"_a,
+        "isSlice"_a,
+        "outputFileName"_a);
+
+    m.def("recenterClusterCloud",
+        &clump::recenterClusterCloud,
+        py::arg("iceCloud"),
+        "nList"_a);
 }
 
