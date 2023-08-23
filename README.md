@@ -8,5 +8,8 @@ All contributions are welcome, this includes code and documentation
 contributions but also questions or other clarifications. Note that we expect
 all contributors to follow our [Code of Conduct](https://github.com/RuhiRG/pyseams/blob/main/CODE_OF_CONDUCT.md).
 
+# Acknowledgments
+This project was conceived as part of d-SEAM’s participation under the Python Software Foundation (PSF) in the 2023 iteration of the Google Summer of Code programme.
+
 # License
 [MIT](https://github.com/RuhiRG/pyseams/blob/main/LICENSE).
