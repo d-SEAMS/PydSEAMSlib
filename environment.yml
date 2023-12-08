@@ -15,5 +15,7 @@ dependencies:
   # d-SEAMS deps
   - yaml-cpp
   - boost-cpp
+  - fmt==9.0.0
+  - eigen==3.4.0
   # Python
   - pdm
