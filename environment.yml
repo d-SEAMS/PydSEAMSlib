@@ -19,3 +19,4 @@ dependencies:
   - eigen==3.4.0
   # Python
   - pdm
+  - pybind11
