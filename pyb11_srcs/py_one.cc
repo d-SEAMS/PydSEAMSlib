@@ -421,11 +421,11 @@ PYBIND11_MODULE(cyoda, m) {
         py::arg("ring1"),
         "ring2"_a);
 
-    m.def("keepAxialRingsOnly",
-        &ring::keepAxialRingsOnly,
-        "Saves only axial rings out of all possible rings",
-        py::arg("rings"),
-        "yCloud"_a);
+//   m.def("keepAxialRingsOnly",
+//        &ring::keepAxialRingsOnly,
+//        "Saves only axial rings out of all possible rings",
+//        py::arg("rings"),
+//        "yCloud"_a);
 
     m.def("moleculesInSingleSlice",
         &gen::moleculesInSingleSlice,
