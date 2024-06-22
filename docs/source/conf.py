@@ -36,6 +36,7 @@ autodoc2_packages = [
 
 myst_enable_extensions = [
     "deflist",
+    "fieldlist",
 ]
 
 intersphinx_mapping = {
@@ -51,8 +52,18 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
+html_theme = 'sphinx_book_theme'
+html_title = "pyseams"
 html_static_path = ['_static']
+
+html_theme_options = {
+    "repository_url": "https://github.com/d-SEAMS/pyseams",
+    "use_repository_button": True,
+    
+}
+# --- Plugin options
+autodoc2_render_plugin = "myst"
+
 
 #references
 # [1] https://github.com/HaoZeke/openblas_buildsys_snips/blob/main/docs/source/conf.py
