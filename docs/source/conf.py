@@ -17,8 +17,8 @@ release = '0.1.0'
 #referenced my favourite [1]
 extensions = [
     "myst_parser",
-    "autodoc2",
-    "sphinx.ext.autodoc",
+#    "autodoc2",
+    # "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -27,21 +27,40 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.spelling",
+    "breathe",
+    "exhale",
 ]
 
-autodoc2_render_plugin = "myst"
-autodoc2_packages = [
-    f"../../src/{project}",
-]
+# autodoc2_render_plugin = "myst"
+# autodoc2_packages = [
+#     f"../{project}",
+# ]
 
 myst_enable_extensions = [
     "deflist",
     "fieldlist",
 ]
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
+# Setup the breathe extension
+breathe_projects = {
+    "Pyseams": "./_doxygen/xml"
 }
+breathe_default_project = "Pyseams"
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./api",
+    "rootFileName":          "library_root.rst",
+    "doxygenStripFromPath":  "..",
+    # Heavily encouraged optional argument (see docs)
+    "rootFileTitle":         "Library API",
+    # Suggested optional arguments
+    "createTreeView":        True,
+}
+# intersphinx_mapping = {
+#     "python": ("https://docs.python.org/3/", None),
+# }
 
 
 templates_path = ['_templates']
@@ -61,9 +80,13 @@ html_theme_options = {
     "use_repository_button": True,
     
 }
+
+
+
 # --- Plugin options
-autodoc2_render_plugin = "myst"
+# autodoc2_render_plugin = "myst"
 
 
 #references
 # [1] https://github.com/HaoZeke/openblas_buildsys_snips/blob/main/docs/source/conf.py
+# [2] https://exhale.readthedocs.io/en/latest/quickstart.html
