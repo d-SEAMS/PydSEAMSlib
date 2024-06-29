@@ -1,3 +1,19 @@
+/**
+ *  @file   py_one.cc
+ *  @author Ruhila
+ *  @date   2024-05-25
+ *  @brief  Documentation for python bindings (Pyseams)
+ *
+ *  Created on: 2024-05-25
+ *
+ *  This is part of the Pyseams project in gsoc24. This documentation helps understanding the python bindings.
+ *  The bindings are created using the pybind11 library. 
+ *  @ref https://github.com/d-SEAMS/pyseams
+ *  @ref https://pyseams.surge.sh
+ *  @ref https://pybind11.readthedocs.io 
+ *  @ref https://docs.dseams.info
+ */
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/core.h>
@@ -13,21 +29,28 @@
 #include "../subprojects/seams-core/src/include/internal/selection.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 
+
+
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 PYBIND11_MODULE(cyoda, m) {
-    py::class_<molSys::Point<double>>(m, "PointDouble")
+ /**
+ * @brief This function defines all the point double class.
+ *
+ */
+    py::class_<molSys::Point<double>>(m, "PointDouble") 
         .def(py::init<>())
-        .def_readwrite("c_type", &molSys::Point<double>::type)
-        .def_readwrite("molID", &molSys::Point<double>::molID)
-        .def_readwrite("atomID", &molSys::Point<double>::atomID)
-        .def_readwrite("iceType", &molSys::Point<double>::iceType)
-        .def_readwrite("x", &molSys::Point<double>::x)
-        .def_readwrite("y", &molSys::Point<double>::y)
-        .def_readwrite("z", &molSys::Point<double>::z)
-        .def_readwrite("c_ij", &molSys::Point<double>::c_ij)
-        .def_readwrite("inSlice", &molSys::Point<double>::inSlice)
+        .def_readwrite("c_type", &molSys::Point<double>::type) /**< PointDouble value 1 */
+        .def_readwrite("molID", &molSys::Point<double>::molID) /**< PointDouble value 2 */
+        .def_readwrite("atomID", &molSys::Point<double>::atomID) /**< PointDouble value 3 */
+        .def_readwrite("iceType", &molSys::Point<double>::iceType) /**< PointDouble value 4 */
+        .def_readwrite("x", &molSys::Point<double>::x) /**< PointDouble value 5 */
+        .def_readwrite("y", &molSys::Point<double>::y) /**< PointDouble value 6 */
+        .def_readwrite("z", &molSys::Point<double>::z) /**< PointDouble value 7 */
+        .def_readwrite("c_ij", &molSys::Point<double>::c_ij) /**< PointDouble value 8 */
+        .def_readwrite("inSlice", &molSys::Point<double>::inSlice) /**< PointDouble value 9 */
         .def("__repr__",
              [](const molSys::Point<double> &self_C) {
                  std::uintptr_t ptr_val = std::uintptr_t(&self_C);
@@ -44,11 +67,19 @@ PYBIND11_MODULE(cyoda, m) {
                                self_C.inSlice);
         });
 
+/**
+ * @brief This function defines all BondType class.
+ *
+ */
     py::enum_<molSys::bond_type>(m, "BondType")
         .value("staggered", molSys::bond_type::staggered)
         .value("eclipsed", molSys::bond_type::eclipsed)
         .value("out_of_range", molSys::bond_type::out_of_range);
 
+/**
+ * @brief This function defines all AtomStateType class.
+ *
+ */
     py::enum_<molSys::atom_state_type>(m, "AtomStateType")
         .value("cubic", molSys::atom_state_type ::cubic)
         .value("hexagonal", molSys::atom_state_type ::hexagonal)
@@ -59,6 +90,11 @@ PYBIND11_MODULE(cyoda, m) {
         .value("unclassified", molSys::atom_state_type ::unclassified)
         .value("reCubic", molSys::atom_state_type ::reCubic)
         .value("reHex", molSys::atom_state_type ::reHex);
+
+/**
+ * @brief This function defines all Result class.
+ *
+ */
 
     py::class_<molSys::Result>(m, "Result")
         .def(py::init<>())
@@ -73,6 +109,11 @@ PYBIND11_MODULE(cyoda, m) {
             return fmt::format("classifier: {} c_value: {}", self_C.classifier, self_C.c_value);
         });
 
+/**
+ * @brief This function defines all PointCloudDouble class.
+ *
+ */
+
     py::class_<molSys::PointCloud<molSys::Point<double>, double>>(m, "PointCloudDouble")
         .def(py::init<>())
         .def_readwrite("pts", &molSys::PointCloud<molSys::Point<double>, double>::pts)
@@ -84,11 +125,26 @@ PYBIND11_MODULE(cyoda, m) {
         .def_readwrite("idIndexMap",
                        &molSys::PointCloud<molSys::Point<double>, double>::idIndexMap);
 
+/**
+ * @details This is a python binding for the function readXYZ which reads in atom coordinates from an XYZ file.
+ *  or reads in an XYZ file
+ *  @param[in] filename Filename of the trajectory.
+ */
+
     m.def("readXYZ",
           &sinp::readXYZ,
           "A function to populate a PointCloudDouble with data from a file",
           py::arg("filename"));
 
+/**
+ * @details This is a python binding for the function readLammpsTrjreduced which reads in only atoms of the desired type and ignores all atoms which are not in the slice as well.
+ * @param[in] filename	The name of the lammps trajectory file to be read in
+ * @param[in] targetFrame	The frame number whose information will be read in
+ * @param[in] typeI	The type ID of the desired type of atoms
+ * @param[in] isSlice	This decides whether a slice will be created or not
+ * @param[in] coordLow	Contains the lower limits of the slice, if a slice is to be created
+ * @param[in] coordHigh	Contains the upper limits of the slice, if a slice is to be created
+ */
     m.def("readLammpsTrjreduced",
           &sinp::readLammpsTrjreduced,
           "A Function that reads in only atoms of the desired type and ignores all atoms which "
@@ -100,6 +156,15 @@ PYBIND11_MODULE(cyoda, m) {
           "coordLow"_a,
           "coordHigh"_a);
 
+/**
+ * @details This is a python binding for the function readLammpsTrjO which reads in atom in a specified frame.
+ * @param[in] filename	The name of the lammps trajectory file to be read in
+ * @param[in] targetFrame	The frame number whose information will be read in
+ * @param[in] typeO	The type ID of the Oxygen atoms
+ * @param[in] isSlice	This decides whether a slice will be created or not
+ * @param[in] coordLow	Contains the lower limits of the slice, if a slice is to be created
+ * @param[in] coordHigh	Contains the upper limits of the slice, if a slice is to be created
+ */
     m.def("readLammpsTrjO",
           &sinp::readLammpsTrjO,
           "A Function for reading oxygen atom in a specified frame",
@@ -188,6 +253,14 @@ PYBIND11_MODULE(cyoda, m) {
           "oAtomIndex"_a,
           "hAtomIndex"_a);
 
+/**
+ * @details This is the python binding for the function populateHbonds which creates a vector of vectors containing the hydrogen bond connectivity information. 
+ * It also decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed.
+ *  @param[in] filename Filename of the trajectory, with the hydrogen and oxygen coordinates
+ *  @param[in] yCloud The input molSys::PointCloud for the oxygen atoms only
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] targetFrame The target or current frame number (starts from 1) and is not the timestep value
+ */
     m.def("populateHbonds",
           &bond::populateHbonds,
           "Create a vector of vectors containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed",
