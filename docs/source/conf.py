@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Pyseams'
-copyright = '2024, RuhiRG'
-author = 'RuhiRG'
 release = '0.1.0'
+copyright = '2024, d-SEAMS developers'
+author = 'Ruhila'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -31,7 +31,7 @@ extensions = [
 
 autodoc2_render_plugin = "myst"
 autodoc2_packages = [
-    f"../../src/{project}",
+    f"../../src/{project.lower()}",
 ]
 
 myst_enable_extensions = [
