@@ -1,17 +1,20 @@
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/core.h>
 
 #include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
+#include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
 #include "../subprojects/seams-core/src/include/internal/neighbours.hpp"
 #include "../subprojects/seams-core/src/include/internal/bond.hpp"
 #include "../subprojects/seams-core/src/include/internal/franzblau.hpp"
 #include "../subprojects/seams-core/src/include/internal/ring.hpp"
-#include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/bulkTUM.hpp"
 #include "../subprojects/seams-core/src/include/internal/selection.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
+#include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
+#include "../subprojects/seams-core/src/include/internal/cluster.hpp"
+#include "../subprojects/seams-core/src/include/internal/bop.hpp"
+#include "../subprojects/seams-core/src/include/internal/seams_output.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -168,8 +171,8 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("neighListO",
         &nneigh::neighListO,
         "Inefficient O(n^2) implementation of neighbour lists ",
-        py::arg("yCloud"),
-        "rcutoff"_a,
+        py::arg("rcutoff"),
+        "yCloud"_a,
         "typeI"_a);
 
     m.def("createBondsFromCages",
@@ -191,11 +194,11 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("populateHbonds",
           &bond::populateHbonds,
           "Create a vector of vectors containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed",
-          py::arg("yCloud"),
-          "filename"_a,
+          py::arg("filename"),
+          "yCloud"_a,
+          "nList"_a,
           "targetFrame"_a,
-          "Htype"_a,
-          "nList"_a);
+          "Htype"_a);
 
     m.def("populateHbondsWithInputClouds",
         &bond::populateHbondsWithInputClouds,
@@ -255,8 +258,8 @@ PYBIND11_MODULE(cyoda, m) {
     m.def("ringNetwork",
         &primitive::ringNetwork,
         "Returns a vector of vectors containing the rings",
-        py::arg("maxDepth"),
-        "nList"_a);
+        py::arg("nList"),
+        "maxDepth"_a);
 
     m.def("shortestPath",
           &primitive::shortestPath,
@@ -427,6 +430,7 @@ PYBIND11_MODULE(cyoda, m) {
 //        py::arg("rings"),
 //        "yCloud"_a);
 
+
     m.def("moleculesInSingleSlice",
         &gen::moleculesInSingleSlice,
         "Given a pointCloud set the inSlice bool for every atom, if the molecules are inside the specified (single) region. If even one atom of a molecule is inside the region, then all atoms of that molecule will be inside the region (irrespective of type)",
@@ -546,4 +550,88 @@ PYBIND11_MODULE(cyoda, m) {
         "rmsdPerAtom"_a,
         "noOfCommonAtoms"_a,
         "atomTypes"_a);
+
+    m.def("rdf2Danalysis_AA",
+        &rdf2::rdf2Danalysis_AA,
+        "calls other functions for initializing, sampling and normalizing the RDF",
+        py::arg("path"),
+        "rdfValues"_a,
+        "yCloud"_a,
+        "cutoff"_a,
+        "binwidth"_a,
+        "firstFrame"_a,
+        "finalFrame"_a);   
+
+    m.def("bulkPolygonRingAnalysis",
+        &ring::bulkPolygonRingAnalysis,
+        "Find out rings in the bulk, looping through all ring sizes upto the maxDepth",
+        py::arg("path"),
+        "rings"_a,
+        "nList"_a,
+        "yCloud"_a,
+        "maxDepth"_a,
+        "firstFrame"_a);
+
+    m.def("clusterAnalysis",
+        &clump::clusterAnalysis,
+        "Does the cluster analysis of ice particles in the system.",
+        py::arg("path"),
+        "iceCloud"_a,
+        "yCloud"_a,
+        "nList"_a,
+        "iceNeighbourList"_a,
+        "cutoff"_a,
+        "firstFrame"_a,
+        "bopAnalysis"_a);
+
+    m.def("getCorrelPlus",
+        &chill::getCorrelPlus,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "isSlice"_a);
+
+    m.def("getIceTypePlus",
+        &chill::getIceTypePlus,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "path"_a,
+        "firstFrame"_a,
+        "isSlice"_a,
+        "outputFileName"_a);
+
+    m.def("writeDump",
+        &sout::writeDump,
+        "Generic function for writing out to a dump file.",
+        py::arg("yCloud"),
+        "path"_a,
+        "outFile"_a);
+
+    m.def("getq6",
+        &chill::getq6,
+        "q6 can distinguish between water and ice. Use this for the largest ice cluster.",
+        py::arg("yCloud"),
+        "nList"_a,
+        "isSlice"_a);
+
+    m.def("reclassifyWater",
+        &chill::reclassifyWater,
+        py::arg("yCloud"),
+        "q6"_a);
+
+    m.def("printIceType",
+        &chill::printIceType,
+        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+        py::arg("yCloud"),
+        "path"_a,
+        "firstFrame"_a,
+        "isSlice"_a,
+        "outputFileName"_a);
+
+    m.def("recenterClusterCloud",
+        &clump::recenterClusterCloud,
+        py::arg("iceCloud"),
+        "nList"_a);
 }
+
