@@ -63,15 +63,15 @@ PYBIND11_MODULE(cyoda, m) {
     py::class_<molSys::Result>(m, "Result")
         .def(py::init<>())
         .def_readwrite("classifier", &molSys::Result::classifier)
-        .def_readwrite("c_value", &molSys::Result::c_value)
-        .def("__repr__",
-             [](const molSys::Result &self_C) {
+       .def_readwrite("c_value", &molSys::Result::c_value)
+       .def("__repr__",
+           [](const molSys::Result &self_C) {
                  std::uintptr_t ptr_val = std::uintptr_t(&self_C);
                  return fmt::format("<Result mem_loc:{:x}>", static_cast<uint>(ptr_val));
-             })
-        .def("__str__", [](const molSys::Result &self_C) {
-            return fmt::format("classifier: {} c_value: {}", self_C.classifier, self_C.c_value);
-        });
+             });
+//        .def("__str__", [](const molSys::Result &self_C) {
+//            return fmt::format("classifier: {} c_value: {}", self_C.classifier, self_C.c_value);
+//        });
 
     py::class_<molSys::PointCloud<molSys::Point<double>, double>>(m, "PointCloudDouble")
         .def(py::init<>())
