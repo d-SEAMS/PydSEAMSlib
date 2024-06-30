@@ -1,7 +1,6 @@
 # Manual additions
 *.swp
 tmp.py
-<<<<<<< HEAD
 .vscode/settings.json
 subprojects/*.wrap
 =======
