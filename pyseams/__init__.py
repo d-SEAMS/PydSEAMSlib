@@ -1,1 +1,1 @@
-from pyseams import _seams_core
+from pyseams import cyoda
