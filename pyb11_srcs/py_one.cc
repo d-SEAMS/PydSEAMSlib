@@ -20,6 +20,19 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 
 PYBIND11_MODULE(cyoda, m) {
+        m.doc() = R"pbdoc(
+        Pybind11 example plugin
+        -----------------------
+        
+        .. currentmodule:: pyseams.cyoda
+
+        .. autosummary::
+           :toctree: _generate
+
+           readXYZ
+         
+    )pbdoc";
+
     py::class_<molSys::Point<double>>(m, "PointDouble")
         .def(py::init<>())
         .def_readwrite("c_type", &molSys::Point<double>::type)
@@ -89,6 +102,10 @@ PYBIND11_MODULE(cyoda, m) {
 
     m.def("readXYZ",
           &sinp::readXYZ,
+          R"pbdoc(
+        A function to populate a PointCloudDouble with data from a file
+    )pbdoc"
+
           "A function to populate a PointCloudDouble with data from a file",
           py::arg("filename"));
 
