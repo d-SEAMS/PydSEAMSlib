@@ -27,7 +27,7 @@ cd pyseams
 
 
 
-## Additional Topics
+## documentation for pyseams-bindings 
 
 ```{toctree}
 :maxdepth: 2

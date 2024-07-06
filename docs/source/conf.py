@@ -29,6 +29,7 @@ extensions = [
     "sphinxcontrib.spelling",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
 ]
 autosummary_generate = True
 
