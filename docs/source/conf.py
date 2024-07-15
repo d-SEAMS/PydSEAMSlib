@@ -11,15 +11,15 @@ release = '0.1.0'
 copyright = '2024, d-SEAMS developers'
 author = 'Ruhila'
 
+import pyseams
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 #referenced my favourite [1]
 extensions = [
     "myst_parser",
-    "autodoc2",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
+    #"autodoc2",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.githubpages",
@@ -27,12 +27,12 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.spelling",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
 ]
+autosummary_generate = True
 
-autodoc2_render_plugin = "myst"
-autodoc2_packages = [
-    f"../../src/{project.lower()}",
-]
 
 myst_enable_extensions = [
     "deflist",
@@ -47,6 +47,11 @@ intersphinx_mapping = {
 templates_path = ['_templates']
 exclude_patterns = []
 
+# The suffix(es) of source filenames.
+source_suffix = [".rst", ".md"]
+
+# The master toctree document.
+master_doc = "index"
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -63,6 +68,7 @@ html_theme_options = {
 }
 # --- Plugin options
 autodoc2_render_plugin = "myst"
+autodoc2_packages = [f"../../{project.lower()}"]
 
 
 #references

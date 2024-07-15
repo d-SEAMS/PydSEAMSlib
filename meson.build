@@ -39,7 +39,7 @@ py.extension_module(
 
 # pyseams main package
 py.install_sources([
-    'pyseams/__init__.py',
+    'src/__init__.py',
   ],
   pure: false, # install next to compiled extension
   subdir: 'pyseams/'

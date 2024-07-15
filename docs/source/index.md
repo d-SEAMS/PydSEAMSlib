@@ -27,18 +27,25 @@ cd pyseams
 
 
 
-## Additional Topics
+## documentation for pyseams-bindings 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+```{toctree}
+:maxdepth: 2
+:caption: Contents
 
-   api/library_root
+```
 
+```{eval-rst}
+.. automodule:: pyseams.cyoda
+```
 
+<!-- ```{autodoc2-summary}
+pyseams.cyoda
+```
 
+```{eval-rst}
 
-
+``` -->
 
 ## Indices and tables
 
