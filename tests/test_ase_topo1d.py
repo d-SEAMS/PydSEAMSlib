@@ -22,6 +22,10 @@ def test_nlist():
     # Construct a pointcloud
     atms = aseread(trajectory)
     pcd = _ase.to_pointcloud(atms)
+    # TODO(ruhi): How should these be passed
+    atms = _ase.map_2({1: 'H', 2: 'O'}, atms)
+    only_O_mask = [x.symbol == 'O' for x in atms]
+    pcd = _ase.to_pointcloud(atms[only_O_mask])
     assert(pcd.box == resCloud.box)
     assert(pcd.nop == resCloud.nop)
 
