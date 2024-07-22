@@ -42,5 +42,13 @@ py.install_sources([
     'src/__init__.py',
   ],
   pure: false, # install next to compiled extension
-  subdir: 'pyseams/'
+  subdir: 'pyseams/',
+)
+
+py.install_sources([
+    'src/adapters/__init__.py',
+    'src/adapters/_ase.py',
+],
+  pure: false,
+  subdir: 'pyseams/adapters',
 )
