@@ -15,11 +15,10 @@ def map_1(dict_map: dict(), atms_a: ase.Atoms):
     return atms_a
 
 
-def map_1(dict_map: dict(), atms_a: ase.Atoms):
-    for key, value in dict_map.items():
-        for pt in atms_a:
-            if pt.number == key:
-                pt.symbol = value
+def map_2(dict_map: dict(), atms_a: ase.Atoms):
+    for pt in atms_a:
+        if pt.number in dict_map.keys():
+            pt.symbol = dict_map[pt.number]
     return atms_a
 
 
