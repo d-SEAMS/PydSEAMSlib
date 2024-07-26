@@ -28,6 +28,10 @@ def test_nlist():
     pcd = _ase.to_pointcloud(atms[only_O_mask])
     assert(pcd.box == resCloud.box)
     assert(pcd.nop == resCloud.nop)
+    assert(pcd.pts[0].x == resCloud.pts[0].x)
+    assert(pcd.pts[0].y == resCloud.pts[0].y)
+    assert(pcd.pts[0].z == resCloud.pts[0].z)
+
 
     # Calculate the neighborlist by ID
     nList = cyoda.neighListO(
