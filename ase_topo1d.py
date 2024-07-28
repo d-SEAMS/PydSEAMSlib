@@ -17,10 +17,11 @@ resCloud = cyoda.readLammpsTrjreduced(
 # pprint.pprint(dir(resCloud))
 
 atms = aseread(trajectory)
-# In ASE, we want to work with atomic numbers instead of LAMMPS types
-atms = _ase.map_2({1: 'H', 2: 'O'}, atms)
+# In ASE, we want to work with atomic symbols instead of LAMMPS types
+lammps_to_ase = {1: 'H', 2: 'O'}
+atms = _ase.map_2(lammps_to_ase, atms)
 only_O_mask = [x.symbol == 'O' for x in atms]
-pcd = _ase.to_pointcloud(atms[only_O_mask])
+pcd = _ase.to_pointcloud(atms[only_O_mask], lammps_to_ase)
 
 # #Calculate the neighborlist by ID
 # nList = cyoda.neighListO(

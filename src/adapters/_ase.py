@@ -21,21 +21,28 @@ def map_2(dict_map: dict(), atms_a: ase.Atoms):
             pt.symbol = dict_map[pt.number]
     return atms_a
 
-def list_pts(atms: ase.Atoms):
+def swap_key_value(my_dict_a):
+    new_dict = { 
+        value: key for key, value in my_dict_a.items()
+    }
+    return new_dict
+
+def list_pts(atms: ase.Atoms, lmp_a: dict):
     ptslist = []
+    map_lmp = swap_key_value(lmp_a)
     for atm in atms:
         pd = PointDouble()
         pd.x = atm.position[0]
         pd.y = atm.position[1]
         pd.z = atm.position[2]
+        pd.c_type = map_lmp[atm.symbol]
         ptslist.append(pd)
     return ptslist
 
-def to_pointcloud(atms_a: ase.Atoms):
+def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict):
     _pcd = PointCloudDouble()
     # TODO(ruhila): Assumes a rectangular box
     _pcd.box = np.diag(np.asarray(atms_a.get_cell()))
     _pcd.nop = len(atms_a)
-    _pcd.pts = list_pts(atms_a)
-
+    _pcd.pts = list_pts(atms_a, lmp_a)
     return _pcd
