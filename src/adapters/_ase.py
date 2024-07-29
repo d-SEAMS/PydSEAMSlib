@@ -27,23 +27,27 @@ def swap_key_value(my_dict_a):
     }
     return new_dict
 
-def list_pts(atms: ase.Atoms, lmp_a: dict):
+def list_pts(atms: ase.Atoms, lmp_a: dict, splicemask):
     ptslist = []
+    inslice_atms = atms[splicemask]
     map_lmp = swap_key_value(lmp_a)
-    for atm in atms:
+    all_atm_id = np.asarray([x.index + 1 for x in atms])[splicemask]
+    for idx,atm in enumerate(inslice_atms):
         pd = PointDouble()
         pd.x = atm.position[0]
         pd.y = atm.position[1]
         pd.z = atm.position[2]
         pd.c_type = map_lmp[atm.symbol]
         pd.inSlice = True #Assumes that the atom provided are in the Slice.
+        pd.atomID = all_atm_id[idx]
         ptslist.append(pd)
     return ptslist
 
-def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict):
+def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool]):
     _pcd = PointCloudDouble()
+    inslice_atms = atms_a[splicemask]
     # TODO(ruhila): Assumes a rectangular box
-    _pcd.box = np.diag(np.asarray(atms_a.get_cell()))
-    _pcd.nop = len(atms_a)
-    _pcd.pts = list_pts(atms_a, lmp_a)
+    _pcd.box = np.diag(np.asarray(inslice_atms.get_cell()))
+    _pcd.nop = len(inslice_atms)
+    _pcd.pts = list_pts(atms_a, lmp_a, splicemask)
     return _pcd

@@ -21,7 +21,7 @@ atms = aseread(trajectory)
 lammps_to_ase = {1: 'H', 2: 'O'}
 atms = _ase.map_2(lammps_to_ase, atms)
 only_O_mask = [x.symbol == 'O' for x in atms]
-pcd = _ase.to_pointcloud(atms[only_O_mask], lammps_to_ase)
+pcd = _ase.to_pointcloud(atms, lammps_to_ase, only_O_mask)
 
 # #Calculate the neighborlist by ID
 # nList = cyoda.neighListO(
