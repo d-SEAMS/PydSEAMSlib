@@ -36,6 +36,7 @@ def list_pts(atms: ase.Atoms, lmp_a: dict):
         pd.y = atm.position[1]
         pd.z = atm.position[2]
         pd.c_type = map_lmp[atm.symbol]
+        pd.inSlice = True #Assumes that the atom provided are in the Slice.
         ptslist.append(pd)
     return ptslist
 

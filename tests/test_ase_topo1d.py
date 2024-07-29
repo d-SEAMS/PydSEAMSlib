@@ -32,6 +32,7 @@ def test_nlist():
     assert(pcd.pts[0].y == resCloud.pts[0].y)
     assert(pcd.pts[0].z == resCloud.pts[0].z)
     assert(pcd.pts[0].c_type == resCloud.pts[0].c_type)
+    assert(pcd.pts[0].inSlice == resCloud.pts[0].inSlice)
 
 
     # Calculate the neighborlist by ID
