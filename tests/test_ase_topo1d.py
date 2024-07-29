@@ -1,4 +1,5 @@
 import pprint
+import numpy as np
 
 from approvaltests import verify
 from ase.io import read as aseread
@@ -25,7 +26,8 @@ def test_nlist():
     lammps_to_ase = {1: 'H', 2: 'O'}
     atms = _ase.map_2(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
-    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask)
+    molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
+    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)
     assert(pcd.box == resCloud.box)
     assert(pcd.nop == resCloud.nop)
     assert(pcd.pts[0].x == resCloud.pts[0].x)
@@ -34,6 +36,7 @@ def test_nlist():
     assert(pcd.pts[0].c_type == resCloud.pts[0].c_type)
     assert(pcd.pts[0].inSlice == resCloud.pts[0].inSlice)
     assert(pcd.pts[0].atomID == resCloud.pts[0].atomID)
+    assert(pcd.pts[0].molID == resCloud.pts[0].molID)
 
 
     # Calculate the neighborlist by ID
