@@ -21,6 +21,7 @@ atms = aseread(trajectory)
 # In ASE, we want to work with atomic symbols instead of LAMMPS types
 lammps_to_ase = {1: 'H', 2: 'O'}
 atms = _ase.map_2(lammps_to_ase, atms)
+
 only_O_mask = [x.symbol == 'O' for x in atms]
 # user has to provide proper molID for inslice, each molecule must have one molID. for eg: In H2O, both H atoms and O atom must have same molID. 
 # if one wants molHID, they can just change the last ,1) as ,2) in  the following expression:
@@ -33,6 +34,26 @@ nList = cyoda.neighListO(
      yCloud = resCloud,
      typeI = 2, #oxygenAtomType
  )
+nl = cyoda.neighListO(
+     rcutoff = 3.5,
+     yCloud = pcd,
+     typeI = 2, #oxygenAtomType
+ )
 
+#Get the hydrogen-bonded network for the current frame
+hbnList = cyoda.populateHbonds(
+    filename = trajectory,
+    yCloud = resCloud,
+    nList = nList, 
+    targetFrame = 1,
+    Htype = 1, #hydrogen atom type
+)
+hl = cyoda.populateHbonds(
+    filename = trajectory,
+    yCloud = pcd,
+    nList = nl, 
+    targetFrame = 1,
+    Htype = 1, #hydrogen atom type
+)
 
 # print(pprint.pformat(nList))
