@@ -55,5 +55,13 @@ hl = cyoda.populateHbonds(
     targetFrame = 1,
     Htype = 1, #hydrogen atom type
 )
-
+#Hydrogen-bonded network using indices not IDs
+hbnList =  cyoda.neighbourListByIndex(
+    yCloud = resCloud,
+    nList = hbnList,
+)
+hL =  cyoda.neighbourListByIndex(
+    yCloud = pcd,
+    nList = hl,
+)
 # print(pprint.pformat(nList))
