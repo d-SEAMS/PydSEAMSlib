@@ -20,6 +20,7 @@ def test_nlist():
               coordHigh = [0,0,0],
     )
 
+
     # Construct a pointcloud
     atms = aseread(trajectory)
     # TODO(ruhi): How should these be passed
@@ -30,20 +31,33 @@ def test_nlist():
     pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)
     assert(pcd.box == resCloud.box)
     assert(pcd.nop == resCloud.nop)
-    assert(pcd.pts[0].x == resCloud.pts[0].x)
-    assert(pcd.pts[0].y == resCloud.pts[0].y)
-    assert(pcd.pts[0].z == resCloud.pts[0].z)
-    assert(pcd.pts[0].c_type == resCloud.pts[0].c_type)
-    assert(pcd.pts[0].inSlice == resCloud.pts[0].inSlice)
-    assert(pcd.pts[0].atomID == resCloud.pts[0].atomID)
-    assert(pcd.pts[0].molID == resCloud.pts[0].molID)
+    assert(pcd.idIndexMap == resCloud.idIndexMap)
 
-
+    for idx in range(len(pcd.pts)):
+        assert(pcd.pts[idx].x == resCloud.pts[idx].x)
+        assert(pcd.pts[idx].y == resCloud.pts[idx].y)
+        assert(pcd.pts[idx].z == resCloud.pts[idx].z)
+        assert(pcd.pts[idx].c_type == resCloud.pts[idx].c_type)
+        assert(pcd.pts[idx].inSlice == resCloud.pts[idx].inSlice)
+        assert(pcd.pts[idx].atomID == resCloud.pts[idx].atomID)
+        assert(pcd.pts[idx].molID == resCloud.pts[idx].molID)
+    
+   
     # Calculate the neighborlist by ID
     nList = cyoda.neighListO(
         rcutoff = 3.5,
         yCloud = resCloud,
         typeI = 2, #oxygenAtomType
     )
+    nl = cyoda.neighListO(
+        rcutoff = 3.5,
+        yCloud = pcd,
+        typeI = 2, #oxygenAtomType
+    )
+    for idx in range(len(nList)):
+        assert(nList[idx]== nl[idx])
+    
 
-    verify(pprint.pformat(nList))
+
+
+    verify(pprint.pformat(nl))

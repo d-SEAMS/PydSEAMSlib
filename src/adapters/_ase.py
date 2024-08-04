@@ -51,4 +51,14 @@ def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids
     _pcd.box = np.diag(np.asarray(inslice_atms.get_cell()))
     _pcd.nop = len(inslice_atms)
     _pcd.pts = list_pts(atms_a, lmp_a, splicemask, molids)
+    _pcd.idIndexMap = make_indexmap(atms_a, splicemask)
     return _pcd
+
+def make_indexmap(atms: ase.Atoms, splicemask: list[bool]):
+    inslice_atms = atms[splicemask]
+    atm_id = np.asarray([x.index + 1 for x in atms])[splicemask]
+    ret = dict()
+    for idx in range(len(inslice_atms)):
+        key = int(atm_id[idx])
+        ret[key] = idx
+    return ret

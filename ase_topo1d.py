@@ -27,12 +27,12 @@ only_O_mask = [x.symbol == 'O' for x in atms]
 molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1) 
 pcd = _ase.to_pointcloud(atms, lammps_to_ase, only_O_mask, molOID)
 
-# #Calculate the neighborlist by ID
-# nList = cyoda.neighListO(
-#     rcutoff = 3.5,
-#     yCloud = resCloud,
-#     typeI = 2, #oxygenAtomType
-# )
+#Calculate the neighborlist by ID
+nList = cyoda.neighListO(
+     rcutoff = 3.5,
+     yCloud = resCloud,
+     typeI = 2, #oxygenAtomType
+ )
 
 
 # print(pprint.pformat(nList))
