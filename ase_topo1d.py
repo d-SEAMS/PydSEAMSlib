@@ -64,4 +64,13 @@ hL =  cyoda.neighbourListByIndex(
     yCloud = pcd,
     nList = hl,
 )
+#Gets every ring (non-primitives included)
+rings = cyoda.ringNetwork(
+    nList = hbnList,
+    maxDepth = 6,
+)
+Rgs = cyoda.ringNetwork(
+    nList = hL,
+    maxDepth = 6,
+)
 # print(pprint.pformat(nList))
