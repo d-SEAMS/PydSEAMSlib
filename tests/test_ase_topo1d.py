@@ -28,10 +28,13 @@ def test_nlist():
     atms = _ase.map_2(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
-    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)
+    openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
+    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID,openfile,currentFrame=[1])
     assert(pcd.box == resCloud.box)
     assert(pcd.nop == resCloud.nop)
     assert(pcd.idIndexMap == resCloud.idIndexMap)
+    assert(pcd.currentFrame == resCloud.currentFrame)
+    assert(pcd.boxLow == resCloud.boxLow)
 
     for idx in range(len(pcd.pts)):
         assert(pcd.pts[idx].x == resCloud.pts[idx].x)
@@ -80,7 +83,8 @@ def test_hbnlist():
     atms = _ase.map_2(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
-    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)    
+    openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
+    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID,openfile,currentFrame=[1])    
 
     # Calculate the neighborlist by ID
     nList = cyoda.neighListO(
@@ -135,7 +139,8 @@ def test_hbnlist1():
     atms = _ase.map_2(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
-    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)    
+    openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
+    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID,openfile,currentFrame=[1])    
 
     # Calculate the neighborlist by ID
     nList = cyoda.neighListO(
@@ -199,7 +204,8 @@ def test_rings():
     atms = _ase.map_2(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
-    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID)    
+    openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
+    pcd = _ase.to_pointcloud(atms,lammps_to_ase,only_O_mask,molOID,openfile,currentFrame=[1])    
 
     # Calculate the neighborlist by ID
     nList = cyoda.neighListO(
@@ -250,4 +256,4 @@ def test_rings():
         assert(rings[idx]== Rgs[idx])
 
 
-    verify(pprint.pformat(rings))
+    verify(pprint.pformat(Rgs))

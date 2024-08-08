@@ -44,7 +44,7 @@ def list_pts(atms: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids: list[
         ptslist.append(pd)
     return ptslist
 
-def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids: list[int]):
+def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids: list[int], fname, currentFrame=[1]):
     _pcd = PointCloudDouble()
     inslice_atms = atms_a[splicemask]
     # TODO(ruhila): Assumes a rectangular box
@@ -52,6 +52,8 @@ def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids
     _pcd.nop = len(inslice_atms)
     _pcd.pts = list_pts(atms_a, lmp_a, splicemask, molids)
     _pcd.idIndexMap = make_indexmap(atms_a, splicemask)
+    _pcd.currentFrame = 1
+    _pcd.boxLow = boxlow(fname)
     return _pcd
 
 def make_indexmap(atms: ase.Atoms, splicemask: list[bool]):
@@ -62,3 +64,18 @@ def make_indexmap(atms: ase.Atoms, splicemask: list[bool]):
         key = int(atm_id[idx])
         ret[key] = idx
     return ret
+
+def boxlow(fname):
+# Read the contents of the file into a variable
+    opfile = open(fname)
+    data = opfile.read()
+    filelist = []
+    for i in range(5,8):
+        parfile = data.splitlines()[i]
+        needfile = parfile.split()[0]
+        floatfile = float(needfile)
+        filelist.append(floatfile)
+# Don't forget to close the file again
+    opfile.close()
+    return filelist
+
