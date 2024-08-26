@@ -58,11 +58,14 @@ cd PydSEAMSlib
 
 Subsequently, the earlier steps can be followed.
 
+# License
+
+MIT. For more details, including contribution guidelines visit the GitHub repo.
+
 
 ```{toctree}
 :maxdepth: 2
 :caption: API Documentation
-
 
 api
 ```
