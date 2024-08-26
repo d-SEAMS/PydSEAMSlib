@@ -28,6 +28,12 @@ jobs:
           meson setup bbdir
           meson compile -C bbdir
 
+      - name: Run an import test (dev)
+        shell: bash -l {0}
+        run: |
+          python -c 'import bbdir.cyoda'
+
+
       - name: Run standard tests
         shell: bash -l {0}
         run: |
