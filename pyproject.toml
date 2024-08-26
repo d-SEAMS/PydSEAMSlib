@@ -42,7 +42,7 @@ build-backend = "mesonpy"
 # Important, tells pip how to install the package
 [tool.meson-python.args]
 setup = [
-#'-Dwrap_mode=forcefallback',
+'-Dwrap_mode=forcefallback',
 # ^-- collects subprojects, see https://github.com/ERGO-Code/HiGHS/pull/1343#discussion_r1252446966
 ]
 # Skip during installation to prevent local RPATH stripping issues
