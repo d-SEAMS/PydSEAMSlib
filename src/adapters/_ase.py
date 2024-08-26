@@ -4,39 +4,47 @@ import ase
 
 
 def map_LAMMPS_IDs_to_atomic_symbols(dict_map: dict(), atms_a: ase.Atoms):
-# Traversing by atom is faster than traversing atoms by key value in the map,
-# since there will be fewer map values than atoms
-# See https://github.com/d-SEAMS/pyseams/pull/11#issuecomment-2243986351
-# for benchmarks
+    # Traversing by atom is faster than traversing atoms by key value in the map,
+    # since there will be fewer map values than atoms
+    # See https://github.com/d-SEAMS/pyseams/pull/11#issuecomment-2243986351
+    # for benchmarks
     for pt in atms_a:
         if pt.number in dict_map.keys():
             pt.symbol = dict_map[pt.number]
     return atms_a
 
+
 def swap_key_value(my_dict_a):
-    new_dict = { 
-        value: key for key, value in my_dict_a.items()
-    }
+    new_dict = {value: key for key, value in my_dict_a.items()}
     return new_dict
+
 
 def list_pts(atms: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids: list[int]):
     ptslist = []
     inslice_atms = atms[splicemask]
     map_lmp = swap_key_value(lmp_a)
     all_atm_id = np.asarray([x.index + 1 for x in atms])[splicemask]
-    for idx,atm in enumerate(inslice_atms):
+    for idx, atm in enumerate(inslice_atms):
         pd = PointDouble()
         pd.x = atm.position[0]
         pd.y = atm.position[1]
         pd.z = atm.position[2]
         pd.c_type = map_lmp[atm.symbol]
-        pd.inSlice = True #Assumes that the atom provided are in the Slice.
+        pd.inSlice = True  # Assumes that the atom provided are in the Slice.
         pd.atomID = all_atm_id[idx]
         pd.molID = molids[idx]
         ptslist.append(pd)
     return ptslist
 
-def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids: list[int], fname, currentFrame=[1]):
+
+def to_pointcloud(
+    atms_a: ase.Atoms,
+    lmp_a: dict,
+    splicemask: list[bool],
+    molids: list[int],
+    fname,
+    currentFrame=[1],
+):
     _pcd = PointCloudDouble()
     inslice_atms = atms_a[splicemask]
     # TODO(ruhila): Assumes a rectangular box
@@ -48,6 +56,7 @@ def to_pointcloud(atms_a: ase.Atoms, lmp_a: dict, splicemask: list[bool], molids
     _pcd.boxLow = boxlow(fname)
     return _pcd
 
+
 def make_indexmap(atms: ase.Atoms, splicemask: list[bool]):
     inslice_atms = atms[splicemask]
     atm_id = np.asarray([x.index + 1 for x in atms])[splicemask]
@@ -57,17 +66,17 @@ def make_indexmap(atms: ase.Atoms, splicemask: list[bool]):
         ret[key] = idx
     return ret
 
+
 def boxlow(fname):
-# Read the contents of the file into a variable
+    # Read the contents of the file into a variable
     opfile = open(fname)
     data = opfile.read()
     filelist = []
-    for i in range(5,8):
+    for i in range(5, 8):
         parfile = data.splitlines()[i]
         needfile = parfile.split()[0]
         floatfile = float(needfile)
         filelist.append(floatfile)
-# Don't forget to close the file again
+    # Don't forget to close the file again
     opfile.close()
     return filelist
-
