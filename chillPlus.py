@@ -1,6 +1,6 @@
 import bbdir.cyoda as cyoda
 
-trajectory = "input/traj/mW_cubic.lammpstrj"
+trajectory = "subprojects/seams-core/input/traj/mW_cubic.lammpstrj"
 
 solCloud = cyoda.PointCloudDouble()
 iceList = []
@@ -9,7 +9,7 @@ iceList = []
 resCloud = cyoda.readLammpsTrjO(
     filename=trajectory,
     targetFrame=1,
-    type0=1,  # oxygenAtomType
+    typeO=1,  # oxygenAtomType
     isSlice=False,
     coordLow=[0, 0, 0],
     coordHigh=[50, 0, 0],
@@ -19,7 +19,7 @@ resCloud = cyoda.readLammpsTrjO(
 nList = cyoda.neighListO(
     rcutoff=3.5,
     yCloud=resCloud,
-    type0=1,  # oxygenAtomType
+    typeI=1,  # oxygenAtomType
 )
 
 # Calculate Cij (cloud,slice)
