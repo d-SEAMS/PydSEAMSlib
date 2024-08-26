@@ -1,51 +1,71 @@
-# PydSEAMSlib: python bindings for D-SEAMS
+# PydSEAMSlib: python bindings for d-SEAMS
 
-D-SEAMS is a tool for the analysis of molecular dynamics trajectories which is specifically able to qualitatively classify ice structures in both strong-confinement and bulk systems. PydSEAMSlib makes D-SEAMS user friendly.
+[d-SEAMS](https://dseams.info/) is a tool for the analysis of molecular dynamics
+trajectories which is specifically able to qualitatively classify ice structures
+in both strong-confinement and bulk systems. ``PydSEAMSlib`` makes d-SEAMS user
+friendly and accessible to the larger Scientific Python ecosystem.
 
-# Installation for windows/ubuntu
-Assuming access has been granted to the Github repository:
+```{note}
+Historically, in 2023, the project was initiated under the name ``PySeams``, which could not be registered on PyPI due to naming similarities, so the project in 2024 switched to its current name, ``PydSEAMSlib``.
+```
 
-```{code-block} bash
+# Standard installation instructions
+
+```{code-block} sh
 git clone https://github.com/d-SEAMS/PydSEAMSlib.git
 cd PydSEAMSlib
 ```
-We provide a `conda-lock` environment:
 
-```{code-block} bash
+We provide a ``conda-lock`` environment:
+
+```{code-block} sh
 micromamba create -f conda-lock.yml -n pyseamsdev
 micromamba activate pyseamsdev
 ```
 
-# Installation with dockerfile
+Which can then be used directly for a ``pip`` install:
 
-```{code-block} bash
+```{code-block} sh
+# Pure bindings
+pip install .
+# For ASE integration
+pip install .[adapters]
+# With tests
+pip install .[testing]
+# Everything
+pip install .[testing,adapters,docs]
+```
+
+Development local builds can be prepared via ``meson``:
+
+```{code-block} sh
+meson setup bbdir --prefix=$CONDA_PREFIX --libdir=lib
+meson compile install bbdir
+```
+
+
+# ``docker`` installation for emulated hardware
+
+For ``arm64v8`` machines, it may be easier to use the following ``docker`` image.
+
+
+```{code-block} sh
 git clone https://github.com/RuhiRG/D-seams-docker-recipes.git
 docker run -it dseamsdockerrecipes:latest /usr/bin/bash
 git clone https://github.com/d-SEAMS/PydSEAMSlib.git
 cd PydSEAMSlib
 ```
 
+Subsequently, the earlier steps can be followed.
 
-
-## documentation for PydSEAMSlib-bindings 
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contents
+:caption: API Documentation
 
+
+api
 ```
-
-```{eval-rst}
-.. automodule:: pydseamslib.cyoda
-```
-
-<!-- ```{autodoc2-summary}
-pydseamslib.cyoda
-```
-
-```{eval-rst}
-
-``` -->
 
 ## Indices and tables
 
