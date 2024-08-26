@@ -10,7 +10,6 @@
 ** https://github.com/d-SEAMS/PydSEAMSlib
 */
 #include <pybind11/stl.h>
-#include <cstdint>
 
 #include "../subprojects/seams-core/src/include/internal/bond.hpp"
 #include "../subprojects/seams-core/src/include/internal/bop.hpp"
@@ -26,6 +25,8 @@
 #include "../subprojects/seams-core/src/include/internal/selection.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
+
+#include <cstdint>
 
 #include <fmt/core.h>
 
