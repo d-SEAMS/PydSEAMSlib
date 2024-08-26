@@ -303,7 +303,7 @@ def test_prisms():
         maxDepth=6,
     )
     # Ensure the directory is not present before beginning
-    outDir = "runOne/" # / is important for the C++ engine..
+    outDir = "runOne/"  # / is important for the C++ engine..
     if Path(outDir).exists():
         shutil.rmtree(outDir)
     # Does the prism analysis for quasi-one-dimensional ice
@@ -319,5 +319,11 @@ def test_prisms():
         doShapeMatching=False,
     )
     # Validate the run results
-    verify_file(Path(f"{outDir}/topoINT/dataFiles/system-prisms-1.data"), options=NamerFactory.with_parameters("systemPrisms"))
-    verify_file(Path(f"{outDir}/topoINT/nPrisms.dat"), options=NamerFactory.with_parameters("nPrisms"))
+    verify_file(
+        Path(f"{outDir}/topoINT/dataFiles/system-prisms-1.data"),
+        options=NamerFactory.with_parameters("systemPrisms"),
+    )
+    verify_file(
+        Path(f"{outDir}/topoINT/nPrisms.dat"),
+        options=NamerFactory.with_parameters("nPrisms"),
+    )
