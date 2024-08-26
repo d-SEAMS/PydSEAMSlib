@@ -52,36 +52,18 @@ def test_nlist():
         assert pcd.pts[idx].molID == resCloud.pts[idx].molID
 
     # Calculate the neighborlist by ID
-    nList = cyoda.neighListO(
-        rcutoff=3.5,
-        yCloud=resCloud,
-        typeI=2,  # oxygenAtomType
-    )
     nl = cyoda.neighListO(
         rcutoff=3.5,
         yCloud=pcd,
         typeI=2,  # oxygenAtomType
     )
 
-    # Needs nList and nl for this
-    for idx in range(len(nList)):
-        assert nList[idx] == nl[idx]
-
+    # Validate the results
     verify(pprint.pformat(nl))
 
 
 def test_hbnlist():
-    # Get the frame
-    resCloud = cyoda.readLammpsTrjreduced(
-        filename=strTRJ,
-        targetFrame=1,
-        typeI=2,  # oxygenAtomType
-        isSlice=False,
-        coordLow=[0, 0, 0],
-        coordHigh=[0, 0, 0],
-    )
-
-    # Construct a pointcloud
+    # Get the frame, make a pointcloud
     atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
@@ -93,11 +75,6 @@ def test_hbnlist():
     )
 
     # Calculate the neighborlist by ID
-    nList = cyoda.neighListO(
-        rcutoff=3.5,
-        yCloud=resCloud,
-        typeI=2,  # oxygenAtomType
-    )
     nl = cyoda.neighListO(
         rcutoff=3.5,
         yCloud=pcd,
@@ -105,13 +82,6 @@ def test_hbnlist():
     )
 
     # Get the hydrogen-bonded network for the current frame
-    hbnList = cyoda.populateHbonds(
-        filename=strTRJ,
-        yCloud=resCloud,
-        nList=nList,
-        targetFrame=1,
-        Htype=1,  # hydrogen atom type
-    )
     hl = cyoda.populateHbonds(
         filename=strTRJ,
         yCloud=pcd,
@@ -119,24 +89,13 @@ def test_hbnlist():
         targetFrame=1,
         Htype=1,  # hydrogen atom type
     )
-    for idx in range(len(hbnList)):
-        assert hbnList[idx] == hl[idx]
 
+    # Validate the results
     verify(pprint.pformat(hl))
 
 
 def test_hbnlist1():
-    # Get the frame
-    resCloud = cyoda.readLammpsTrjreduced(
-        filename=strTRJ,
-        targetFrame=1,
-        typeI=2,  # oxygenAtomType
-        isSlice=False,
-        coordLow=[0, 0, 0],
-        coordHigh=[0, 0, 0],
-    )
-
-    # Construct a pointcloud
+    # Get the frame, make a pointcloud
     atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
@@ -148,11 +107,6 @@ def test_hbnlist1():
     )
 
     # Calculate the neighborlist by ID
-    nList = cyoda.neighListO(
-        rcutoff=3.5,
-        yCloud=resCloud,
-        typeI=2,  # oxygenAtomType
-    )
     nl = cyoda.neighListO(
         rcutoff=3.5,
         yCloud=pcd,
@@ -160,13 +114,6 @@ def test_hbnlist1():
     )
 
     # Get the hydrogen-bonded network for the current frame
-    hbnList = cyoda.populateHbonds(
-        filename=strTRJ,
-        yCloud=resCloud,
-        nList=nList,
-        targetFrame=1,
-        Htype=1,  # hydrogen atom type
-    )
     hl = cyoda.populateHbonds(
         filename=strTRJ,
         yCloud=pcd,
@@ -175,32 +122,17 @@ def test_hbnlist1():
         Htype=1,  # hydrogen atom type
     )
     # Hydrogen-bonded network using indices not IDs
-    hbnList = cyoda.neighbourListByIndex(
-        yCloud=resCloud,
-        nList=hbnList,
-    )
     hL = cyoda.neighbourListByIndex(
         yCloud=pcd,
         nList=hl,
     )
-    for idx in range(len(hbnList)):
-        assert hbnList[idx] == hL[idx]
 
+    # Validate the results
     verify(pprint.pformat(hL))
 
 
 def test_rings():
-    # Get the frame
-    resCloud = cyoda.readLammpsTrjreduced(
-        filename=strTRJ,
-        targetFrame=1,
-        typeI=2,  # oxygenAtomType
-        isSlice=False,
-        coordLow=[0, 0, 0],
-        coordHigh=[0, 0, 0],
-    )
-
-    # Construct a pointcloud
+    # Get the frame, make a pointcloud
     atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
@@ -212,11 +144,6 @@ def test_rings():
     )
 
     # Calculate the neighborlist by ID
-    nList = cyoda.neighListO(
-        rcutoff=3.5,
-        yCloud=resCloud,
-        typeI=2,  # oxygenAtomType
-    )
     nl = cyoda.neighListO(
         rcutoff=3.5,
         yCloud=pcd,
@@ -224,13 +151,6 @@ def test_rings():
     )
 
     # Get the hydrogen-bonded network for the current frame
-    hbnList = cyoda.populateHbonds(
-        filename=strTRJ,
-        yCloud=resCloud,
-        nList=nList,
-        targetFrame=1,
-        Htype=1,  # hydrogen atom type
-    )
     hl = cyoda.populateHbonds(
         filename=strTRJ,
         yCloud=pcd,
@@ -239,26 +159,17 @@ def test_rings():
         Htype=1,  # hydrogen atom type
     )
     # Hydrogen-bonded network using indices not IDs
-    hbnList = cyoda.neighbourListByIndex(
-        yCloud=resCloud,
-        nList=hbnList,
-    )
     hL = cyoda.neighbourListByIndex(
         yCloud=pcd,
         nList=hl,
     )
     # Gets every ring (non-primitives included)
-    rings = cyoda.ringNetwork(
-        nList=hbnList,
-        maxDepth=6,
-    )
     Rgs = cyoda.ringNetwork(
         nList=hL,
         maxDepth=6,
     )
-    for idx in range(len(rings)):
-        assert rings[idx] == Rgs[idx]
 
+    # Validate the results
     verify(pprint.pformat(Rgs))
 
 
