@@ -15,7 +15,10 @@ _linkto = []  # All the sub-libraries
 _incdirs = []  # All the includes
 
 # ---------------------- Library Dependencies
-ydslib = subproject('seams-core', default_options: ['default_library=static', 'wrap_mode=forcefallback']).get_variable(
+ydslib = subproject(
+    'seams-core',
+    default_options: ['default_library=static', 'wrap_mode=forcefallback'],
+).get_variable(
     'yds_dep',
 )
 _deps += ydslib
