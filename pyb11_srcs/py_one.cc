@@ -33,10 +33,10 @@ using namespace pybind11::literals;
 
 PYBIND11_MODULE(cyoda, m) {
     m.doc() = R"pbdoc(
-        Pyseams bindings
-        ----------------
+        PydSEAMSlib bindings
+        --------------------
 
-        .. currentmodule:: pyseams.cyoda
+        .. currentmodule:: PydSEAMSlib.cyoda
 
         .. autosummary::
            :toctree: _generate

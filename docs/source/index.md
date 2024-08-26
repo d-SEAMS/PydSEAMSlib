@@ -1,18 +1,18 @@
-# Pyseams: python bindings for D-SEAMS
+# PydSEAMSlib: python bindings for D-SEAMS
 
-D-SEAMS is a tool for the analysis of molecular dynamics trajectories which is specifically able to qualitatively classify ice structures in both strong-confinement and bulk systems. Pyseams makes D-SEAMS user friendly.
+D-SEAMS is a tool for the analysis of molecular dynamics trajectories which is specifically able to qualitatively classify ice structures in both strong-confinement and bulk systems. PydSEAMSlib makes D-SEAMS user friendly.
 
 # Installation for windows/ubuntu
 Assuming access has been granted to the Github repository:
 
 ```{code-block} bash
-git clone https://github.com/d-SEAMS/pyseams.git
-cd pyseams
+git clone https://github.com/d-SEAMS/PydSEAMSlib.git
+cd PydSEAMSlib
 ```
-We provide a `conda` environment:
+We provide a `conda-lock` environment:
 
 ```{code-block} bash
-micromamba create -f environment.yml
+micromamba create -f conda-lock.yml -n pyseamsdev
 micromamba activate pyseamsdev
 ```
 
@@ -21,13 +21,13 @@ micromamba activate pyseamsdev
 ```{code-block} bash
 git clone https://github.com/RuhiRG/D-seams-docker-recipes.git
 docker run -it dseamsdockerrecipes:latest /usr/bin/bash
-git clone https://github.com/d-SEAMS/pyseams.git
-cd pyseams
+git clone https://github.com/d-SEAMS/PydSEAMSlib.git
+cd PydSEAMSlib
 ```
 
 
 
-## documentation for pyseams-bindings 
+## documentation for PydSEAMSlib-bindings 
 
 ```{toctree}
 :maxdepth: 2
@@ -36,11 +36,11 @@ cd pyseams
 ```
 
 ```{eval-rst}
-.. automodule:: pyseams.cyoda
+.. automodule:: pydseamslib.cyoda
 ```
 
 <!-- ```{autodoc2-summary}
-pyseams.cyoda
+pydseamslib.cyoda
 ```
 
 ```{eval-rst}

@@ -1,5 +1,5 @@
 [project]
-name = "pyseams"
+name = "pydseamslib"
 version = "0.0.1"
 description = "Python bindings for seams-core"
 authors = [

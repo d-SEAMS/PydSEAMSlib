@@ -1,9 +1,9 @@
 # To use:
 #
 #   $ mamba env create -f environment.yml
-#   $ mamba activate pyseamsdev
+#   $ mamba activate PydSEAMSlibdev
 #
-name: pyseamsdev
+name: PydSEAMSlibdev
 channels:
   - conda-forge
 dependencies:

@@ -1,5 +1,5 @@
 project(
-    'pyseams',
+    'PydSEAMSlib',
     'cpp',
     version: '1.0.1',
     default_options: ['warning_level=1', 'cpp_std=c++14'],
@@ -36,18 +36,18 @@ py.extension_module(
     link_with: _linkto,
     cpp_args: _args,
     install: true,
-    subdir: 'pyseams/',
+    subdir: 'pydseamslib/',
 )
 
-# pyseams main package
+# pydseamslib main package
 py.install_sources(
     ['src/__init__.py'],
     pure: false,  # install next to compiled extension
-    subdir: 'pyseams/',
+    subdir: 'pydseamslib/',
 )
 
 py.install_sources(
     ['src/adapters/__init__.py', 'src/adapters/_ase.py'],
     pure: false,
-    subdir: 'pyseams/adapters',
+    subdir: 'pydseamslib/adapters',
 )

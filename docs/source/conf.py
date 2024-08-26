@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Pyseams"
+project = "PydSEAMSlib"
 release = "0.1.0"
 copyright = "2024, d-SEAMS developers"
 author = "Ruhila"
@@ -44,11 +44,11 @@ master_doc = "index"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_book_theme"
-html_title = "pyseams"
+html_title = "PydSEAMSlib"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    "repository_url": "https://github.com/d-SEAMS/pyseams",
+    "repository_url": "https://github.com/d-SEAMS/PydSEAMSlib",
     "use_repository_button": True,
 }
 # --- Plugin options
