@@ -50,6 +50,10 @@ html_static_path = ["_static"]
 html_theme_options = {
     "repository_url": "https://github.com/d-SEAMS/PydSEAMSlib",
     "use_repository_button": True,
+    "logo": {
+        "image_light": "_static/logo/pydseamslib_logo_light.png",
+        "image_dark": "_static/logo/pydseamslib_logo_dark.png",
+    },
 }
 # --- Plugin options
 
