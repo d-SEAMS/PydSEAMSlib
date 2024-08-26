@@ -1,0 +1,19 @@
+name: pre-commit
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Conda environment
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: conda-lock.yml
+        environment-name: pyseamsdev
+    - name: Run precommit
+      shell: bash -l {0}
+      run: |
+        pre-commit run -a
