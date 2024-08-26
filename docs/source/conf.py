@@ -18,30 +18,17 @@ author = "Ruhila"
 # referenced my favourite [1]
 extensions = [
     "myst_parser",
-    # "autodoc2",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.githubpages",
     "sphinx_contributors",
     "sphinx_copybutton",
     "sphinx_design",
-    "sphinxcontrib.spelling",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
 ]
 autosummary_generate = True
-
-
-myst_enable_extensions = [
-    "deflist",
-    "fieldlist",
-]
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-}
-
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -65,8 +52,15 @@ html_theme_options = {
     "use_repository_button": True,
 }
 # --- Plugin options
-autodoc2_render_plugin = "myst"
-autodoc2_packages = [f"../../{project.lower()}"]
+
+myst_enable_extensions = [
+    "deflist",
+    "fieldlist",
+]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
 
 
 # references
