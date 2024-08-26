@@ -32,4 +32,5 @@ jobs:
         shell: bash -l {0}
         run: |
           meson install -C bbdir --destdir $CONDA_PREFIX
+          pip install pytest approvaltests pytest-approvaltests "ase>=3.23.0"
           python -m pytest
