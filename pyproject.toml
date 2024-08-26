@@ -12,10 +12,19 @@ dependencies = [
     "numpy>=1.26.4",
     "pybind11>=2.12.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 
+[project.optional-dependencies]
+testing = [
+    "pytest>=8.3.1",
+    "approvaltests>=14.0.0",
+    "pytest-approvaltests>=0.2.4",
+]
+adapters = [
+    "ase>=3.23.0",
+]
 [build-system]
 # These are all that are seen by pip install .
 requires = ["pybind11", "meson-python", "numpy"]
@@ -32,3 +41,5 @@ install = ['--skip-subprojects']
 # Include so auditwheel on the CI can correctly generate wheels
 # See: https://github.com/ERGO-Code/HiGHS/pull/1343/files
 dist = ['--include-subprojects']
+
+[tool.pdm]

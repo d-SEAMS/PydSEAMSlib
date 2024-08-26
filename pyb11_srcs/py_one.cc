@@ -1,29 +1,41 @@
+/*
+** This file is part of d-SEAMS (PydSEAMSlib).
+**
+** SPDX-License-Identifier: MIT
+**
+** Copyright (c) 2023--present, d-SEAMS core team
+** All rights reserved.
+**
+** Repo:
+** https://github.com/d-SEAMS/PydSEAMSlib
+*/
 #include <pybind11/stl.h>
-#include <fmt/core.h>
 
-#include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
-#include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
-#include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
-#include "../subprojects/seams-core/src/include/internal/neighbours.hpp"
 #include "../subprojects/seams-core/src/include/internal/bond.hpp"
-#include "../subprojects/seams-core/src/include/internal/franzblau.hpp"
-#include "../subprojects/seams-core/src/include/internal/ring.hpp"
-#include "../subprojects/seams-core/src/include/internal/bulkTUM.hpp"
-#include "../subprojects/seams-core/src/include/internal/selection.hpp"
-#include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
-#include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
-#include "../subprojects/seams-core/src/include/internal/cluster.hpp"
 #include "../subprojects/seams-core/src/include/internal/bop.hpp"
+#include "../subprojects/seams-core/src/include/internal/bulkTUM.hpp"
+#include "../subprojects/seams-core/src/include/internal/cluster.hpp"
+#include "../subprojects/seams-core/src/include/internal/franzblau.hpp"
+#include "../subprojects/seams-core/src/include/internal/mol_sys.hpp"
+#include "../subprojects/seams-core/src/include/internal/neighbours.hpp"
+#include "../subprojects/seams-core/src/include/internal/rdf2d.hpp"
+#include "../subprojects/seams-core/src/include/internal/ring.hpp"
+#include "../subprojects/seams-core/src/include/internal/seams_input.hpp"
 #include "../subprojects/seams-core/src/include/internal/seams_output.hpp"
+#include "../subprojects/seams-core/src/include/internal/selection.hpp"
+#include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
+#include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
+
+#include <fmt/core.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 
 PYBIND11_MODULE(cyoda, m) {
-        m.doc() = R"pbdoc(
+    m.doc() = R"pbdoc(
         Pyseams bindings
         ----------------
-        
+
         .. currentmodule:: pyseams.cyoda
 
         .. autosummary::
@@ -99,7 +111,7 @@ PYBIND11_MODULE(cyoda, m) {
            reclassifyWater
            printIceType
            recenterClusterCloud
-         
+
     )pbdoc";
 
     py::class_<molSys::Point<double>>(m, "PointDouble")
@@ -148,15 +160,15 @@ PYBIND11_MODULE(cyoda, m) {
     py::class_<molSys::Result>(m, "Result")
         .def(py::init<>())
         .def_readwrite("classifier", &molSys::Result::classifier)
-       .def_readwrite("c_value", &molSys::Result::c_value)
-       .def("__repr__",
-           [](const molSys::Result &self_C) {
-                 std::uintptr_t ptr_val = std::uintptr_t(&self_C);
-                 return fmt::format("<Result mem_loc:{:x}>", static_cast<uint>(ptr_val));
-             });
-//        .def("__str__", [](const molSys::Result &self_C) {
-//            return fmt::format("classifier: {} c_value: {}", self_C.classifier, self_C.c_value);
-//        });
+        .def_readwrite("c_value", &molSys::Result::c_value)
+        .def("__repr__", [](const molSys::Result &self_C) {
+            std::uintptr_t ptr_val = std::uintptr_t(&self_C);
+            return fmt::format("<Result mem_loc:{:x}>", static_cast<uint>(ptr_val));
+        });
+    //        .def("__str__", [](const molSys::Result &self_C) {
+    //            return fmt::format("classifier: {} c_value: {}", self_C.classifier,
+    //            self_C.c_value);
+    //        });
 
     py::class_<molSys::PointCloud<molSys::Point<double>, double>>(m, "PointCloudDouble")
         .def(py::init<>())
@@ -169,9 +181,8 @@ PYBIND11_MODULE(cyoda, m) {
         .def_readwrite("idIndexMap",
                        &molSys::PointCloud<molSys::Point<double>, double>::idIndexMap);
 
-
     m.def("readXYZ",
-          &sinp::readXYZ,              
+          &sinp::readXYZ,
           py::arg("filename"),
           R"pbdoc(
 
@@ -183,9 +194,6 @@ PYBIND11_MODULE(cyoda, m) {
     filename : The name of the file that needs to be read
 
       )pbdoc");
-      
-
-       
 
     m.def("readLammpsTrjreduced",
           &sinp::readLammpsTrjreduced,
@@ -258,9 +266,9 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("readBonds",
-        &sinp::readBonds,
-        py::arg("filename"),
-        R"pbdoc(
+          &sinp::readBonds,
+          py::arg("filename"),
+          R"pbdoc(
 
     Reads bonds into a vector of vectors from a file with a specific format
 
@@ -294,10 +302,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("clearNeighbourList",
-        &nneigh::clearNeighbourList,
-        "Erases memory for a vector of vectors for the neighbour list",
-        py::arg("nList"),
-        R"pbdoc(
+          &nneigh::clearNeighbourList,
+          "Erases memory for a vector of vectors for the neighbour list",
+          py::arg("nList"),
+          R"pbdoc(
 
     Erases memory for a vector of vectors for the neighbour list, Call this before creating the neighbour list for a new frame
 
@@ -309,11 +317,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("getNewNeighbourListByIndex",
-        &nneigh::getNewNeighbourListByIndex,
-        "Gets a neighbour list by index, according to a pointCloud given as the input",
-        py::arg("yCloud"),
-        "cutoff"_a,
-        R"pbdoc(
+          &nneigh::getNewNeighbourListByIndex,
+          "Gets a neighbour list by index, according to a pointCloud given as the input",
+          py::arg("yCloud"),
+          "cutoff"_a,
+          R"pbdoc(
 
     Gets a neighbour list by index, according to a pointCloud given as the input
 
@@ -326,12 +334,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("halfNeighList",
-        &nneigh::halfNeighList,
-        "Inefficient O(n^2) implementation of neighbour lists ",
-        py::arg("yCloud"),
-        "rcutoff"_a,
-        "typeI"_a,
-        R"pbdoc(
+          &nneigh::halfNeighList,
+          "Inefficient O(n^2) implementation of neighbour lists ",
+          py::arg("yCloud"),
+          "rcutoff"_a,
+          "typeI"_a,
+          R"pbdoc(
 
     Inefficient O(n^2) implementation of neighbour lists
 
@@ -345,11 +353,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("neighbourListByIndex",
-        &nneigh::neighbourListByIndex,
-        "Converts the neighbour list build with atom IDs into a neighbour list of atom indices, according to the pointCloud",
-        py::arg("yCloud"),
-        "nList"_a,
-        R"pbdoc(
+          &nneigh::neighbourListByIndex,
+          "Converts the neighbour list build with atom IDs into a neighbour list of atom indices, "
+          "according to the pointCloud",
+          py::arg("yCloud"),
+          "nList"_a,
+          R"pbdoc(
 
     Converts the neighbour list build with atom IDs into a neighbour list of atom indices, according to the pointCloud
 
@@ -383,12 +392,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("neighListO",
-        &nneigh::neighListO,
-        "Inefficient O(n^2) implementation of neighbour lists ",
-        py::arg("rcutoff"),
-        "yCloud"_a,
-        "typeI"_a,
-        R"pbdoc(
+          &nneigh::neighListO,
+          "Inefficient O(n^2) implementation of neighbour lists ",
+          py::arg("rcutoff"),
+          "yCloud"_a,
+          "typeI"_a,
+          R"pbdoc(
 
     Inefficient O(n^2) implementation of neighbour lists
 
@@ -403,7 +412,8 @@ PYBIND11_MODULE(cyoda, m) {
 
     m.def("createBondsFromCages",
           &bond::createBondsFromCages,
-          "Creates a vector of vectors containing bond connectivity information from the rings vector of vectors and cage information",
+          "Creates a vector of vectors containing bond connectivity information from the rings "
+          "vector of vectors and cage information",
           py::arg("rings"),
           "cageList"_a,
           "type"_a,
@@ -445,7 +455,9 @@ PYBIND11_MODULE(cyoda, m) {
 
     m.def("populateHbonds",
           &bond::populateHbonds,
-          "Create a vector of vectors containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed",
+          "Create a vector of vectors containing the hydrogen bond connectivity information. "
+          "Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from "
+          "the neighbour list already constructed",
           py::arg("filename"),
           "yCloud"_a,
           "nList"_a,
@@ -467,12 +479,15 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("populateHbondsWithInputClouds",
-        &bond::populateHbondsWithInputClouds,
-        "Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed, taking a PointCloud for the H atoms as input",
-        py::arg("yCloud"),
-        "hCloud"_a,
-        "nList"_a,
-        R"pbdoc(
+          &bond::populateHbondsWithInputClouds,
+          "Create a vector of vectors (similar to the neighbour list conventions) containing the "
+          "hydrogen bond connectivity information. Decides the existence of the hydrogen bond "
+          "depending on the O–O and O–H vectors from the neighbour list already constructed, "
+          "taking a PointCloud for the H atoms as input",
+          py::arg("yCloud"),
+          "hCloud"_a,
+          "nList"_a,
+          R"pbdoc(
 
     Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O–O and O–H vectors from the neighbour list already constructed, taking a PointCloud for the H atoms as input
 
@@ -486,10 +501,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("trimBonds",
-        &bond::trimBonds,
-        "Remove duplicate bonds",
-        py::arg("bonds"),
-        R"pbdoc(
+          &bond::trimBonds,
+          "Remove duplicate bonds",
+          py::arg("bonds"),
+          R"pbdoc(
 
     Remove duplicate bonds
 
@@ -501,10 +516,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("clearGraph",
-        &primitive::clearGraph,
-        "Function for clearing vectors in Graph after multiple usage",
-        py::arg("currentGraph"),
-        R"pbdoc(
+          &primitive::clearGraph,
+          "Function for clearing vectors in Graph after multiple usage",
+          py::arg("currentGraph"),
+          R"pbdoc(
 
     Function for clearing vectors in Graph after multiple usage
 
@@ -516,11 +531,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("countAllRingsFromIndex",
-        &primitive::countAllRingsFromIndex,
-        "Creates a vector of vectors of all possible rings",
-        py::arg("neighHbondList"),
-        "maxDepth"_a,
-        R"pbdoc(
+          &primitive::countAllRingsFromIndex,
+          "Creates a vector of vectors of all possible rings",
+          py::arg("neighHbondList"),
+          "maxDepth"_a,
+          R"pbdoc(
 
     Creates a vector of vectors of all possible rings
 
@@ -530,7 +545,7 @@ PYBIND11_MODULE(cyoda, m) {
     neighHbondList : Row-ordered neighbour list by atom index [not ID]
     maxDepth : The maximum depth upto which rings will be searched. This means that rings larger than maxDepth will not be generated
 
-      )pbdoc"); 
+      )pbdoc");
 
     m.def("findRings",
           &primitive::findRings,
@@ -558,10 +573,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("populateGraphFromIndices",
-        &primitive::populateGraphFromIndices,
-        "Creates a graph object and fills it with the information from a neighbour list of INDICES NOT ATOM IDs created before",
-        py::arg("nList"),
-        R"pbdoc(
+          &primitive::populateGraphFromIndices,
+          "Creates a graph object and fills it with the information from a neighbour list of "
+          "INDICES NOT ATOM IDs created before",
+          py::arg("nList"),
+          R"pbdoc(
 
     Creates a graph object and fills it with the information from a neighbour list of INDICES NOT ATOM IDs created before
 
@@ -573,11 +589,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("populateGraphFromNListID",
-        &primitive::populateGraphFromNListID,
-        "Creates a graph object and fills it with the information from a neighbour list and pointCloud created before",
-        py::arg("yCloud"),
-        "neighHbondList"_a,
-        R"pbdoc(
+          &primitive::populateGraphFromNListID,
+          "Creates a graph object and fills it with the information from a neighbour list and "
+          "pointCloud created before",
+          py::arg("yCloud"),
+          "neighHbondList"_a,
+          R"pbdoc(
 
     Creates a graph object and fills it with the information from a neighbour list and pointCloud created before
 
@@ -590,10 +607,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("removeNonSPrings",
-        &primitive::removeNonSPrings,
-        "Removes the non-SP rings, using the Franzblau shortest path criterion",
-        py::arg("fullGraph"),
-        R"pbdoc(
+          &primitive::removeNonSPrings,
+          "Removes the non-SP rings, using the Franzblau shortest path criterion",
+          py::arg("fullGraph"),
+          R"pbdoc(
 
     Removes the non-SP rings, using the Franzblau shortest path criterion
 
@@ -605,11 +622,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("restoreEdgesFromIndices",
-        &primitive::restoreEdgesFromIndices,
-        "Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT ATOM IDs created before",
-        py::arg("fullGraph"),
-        "nList"_a,
-        R"pbdoc(
+          &primitive::restoreEdgesFromIndices,
+          "Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT "
+          "ATOM IDs created before",
+          py::arg("fullGraph"),
+          "nList"_a,
+          R"pbdoc(
 
     Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT ATOM IDs created before
 
@@ -622,11 +640,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("ringNetwork",
-        &primitive::ringNetwork,
-        "Returns a vector of vectors containing the rings",
-        py::arg("nList"),
-        "maxDepth"_a,
-        R"pbdoc(
+          &primitive::ringNetwork,
+          "Returns a vector of vectors containing the rings",
+          py::arg("nList"),
+          "maxDepth"_a,
+          R"pbdoc(
 
     Returns a vector of vectors containing the rings
 
@@ -666,12 +684,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("assignPolygonType",
-        &ring::assignPolygonType,
-        "Assign an atomType (equal to the number of nodes in the ring) given n-membered rings",
-        py::arg("rings"),
-        "atomTypes"_a,
-        "nRings"_a,
-        R"pbdoc(
+          &ring::assignPolygonType,
+          "Assign an atomType (equal to the number of nodes in the ring) given n-membered rings",
+          py::arg("rings"),
+          "atomTypes"_a,
+          "nRings"_a,
+          R"pbdoc(
 
     Assign an atomType (equal to the number of nodes in the ring) given n-membered rings
 
@@ -686,7 +704,8 @@ PYBIND11_MODULE(cyoda, m) {
 
     m.def("assignPrismType",
           &ring::assignPrismType,
-          "Assign an atomType (equal to the number of nodes in the ring) given a vector with a list of indices of rings comprising the prisms",
+          "Assign an atomType (equal to the number of nodes in the ring) given a vector with a "
+          "list of indices of rings comprising the prisms",
           py::arg("rings"),
           "listPrism"_a,
           "ringSize"_a,
@@ -705,18 +724,18 @@ PYBIND11_MODULE(cyoda, m) {
     ringSize : The current ring size or number of nodes in each ring.
     ringType : A vector which contains a type for each atom, depending on it's type as classified by the prism identification scheme
     atomTypes : A vector which contains a type for each atom, depending on it's type as classified by the prism identification scheme.
-    atomState : The state of the atom 
+    atomState : The state of the atom
 
       )pbdoc");
 
-// TODO: read about cagelist and clustercages function
+    // TODO: read about cagelist and clustercages function
     m.def("atomsFromCages",
-        &tum3::atomsFromCages,
-        "Gets the atoms in the cages of a given cluster",
-        py::arg("rings"),
-        "cageList"_a,
-        "clusterCages"_a,
-        R"pbdoc(
+          &tum3::atomsFromCages,
+          "Gets the atoms in the cages of a given cluster",
+          py::arg("rings"),
+          "cageList"_a,
+          "clusterCages"_a,
+          R"pbdoc(
 
     Gets the atoms in the cages of a given cluster
 
@@ -725,13 +744,14 @@ PYBIND11_MODULE(cyoda, m) {
 
     rings : The vector of vectors containing the primitive rings, of a particular ring size
     cageList : A vector of cage::Cage containing a list of HCs or DDCs
-    clusterCages : The cluster of the cages 
+    clusterCages : The cluster of the cages
 
       )pbdoc");
 
     m.def("atomsInSingleSlice",
           &gen::atomsInSingleSlice,
-          "Given a pointCloud set the inSlice bool for every atom, if the atoms are inside the specified (single) region",
+          "Given a pointCloud set the inSlice bool for every atom, if the atoms are inside the "
+          "specified (single) region",
           py::arg("yCloud"),
           "clearPreviousSliceSelection"_a,
           "coordLow"_a,
@@ -750,49 +770,50 @@ PYBIND11_MODULE(cyoda, m) {
 
       )pbdoc");
 
-// TODO: read about rmsdPerAtom and noOfCommonAtoms function
+    // TODO: read about rmsdPerAtom and noOfCommonAtoms function
 
     m.def("averageRMSDatom",
-        &tum3::averageRMSDatom,
-        "Average the RMSD per atom",
-        py::arg("rmsdPerAtom"),
-        "noOfCommonAtoms"_a,
-        R"pbdoc(
+          &tum3::averageRMSDatom,
+          "Average the RMSD per atom",
+          py::arg("rmsdPerAtom"),
+          "noOfCommonAtoms"_a,
+          R"pbdoc(
 
     Average the RMSD per atom
 
     Parameters
     ----------
 
-    rmsdPerAtom : The root mean square distance per atom 
-    noOfCommonAtoms : The number od common atom 
+    rmsdPerAtom : The root mean square distance per atom
+    noOfCommonAtoms : The number od common atom
 
       )pbdoc");
- 
+
     m.def("basalPrismConditions",
-        &ring::basalPrismConditions,
-        "Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion",
-        py::arg("nList"),
-        "basal1"_a,
-        "basal2"_a,
-        R"pbdoc(
+          &ring::basalPrismConditions,
+          "Tests whether two rings are basal rings (true) or not (false) for a prism (strict "
+          "criterion",
+          py::arg("nList"),
+          "basal1"_a,
+          "basal2"_a,
+          R"pbdoc(
 
     Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion)
 
     Parameters
     ----------
 
-    nList : Row-ordered neighbour list by atom index 
-    basal1 : The vector for one of the basal rings 
+    nList : Row-ordered neighbour list by atom index
+    basal1 : The vector for one of the basal rings
     basal2 : The vector for the other basal ring.
 
       )pbdoc");
 
     m.def("buildRefDDC",
-        &tum3::buildRefDDC,
-        "Build a reference Double-Diamond cage, reading in from a template XYZ file",
-        py::arg("fileName"),
-        R"pbdoc(
+          &tum3::buildRefDDC,
+          "Build a reference Double-Diamond cage, reading in from a template XYZ file",
+          py::arg("fileName"),
+          R"pbdoc(
 
     Build a reference Double-Diamond cage, reading in from a template XYZ file
 
@@ -804,10 +825,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("buildRefHC",
-        &tum3::buildRefHC,
-        "Build a reference Hexagonal cage, reading in from a template XYZ file",
-        py::arg("fileName"),
-        R"pbdoc(
+          &tum3::buildRefHC,
+          "Build a reference Hexagonal cage, reading in from a template XYZ file",
+          py::arg("fileName"),
+          R"pbdoc(
 
     Build a reference Hexagonal cage, reading in from a template XYZ file
 
@@ -819,10 +840,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("clearRingList",
-        &ring::clearRingList,
-        "Erases memory for a vector of vectors for a list of rings",
-        py::arg("rings"),
-        R"pbdoc(
+          &ring::clearRingList,
+          "Erases memory for a vector of vectors for a list of rings",
+          py::arg("rings"),
+          R"pbdoc(
 
     Erases memory for a vector of vectors for a list of rings
 
@@ -833,11 +854,12 @@ PYBIND11_MODULE(cyoda, m) {
 
       )pbdoc");
 
-// TODO: read about path, numHC, numDDC and cageList function
+    // TODO: read about path, numHC, numDDC and cageList function
 
     m.def("clusterCages",
           &tum3::clusterCages,
-          "Clustering Clusters cages using the Stillinger algorithm and prints out individual XYZ files of clusters.",
+          "Clustering Clusters cages using the Stillinger algorithm and prints out individual XYZ "
+          "files of clusters.",
           py::arg("yCloud"),
           "path"_a,
           "rings"_a,
@@ -859,14 +881,14 @@ PYBIND11_MODULE(cyoda, m) {
     numDDC : The number of Double-Diamond cage
 
       )pbdoc");
- 
+
     m.def("commonElementsInThreeRings",
-        &ring::commonElementsInThreeRings,
-        "Common elements in 3 rings",
-        py::arg("ring1"),
-        "ring2"_a,
-        "ring3"_a,
-        R"pbdoc(
+          &ring::commonElementsInThreeRings,
+          "Common elements in 3 rings",
+          py::arg("ring1"),
+          "ring2"_a,
+          "ring3"_a,
+          R"pbdoc(
 
     Common elements in 3 rings
 
@@ -880,11 +902,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("compareRings",
-        &ring::compareRings,
-        "Compares two disordered vectors and checks to see if they contain the same elements",
-        py::arg("ring1"),
-        "ring2"_a,
-        R"pbdoc(
+          &ring::compareRings,
+          "Compares two disordered vectors and checks to see if they contain the same elements",
+          py::arg("ring1"),
+          "ring2"_a,
+          R"pbdoc(
 
     Compares two disordered vectors and checks to see if they contain the same elements
 
@@ -897,55 +919,57 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("deformedPrismTypes",
-        &ring::deformedPrismTypes,
-        "Get the atom type values for deformed prisms",
-        py::arg("atomState"),
-        "atomTypes"_a,
-        "maxDepth"_a,
-        R"pbdoc(
+          &ring::deformedPrismTypes,
+          "Get the atom type values for deformed prisms",
+          py::arg("atomState"),
+          "atomTypes"_a,
+          "maxDepth"_a,
+          R"pbdoc(
 
     Get the atom type values for deformed prisms
 
     Parameters
     ----------
 
-    atomState : The state of the atom 
+    atomState : The state of the atom
     atomTypes : A vector which contains a type for each atom, depending on it's type as classified by the prism identification scheme
     maxDepth : The maximum depth or maximum length of the rings.
 
       )pbdoc");
 
     m.def("discardExtraTetragonBlocks",
-        &ring::discardExtraTetragonBlocks,
-        "Checks whether two 4-membered rings are parallel in one dimension or not to prevent overcounting",
-        py::arg("basal1"),
-        "basal2"_a,
-        "yCloud"_a,
-        R"pbdoc(
+          &ring::discardExtraTetragonBlocks,
+          "Checks whether two 4-membered rings are parallel in one dimension or not to prevent "
+          "overcounting",
+          py::arg("basal1"),
+          "basal2"_a,
+          "yCloud"_a,
+          R"pbdoc(
 
     Checks whether two 4-membered rings are parallel in one dimension or not to prevent overcounting
 
     Parameters
     ----------
 
-    basal1 : The first basal ring. 
+    basal1 : The first basal ring.
     basal2 : The other candidate basal ring.
     yCloud : The input PointCloud.
 
       )pbdoc");
 
     m.def("findPrisms",
-        &ring::findPrisms,
-        "Find out which rings are prisms. Returns a vector containing all the ring IDs which are prisms",
-        py::arg("rings"),
-        "ringType"_a,
-        "nPerfectPrisms"_a,
-        "nImperfectPrisms"_a,
-        "nList"_a,
-        "rmsdPerAtom"_a,
-        "doShapeMatching"_a,
-        "yCloud"_a,
-        R"pbdoc(
+          &ring::findPrisms,
+          "Find out which rings are prisms. Returns a vector containing all the ring IDs which "
+          "are prisms",
+          py::arg("rings"),
+          "ringType"_a,
+          "nPerfectPrisms"_a,
+          "nImperfectPrisms"_a,
+          "nList"_a,
+          "rmsdPerAtom"_a,
+          "doShapeMatching"_a,
+          "yCloud"_a,
+          R"pbdoc(
 
     Find out which rings are prisms. Returns a vector containing all the ring IDs which are prisms
 
@@ -957,18 +981,18 @@ PYBIND11_MODULE(cyoda, m) {
     nPerfectPrisms : The number of perfect prism blocks identified for the number of nodes
     nImperfectPrisms : The number of imperfect prism blocks identified for the number of nodes
     nList : The row-ordered neighbour list [by atom index]
-    rmsdPerAtom : The root mean square distance per atom 
-    doShapeMatching : If one wants to do shape matching 
+    rmsdPerAtom : The root mean square distance per atom
+    doShapeMatching : If one wants to do shape matching
     yCloud : The input PointCloud
 
       )pbdoc");
 
     m.def("findsCommonElements",
-        &ring::findsCommonElements,
-        "Returns the common elements of two rings",
-        py::arg("ring1"),
-        "ring2"_a,
-        R"pbdoc(
+          &ring::findsCommonElements,
+          "Returns the common elements of two rings",
+          py::arg("ring1"),
+          "ring2"_a,
+          R"pbdoc(
 
     Returns the common elements of two rings
 
@@ -981,11 +1005,11 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("findTripletInRing",
-        &ring::findTripletInRing,
-        "Searches a particular ring for a triplet",
-        py::arg("ring"),
-        "triplet"_a,
-        R"pbdoc(
+          &ring::findTripletInRing,
+          "Searches a particular ring for a triplet",
+          py::arg("ring"),
+          "triplet"_a,
+          R"pbdoc(
 
     Searches a particular ring for a triplet
 
@@ -999,20 +1023,20 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("getEdgeMoleculesInRings",
-        &ring::getEdgeMoleculesInRings,
-        py::arg("rings"),
-        "oCloud"_a,
-        "yCloud"_a,
-        "identicalCloud"_a,
-        "coordLow"_a,
-        "coordHigh"_a,
-        R"pbdoc(
+          &ring::getEdgeMoleculesInRings,
+          py::arg("rings"),
+          "oCloud"_a,
+          "yCloud"_a,
+          "identicalCloud"_a,
+          "coordLow"_a,
+          "coordHigh"_a,
+          R"pbdoc(
 
     Function that loops through the PointCloud used to construct the neighbour list (used to generate primitive rings) and sets the inSlice bool values of edge atoms which belong to rings that are formed by atoms in the slice.
 
     Parameters
     ----------
-    
+
     rings : Vector of vectors of the primitive rings [by index] according to oCloud
     oCloud : PointCloud of O atoms, used to construct the rings vector of vectors
     yCloud : The output PointCloud [may contain more than just the O atoms]
@@ -1024,37 +1048,38 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("getPointCloudOneAtomType",
-        &gen::getPointCloudOneAtomType,
-        "Given a pointCloud containing certain atom types, this returns a pointCloud containing atoms of only the desired type",
-        py::arg("yCloud"),
-        "outCloud"_a,
-        "atomTypeI"_a,
-        "isSlice"_a,
-        "coordLow"_a,
-        "coordHigh"_a,
-        R"pbdoc(
+          &gen::getPointCloudOneAtomType,
+          "Given a pointCloud containing certain atom types, this returns a pointCloud containing "
+          "atoms of only the desired type",
+          py::arg("yCloud"),
+          "outCloud"_a,
+          "atomTypeI"_a,
+          "isSlice"_a,
+          "coordLow"_a,
+          "coordHigh"_a,
+          R"pbdoc(
 
     Given a pointCloud containing certain atom types, this returns a pointCloud containing atoms of only the desired type
 
     Parameters
     ----------
-    
+
     atomTypeI : The type ID of the atoms to save in the output PointCloud
     outCloud : The output PointCloud
     yCloud : The given input PointCloud
     isSlice :  This decides whether a slice will be used or not
     coordLow : Contains the lower limits of the slice, if a slice is to be created
     coordHigh : Contains the upper limits of the slice, if a slice is to be created
-	
+
 
       )pbdoc");
 
     m.def("getSingleRingSize",
-        &ring::getSingleRingSize,
-        "Returns a vector of vectors of rings of a single size.",
-        py::arg("rings"),
-        "ringSize"_a,
-        R"pbdoc(
+          &ring::getSingleRingSize,
+          "Returns a vector of vectors of rings of a single size.",
+          py::arg("rings"),
+          "ringSize"_a,
+          R"pbdoc(
 
     Returns a vector of vectors of rings of a single size.
 
@@ -1068,11 +1093,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("hasCommonElements",
-        &ring::hasCommonElements,
-        "Check to see if two vectors have common elements or not True, if common elements are present and false if there are no common element",
-        py::arg("ring1"),
-        "ring2"_a,
-        R"pbdoc(
+          &ring::hasCommonElements,
+          "Check to see if two vectors have common elements or not True, if common elements are "
+          "present and false if there are no common element",
+          py::arg("ring1"),
+          "ring2"_a,
+          R"pbdoc(
 
     Returns a vector of vectors of rings of a single size.
 
@@ -1084,21 +1110,22 @@ PYBIND11_MODULE(cyoda, m) {
 
       )pbdoc");
 
-//   m.def("keepAxialRingsOnly",
-//        &ring::keepAxialRingsOnly,
-//        "Saves only axial rings out of all possible rings",
-//        py::arg("rings"),
-//        "yCloud"_a);
-
+    //   m.def("keepAxialRingsOnly",
+    //        &ring::keepAxialRingsOnly,
+    //        "Saves only axial rings out of all possible rings",
+    //        py::arg("rings"),
+    //        "yCloud"_a);
 
     m.def("moleculesInSingleSlice",
-        &gen::moleculesInSingleSlice,
-        "Given a pointCloud set the inSlice bool for every atom, if the molecules are inside the specified (single) region. If even one atom of a molecule is inside the region, then all atoms of that molecule will be inside the region (irrespective of type)",
-        py::arg("yCloud"),
-        "clearPreviousSliceSelection"_a,
-        "coordLow"_a,
-        "coordHigh"_a,
-        R"pbdoc(
+          &gen::moleculesInSingleSlice,
+          "Given a pointCloud set the inSlice bool for every atom, if the molecules are inside "
+          "the specified (single) region. If even one atom of a molecule is inside the region, "
+          "then all atoms of that molecule will be inside the region (irrespective of type)",
+          py::arg("yCloud"),
+          "clearPreviousSliceSelection"_a,
+          "coordLow"_a,
+          "coordHigh"_a,
+          R"pbdoc(
 
     Given a pointCloud set the inSlice bool for every atom, if the atoms are inside the specified (single) region
 
@@ -1111,18 +1138,19 @@ PYBIND11_MODULE(cyoda, m) {
     coordHigh : Contains the upper limits of the slice, if a slice is to be created
 
       )pbdoc");
-  
+
     m.def("polygonRingAnalysis",
-        &ring::polygonRingAnalysis,
-        "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size",
-        py::arg("path"),
-        "rings"_a,
-        "nList"_a,
-        "yCloud"_a,
-        "maxDepth"_a,
-        "sheetArea"_a,
-        "firstFrame"_a,
-        R"pbdoc(
+          &ring::polygonRingAnalysis,
+          "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The "
+          "input ringsAllSizes array has rings of every size",
+          py::arg("path"),
+          "rings"_a,
+          "nList"_a,
+          "yCloud"_a,
+          "maxDepth"_a,
+          "sheetArea"_a,
+          "firstFrame"_a,
+          R"pbdoc(
 
     Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size
 
@@ -1140,21 +1168,21 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("printSliceGetEdgeMoleculesInRings",
-        &ring::printSliceGetEdgeMoleculesInRings,
-        py::arg("path"),
-        "rings"_a,
-        "oCloud"_a,
-        "yCloud"_a,
-        "coordLow"_a,
-        "coordHigh"_a,
-        "identicalCloud"_a,
-        R"pbdoc(
+          &ring::printSliceGetEdgeMoleculesInRings,
+          py::arg("path"),
+          "rings"_a,
+          "oCloud"_a,
+          "yCloud"_a,
+          "coordLow"_a,
+          "coordHigh"_a,
+          "identicalCloud"_a,
+          R"pbdoc(
 
     Function that loops through the PointCloud used to construct the neighbour list (used to generate primitive rings) and sets the inSlice bool values of edge atoms which belong to rings that are formed by atoms in the slice.
 
     Parameters
     ----------
-    
+
     rings : Vector of vectors of the primitive rings [by index] according to oCloud
     path : The string to the output directory, in which files will be written out
     oCloud : PointCloud of O atoms, used to construct the rings vector of vectors
@@ -1167,24 +1195,25 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("prismAnalysis",
-        &ring::prismAnalysis,
-        "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size",
-        py::arg("path"),
-        "rings"_a,
-        "nList"_a,
-        "yCloud"_a,
-        "maxDepth"_a,
-        "atomID"_a,
-        "firstFrame"_a,
-        "currentFrame"_a,
-        "doShapeMatching"_a,
-        R"pbdoc(
+          &ring::prismAnalysis,
+          "Find out which rings are prisms, looping through all ring sizes upto the maxDepth The "
+          "input ringsAllSizes array has rings of every size",
+          py::arg("path"),
+          "rings"_a,
+          "nList"_a,
+          "yCloud"_a,
+          "maxDepth"_a,
+          "atomID"_a,
+          "firstFrame"_a,
+          "currentFrame"_a,
+          "doShapeMatching"_a,
+          R"pbdoc(
 
     Find out which rings are prisms, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size
 
     Parameters
     ----------
-    
+
     rings : Row-ordered vector of vectors for rings of a single type
     path : The string to the output directory, in which files will be written out
     nList : Row-ordered neighbour list by index
@@ -1193,38 +1222,38 @@ PYBIND11_MODULE(cyoda, m) {
     atomID : The ID of the atom
     firstFrame : The first frame
     currentFrame : The current frame
-    doShapeMatching : If one wants to do shape matching 
+    doShapeMatching : If one wants to do shape matching
 
 
       )pbdoc");
 
     m.def("relaxedPrismConditions",
-        &ring::relaxedPrismConditions,
-        "Two candidate basal rings of a prism block should have at least one bond between them",
-        py::arg("nList"),
-        "basal1"_a,
-        "basal2"_a,
-        R"pbdoc(
+          &ring::relaxedPrismConditions,
+          "Two candidate basal rings of a prism block should have at least one bond between them",
+          py::arg("nList"),
+          "basal1"_a,
+          "basal2"_a,
+          R"pbdoc(
 
     Two candidate basal rings of a prism block should have at least one bond between them
 
     Parameters
     ----------
 
-    nList : Row-ordered neighbour list by atom index 
-    basal1 : The vector for one of the basal rings 
+    nList : Row-ordered neighbour list by atom index
+    basal1 : The vector for one of the basal rings
     basal2 : The vector for the other basal ring.
 
       )pbdoc");
 
     m.def("rmAxialTranslations",
-        &ring::rmAxialTranslations,
-        "Shift the entire ice nanotube and remove axial translations",
-        py::arg("yCloud"),
-        "atomID"_a,
-        "firstFrame"_a,
-        "currentFrame"_a,
-        R"pbdoc(
+          &ring::rmAxialTranslations,
+          "Shift the entire ice nanotube and remove axial translations",
+          py::arg("yCloud"),
+          "atomID"_a,
+          "firstFrame"_a,
+          "currentFrame"_a,
+          R"pbdoc(
 
     Shift the entire ice nanotube and remove axial translations
 
@@ -1239,13 +1268,14 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("setAtomsWithSameMolID",
-        &gen::setAtomsWithSameMolID,
-        "Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms, with that molecule ID",
-        py::arg("yCloud"),
-        "molIDAtomIDmap"_a,
-        "molID"_a,
-        "inSliceValue"_a,
-        R"pbdoc(
+          &gen::setAtomsWithSameMolID,
+          "Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms, "
+          "with that molecule ID",
+          py::arg("yCloud"),
+          "molIDAtomIDmap"_a,
+          "molID"_a,
+          "inSliceValue"_a,
+          R"pbdoc(
 
     Function that loops through a given input PointCloud and sets the inSlice bool for every Point according to whether the molecule is in the specified (single) slice or not. If even one atom of a molecule is inside the region, then all atoms belonging to that molecule should be inside the slice as well (therefore, inSlice would be set to true)
 
@@ -1258,18 +1288,18 @@ PYBIND11_MODULE(cyoda, m) {
     inSliceValue : It's a bool value
 
       )pbdoc");
- 
+
     m.def("shapeMatchDDC",
-        &tum3::shapeMatchDDC,
-        "Shape-matching for a target DDC",
-        py::arg("yCloud"),
-        "refPoints"_a,
-        "cageList"_a,
-        "cageIndex"_a,
-        "rings"_a,
-        "quat"_a,
-        "rmsd"_a,
-        R"pbdoc(
+          &tum3::shapeMatchDDC,
+          "Shape-matching for a target DDC",
+          py::arg("yCloud"),
+          "refPoints"_a,
+          "cageList"_a,
+          "cageIndex"_a,
+          "rings"_a,
+          "quat"_a,
+          "rmsd"_a,
+          R"pbdoc(
 
     Shape-matching for a target DDC
 
@@ -1287,16 +1317,16 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("shapeMatchHC",
-        &tum3::shapeMatchHC,
-        "Shape-matching for a target HC",
-        py::arg("yCloud"),
-        "refPoints"_a,
-        "cageUnit"_a,
-        "rings"_a,
-        "nList"_a,
-        "quat"_a,
-        "rmsd"_a,
-        R"pbdoc(
+          &tum3::shapeMatchHC,
+          "Shape-matching for a target HC",
+          py::arg("yCloud"),
+          "refPoints"_a,
+          "cageUnit"_a,
+          "rings"_a,
+          "nList"_a,
+          "quat"_a,
+          "rmsd"_a,
+          R"pbdoc(
 
     Shape-matching for a target HC
 
@@ -1314,17 +1344,17 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("topoBulkCriteria",
-        &tum3::topoBulkCriteria,
-        "Topological network methods Finds the HCs and DDCs for the system",
-        py::arg("path"),
-        "rings"_a,
-        "nList"_a,
-        "yCloud"_a,
-        "firstFrame"_a,
-        "numHC"_a,
-        "numDDC"_a,
-        "ringType"_a,
-        R"pbdoc(
+          &tum3::topoBulkCriteria,
+          "Topological network methods Finds the HCs and DDCs for the system",
+          py::arg("path"),
+          "rings"_a,
+          "nList"_a,
+          "yCloud"_a,
+          "firstFrame"_a,
+          "numHC"_a,
+          "numDDC"_a,
+          "ringType"_a,
+          R"pbdoc(
 
     Topological network methods Finds the HCs and DDCs for the system
 
@@ -1337,22 +1367,23 @@ PYBIND11_MODULE(cyoda, m) {
     yCloud : The input PointCloud, with respect to which the indices in the rings and nList vector of vectors have been saved.
     firstFrame : First frame to be analyzed
     numHC : The number of hexagonal cages
-    numDDC : The number of double-diamond cages 
+    numDDC : The number of double-diamond cages
     ringType : A vector containing a **ring::strucType** value [a classification type] for each ring.
 
       )pbdoc");
 
     m.def("topoUnitMatchingBulk",
-        &tum3::topoUnitMatchingBulk,
-        "Topological unit matching for bulk water. If printClusters is true, individual clusters of connected cages are printed",
-        py::arg("path"),
-        "rings"_a,
-        "nList"_a,
-        "yCloud"_a,
-        "firstFrame"_a,
-        "printClusters"_a,
-        "onlyTetrahedral"_a,
-        R"pbdoc(
+          &tum3::topoUnitMatchingBulk,
+          "Topological unit matching for bulk water. If printClusters is true, individual "
+          "clusters of connected cages are printed",
+          py::arg("path"),
+          "rings"_a,
+          "nList"_a,
+          "yCloud"_a,
+          "firstFrame"_a,
+          "printClusters"_a,
+          "onlyTetrahedral"_a,
+          R"pbdoc(
 
     Topological unit matching for bulk water. If printClusters is true, individual clusters of connected cages are printed
 
@@ -1370,15 +1401,16 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("updateRMSDatom",
-        &tum3::updateRMSDatom,
-        "Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the shape-matching of each cage",
-        py::arg("rings"),
-        "cageUnit"_a,
-        "rmsd"_a,
-        "rmsdPerAtom"_a,
-        "noOfCommonAtoms"_a,
-        "atomTypes"_a,
-        R"pbdoc(
+          &tum3::updateRMSDatom,
+          "Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the "
+          "shape-matching of each cage",
+          py::arg("rings"),
+          "cageUnit"_a,
+          "rmsd"_a,
+          "rmsdPerAtom"_a,
+          "noOfCommonAtoms"_a,
+          "atomTypes"_a,
+          R"pbdoc(
 
     Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the shape-matching of each cage
 
@@ -1395,16 +1427,16 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("rdf2Danalysis_AA",
-        &rdf2::rdf2Danalysis_AA,
-        "calls other functions for initializing, sampling and normalizing the RDF",
-        py::arg("path"),
-        "rdfValues"_a,
-        "yCloud"_a,
-        "cutoff"_a,
-        "binwidth"_a,
-        "firstFrame"_a,
-        "finalFrame"_a,
-        R"pbdoc(
+          &rdf2::rdf2Danalysis_AA,
+          "calls other functions for initializing, sampling and normalizing the RDF",
+          py::arg("path"),
+          "rdfValues"_a,
+          "yCloud"_a,
+          "cutoff"_a,
+          "binwidth"_a,
+          "firstFrame"_a,
+          "finalFrame"_a,
+          R"pbdoc(
 
     Calculates the in-plane RDF for quasi-two-dimensional water, when both the atoms are of the same type
 
@@ -1419,18 +1451,18 @@ PYBIND11_MODULE(cyoda, m) {
     firstFrame : The first frame for RDF binning
     finalFrame : The final frame for RDF binning
 
-      )pbdoc");   
+      )pbdoc");
 
     m.def("bulkPolygonRingAnalysis",
-        &ring::bulkPolygonRingAnalysis,
-        "Find out rings in the bulk, looping through all ring sizes upto the maxDepth",
-        py::arg("path"),
-        "rings"_a,
-        "nList"_a,
-        "yCloud"_a,
-        "maxDepth"_a,
-        "firstFrame"_a,
-        R"pbdoc(
+          &ring::bulkPolygonRingAnalysis,
+          "Find out rings in the bulk, looping through all ring sizes upto the maxDepth",
+          py::arg("path"),
+          "rings"_a,
+          "nList"_a,
+          "yCloud"_a,
+          "maxDepth"_a,
+          "firstFrame"_a,
+          R"pbdoc(
 
     Find out rings in the bulk, looping through all ring sizes upto the maxDepth
 
@@ -1447,17 +1479,17 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("clusterAnalysis",
-        &clump::clusterAnalysis,
-        "Does the cluster analysis of ice particles in the system.",
-        py::arg("path"),
-        "iceCloud"_a,
-        "yCloud"_a,
-        "nList"_a,
-        "iceNeighbourList"_a,
-        "cutoff"_a,
-        "firstFrame"_a,
-        "bopAnalysis"_a,
-        R"pbdoc(
+          &clump::clusterAnalysis,
+          "Does the cluster analysis of ice particles in the system.",
+          py::arg("path"),
+          "iceCloud"_a,
+          "yCloud"_a,
+          "nList"_a,
+          "iceNeighbourList"_a,
+          "cutoff"_a,
+          "firstFrame"_a,
+          "bopAnalysis"_a,
+          R"pbdoc(
 
     Does the cluster analysis of ice particles in the system.
 
@@ -1476,12 +1508,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("getCorrelPlus",
-        &chill::getCorrelPlus,
-        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
-        py::arg("yCloud"),
-        "nList"_a,
-        "isSlice"_a,
-        R"pbdoc(
+          &chill::getCorrelPlus,
+          "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+          py::arg("yCloud"),
+          "nList"_a,
+          "isSlice"_a,
+          R"pbdoc(
 
     Gets c_ij and then classifies bond types according to the CHILL+ algorithm.
 
@@ -1495,15 +1527,15 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("getIceTypePlus",
-        &chill::getIceTypePlus,
-        "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
-        py::arg("yCloud"),
-        "nList"_a,
-        "path"_a,
-        "firstFrame"_a,
-        "isSlice"_a,
-        "outputFileName"_a,
-        R"pbdoc(
+          &chill::getIceTypePlus,
+          "Gets c_ij and then classifies bond types according to the CHILL+ algorithm.",
+          py::arg("yCloud"),
+          "nList"_a,
+          "path"_a,
+          "firstFrame"_a,
+          "isSlice"_a,
+          "outputFileName"_a,
+          R"pbdoc(
 
     Classifies each atom according to the CHILL+ algorithm
 
@@ -1520,12 +1552,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("writeDump",
-        &sout::writeDump,
-        "Generic function for writing out to a dump file.",
-        py::arg("yCloud"),
-        "path"_a,
-        "outFile"_a,
-        R"pbdoc(
+          &sout::writeDump,
+          "Generic function for writing out to a dump file.",
+          py::arg("yCloud"),
+          "path"_a,
+          "outFile"_a,
+          R"pbdoc(
 
     Generic function for writing out to a dump file.
 
@@ -1534,17 +1566,17 @@ PYBIND11_MODULE(cyoda, m) {
 
     yCloud : The output **molSys::PointCloud**
     path : Path to the output directory to which the info in PairCorrel struct are printed out.
-    outFile : The output file to which the info in PairCorrel struct are printed out 
+    outFile : The output file to which the info in PairCorrel struct are printed out
 
       )pbdoc");
 
     m.def("getq6",
-        &chill::getq6,
-        "q6 can distinguish between water and ice. Use this for the largest ice cluster.",
-        py::arg("yCloud"),
-        "nList"_a,
-        "isSlice"_a,
-        R"pbdoc(
+          &chill::getq6,
+          "q6 can distinguish between water and ice. Use this for the largest ice cluster.",
+          py::arg("yCloud"),
+          "nList"_a,
+          "isSlice"_a,
+          R"pbdoc(
 
     q6 can distinguish between water and ice. Use this for the largest ice cluster.
 
@@ -1559,12 +1591,12 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("reclassifyWater",
-        &chill::reclassifyWater,
-        py::arg("yCloud"),
-        "q6"_a,
-        R"pbdoc(
+          &chill::reclassifyWater,
+          py::arg("yCloud"),
+          "q6"_a,
+          R"pbdoc(
 
-    Reclassifies atoms which may have been mis-classified as water using the averaged q6 and q3 parameters. 
+    Reclassifies atoms which may have been mis-classified as water using the averaged q6 and q3 parameters.
 
     Parameters
     ----------
@@ -1576,13 +1608,13 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("printIceType",
-        &chill::printIceType,
-        py::arg("yCloud"),
-        "path"_a,
-        "firstFrame"_a,
-        "isSlice"_a,
-        "outputFileName"_a,
-        R"pbdoc(
+          &chill::printIceType,
+          py::arg("yCloud"),
+          "path"_a,
+          "firstFrame"_a,
+          "isSlice"_a,
+          "outputFileName"_a,
+          R"pbdoc(
 
     Prints out the iceType for a particular frame onto the terminal. Prints out the **molSys::atom_state_type** per-particle ice type, for a particular frame, to a file.
 
@@ -1599,10 +1631,10 @@ PYBIND11_MODULE(cyoda, m) {
       )pbdoc");
 
     m.def("recenterClusterCloud",
-        &clump::recenterClusterCloud,
-        py::arg("iceCloud"),
-        "nList"_a,
-        R"pbdoc(
+          &clump::recenterClusterCloud,
+          py::arg("iceCloud"),
+          "nList"_a,
+          R"pbdoc(
 
     Recenters the largest ice cluster, by applying a transformation on the largest ice cluster coordinates. Requires the neighbour list BY INDEX
 
@@ -1615,4 +1647,3 @@ PYBIND11_MODULE(cyoda, m) {
 
       )pbdoc");
 }
-
