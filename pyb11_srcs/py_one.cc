@@ -36,7 +36,7 @@ PYBIND11_MODULE(cyoda, m) {
         PydSEAMSlib bindings
         --------------------
 
-        .. currentmodule:: PydSEAMSlib.cyoda
+        .. currentmodule:: pydseamslib.cyoda
 
         .. autosummary::
            :toctree: _generate
