@@ -10,8 +10,3 @@ else
     # manylinux
     yum -y install boost-devel
 fi
-
-# Common commands for both systems
-pip install meson
-meson wrap install eigen
-meson wrap install fmt

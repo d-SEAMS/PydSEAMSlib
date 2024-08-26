@@ -1,7 +1,7 @@
 [wrap-git]
 directory=seams-core
 url=https://github.com/RuhiRG/seams-core
-revision=2b06b9a311648f9b87d41ae9e1fb04e214bfd0bc
+revision=ee091b7dc6063b2b7da2c29f44c6eb713b715139
 [provide]
 seams-core=git
 

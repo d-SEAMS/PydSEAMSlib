@@ -79,9 +79,6 @@ jobs:
       - name: Build sdist
         shell: bash -l {0}
         run: |
-          pipx install meson
-          meson wrap install fmt
-          meson wrap install eigen
           pipx run build --sdist
 
       - uses: actions/upload-artifact@v3
