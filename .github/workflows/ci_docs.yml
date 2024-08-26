@@ -30,6 +30,8 @@ jobs:
         shell: bash -el {0}
         run: |
           # Will also install the package
+          meson wrap install fmt
+          meson wrap install eigen
           pipx run pdm sync -v
           pipx run pdm run sphinx-build -b html docs/source html
       - name: Setup Pages
