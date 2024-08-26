@@ -1,12 +1,14 @@
 import pprint
 import numpy as np
 
-from approvaltests import verify
+from approvaltests import verify, verify_file
+from approvaltests.namer.default_namer_factory import NamerFactory
 from ase.io import read as aseread
 
 
 from pyseams import cyoda
 from pyseams.adapters import _ase
+from pathlib import Path
 
 
 def test_nlist():
@@ -260,3 +262,13 @@ def test_rings():
         assert rings[idx] == Rgs[idx]
 
     verify(pprint.pformat(Rgs))
+
+
+def test_prisms():
+    import subprocess
+    gitroot = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                                  check=True,
+                                  capture_output=True).stdout.decode("utf-8").strip())
+    # Validate the run results
+    verify_file(Path(f"{gitroot}/runOneRef/topoINT/dataFiles/system-prisms-1.data"), options=NamerFactory.with_parameters("systemPrisms"))
+    verify_file(Path(f"{gitroot}/runOneRef/topoINT/nPrisms.dat"), options=NamerFactory.with_parameters("nPrisms"))

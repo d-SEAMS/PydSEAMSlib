@@ -1,3 +1,5 @@
+# This is equivalent to running the lua_inputs/config.yml file
+# after building yodaStruct from seams-core
 import bbdir.cyoda as cyoda
 
 trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
