@@ -36,5 +36,5 @@ jobs:
       - name: Run standard tests
         shell: bash -l {0}
         run: |
-          pip install -vvv .[testing,adapters]
+          pip install -v .[testing,adapters]
           python -m pytest
