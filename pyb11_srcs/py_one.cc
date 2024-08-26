@@ -26,6 +26,8 @@
 #include "../subprojects/seams-core/src/include/internal/topo_one_dim.hpp"
 #include "../subprojects/seams-core/src/include/internal/topo_two_dim.hpp"
 
+#include <cstdint>
+
 #include <fmt/core.h>
 
 namespace py = pybind11;
@@ -128,7 +130,7 @@ PYBIND11_MODULE(cyoda, m) {
         .def("__repr__",
              [](const molSys::Point<double> &self_C) {
                  std::uintptr_t ptr_val = std::uintptr_t(&self_C);
-                 return fmt::format("<PointDouble mem_loc:{:x}>", static_cast<uint>(ptr_val));
+                 return fmt::format("<PointDouble mem_loc:{:x}>", static_cast<uint64_t>(ptr_val));
              })
         .def("__str__", [](const molSys::Point<double> &self_C) {
             return fmt::format("x: {} y: {} z: {} type: {} molID: {} atomID: {} inSlice: {}",
@@ -163,7 +165,7 @@ PYBIND11_MODULE(cyoda, m) {
         .def_readwrite("c_value", &molSys::Result::c_value)
         .def("__repr__", [](const molSys::Result &self_C) {
             std::uintptr_t ptr_val = std::uintptr_t(&self_C);
-            return fmt::format("<Result mem_loc:{:x}>", static_cast<uint>(ptr_val));
+            return fmt::format("<Result mem_loc:{:x}>", static_cast<uint64_t>(ptr_val));
         });
     //        .def("__str__", [](const molSys::Result &self_C) {
     //            return fmt::format("classifier: {} c_value: {}", self_C.classifier,
