@@ -52,4 +52,19 @@ install = ['--skip-subprojects']
 # See: https://github.com/ERGO-Code/HiGHS/pull/1343/files
 dist = ['--include-subprojects']
 
+[tool.cibuildwheel]
+skip = [ "pp*" ]
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+musllinux-x86_64-image = "musllinux_1_2"
+
+[tool.cibuildwheel.macos]
+archs = [ "auto64" ]
+
+[tool.cibuildwheel.windows]
+archs = [ "auto64" ]
+
 [tool.pdm]
