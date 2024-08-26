@@ -1,15 +1,16 @@
 # PydSEAMSlib: python bindings for d-SEAMS
 
-[d-SEAMS](https://dseams.info/) is a tool for the analysis of molecular dynamics
+[d-SEAMS](https://dseams.info/) (Deferred Structural Elucidation Analysis for
+Molecular Simulations) is a tool for the analysis of molecular dynamics
 trajectories which is specifically able to qualitatively classify ice structures
-in both strong-confinement and bulk systems. ``PydSEAMSlib`` makes d-SEAMS user
+in both strong-confinement and bulk systems {cite:t}`idx-goswamiDSEAMSDeferredStructural2020`. ``PydSEAMSlib`` makes d-SEAMS user
 friendly and accessible to the larger Scientific Python ecosystem.
 
 ```{note}
 Historically, in 2023, the project was initiated under the name ``PySeams``, which could not be registered on PyPI due to naming similarities, so the project in 2024 switched to its current name, ``PydSEAMSlib``.
 ```
 
-# Standard installation instructions
+# Installation 
 
 ```{code-block} sh
 git clone https://github.com/d-SEAMS/PydSEAMSlib.git
@@ -44,7 +45,7 @@ meson compile install bbdir
 ```
 
 
-# ``docker`` installation for emulated hardware
+## ``docker`` installation for emulated hardware
 
 For ``arm64v8`` machines, it may be easier to use the following ``docker`` image.
 
@@ -63,11 +64,26 @@ Subsequently, the earlier steps can be followed.
 MIT. For more details, including contribution guidelines visit the GitHub repo.
 
 
+## References
+
+```{bibliography}
+---
+style: alpha
+filter: docname in docnames
+labelprefix: IDX_
+keyprefix: idx-
+---
+```
+
+
+## Documentation
+
 ```{toctree}
 :maxdepth: 2
 :caption: API Documentation
 
 api
+history
 ```
 
 ## Indices and tables
