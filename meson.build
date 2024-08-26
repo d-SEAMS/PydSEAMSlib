@@ -12,7 +12,7 @@ host_system = host_machine.system()
    _incdirs = [] # All the includes
 
 # ---------------------- Library Dependencies
-ydslib = subproject('seams-core').get_variable('yds_dep')
+ydslib = subproject('seams-core', default_options: ['default_library=static']).get_variable('yds_dep')
 _deps += ydslib
 
 # ---------------------- Bindings
