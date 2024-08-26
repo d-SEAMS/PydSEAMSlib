@@ -1,5 +1,5 @@
 [project]
-name = "pyseams"
+name = "pydseamslib"
 version = "0.0.1"
 description = "Python bindings for seams-core"
 authors = [
@@ -24,6 +24,16 @@ testing = [
 ]
 adapters = [
     "ase>=3.23.0",
+]
+docs = [
+    "sphinx>=8.0.2",
+    "myst-parser>=4.0.0",
+    "sphinx-contributors>=0.2.7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.6.1",
+    "sphinxcontrib-napoleon>=0.7",
+    "sphinx-book-theme>=1.1.3",
+    "sphinxcontrib-bibtex>=2.6.2",
 ]
 [build-system]
 # These are all that are seen by pip install .

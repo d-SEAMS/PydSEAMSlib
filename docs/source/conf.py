@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Pyseams"
+project = "PydSEAMSlib"
 release = "0.1.0"
 copyright = "2024, d-SEAMS developers"
 author = "Ruhila"
@@ -18,30 +18,18 @@ author = "Ruhila"
 # referenced my favourite [1]
 extensions = [
     "myst_parser",
-    # "autodoc2",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.githubpages",
     "sphinx_contributors",
     "sphinx_copybutton",
     "sphinx_design",
-    "sphinxcontrib.spelling",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
 ]
 autosummary_generate = True
-
-
-myst_enable_extensions = [
-    "deflist",
-    "fieldlist",
-]
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-}
-
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -57,17 +45,29 @@ master_doc = "index"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_book_theme"
-html_title = "pyseams"
+html_title = "PydSEAMSlib"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    "repository_url": "https://github.com/d-SEAMS/pyseams",
+    "repository_url": "https://github.com/d-SEAMS/PydSEAMSlib",
     "use_repository_button": True,
+    "logo": {
+        "image_light": "_static/logo/pydseamslib_logo_light.png",
+        "image_dark": "_static/logo/pydseamslib_logo_dark.png",
+    },
 }
 # --- Plugin options
-autodoc2_render_plugin = "myst"
-autodoc2_packages = [f"../../{project.lower()}"]
 
+myst_enable_extensions = [
+    "deflist",
+    "fieldlist",
+]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
+
+bibtex_bibfiles = ["bibtex/pyseamsDocs.bib"]
 
 # references
 # [1] https://github.com/HaoZeke/openblas_buildsys_snips/blob/main/docs/source/conf.py

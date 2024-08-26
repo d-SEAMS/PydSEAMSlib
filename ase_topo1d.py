@@ -1,5 +1,5 @@
-from pyseams import cyoda
-from pyseams.adapters import _ase
+from pydseamslib import cyoda
+from pydseamslib.adapters import _ase
 import numpy as np
 
 from ase.io import read as aseread

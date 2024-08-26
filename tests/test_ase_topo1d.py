@@ -7,8 +7,8 @@ from approvaltests.namer.default_namer_factory import NamerFactory
 from ase.io import read as aseread
 
 
-from pyseams import cyoda
-from pyseams.adapters import _ase
+from pydseamslib import cyoda
+from pydseamslib.adapters import _ase
 from pathlib import Path
 
 TRAJ = Path("subprojects/seams-core/input/traj/exampleTraj.lammpstrj")

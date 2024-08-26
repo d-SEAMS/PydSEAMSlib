@@ -1,3 +1,3 @@
-from pyseams import cyoda
+from pydseamslib import cyoda
 
 __all__ = ["cyoda"]
