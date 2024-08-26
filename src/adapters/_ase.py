@@ -3,19 +3,11 @@ import numpy as np
 import ase
 
 
-def map_LAMMPS_ID_to_atomic_numbers(dict_map: dict(), atms_a: ase.Atoms):
-    pass
-
-
-def map_1(dict_map: dict(), atms_a: ase.Atoms):
-    for key, value in dict_map.items():
-        for pt in atms_a:
-            if pt.number == key:
-                pt.symbol = value
-    return atms_a
-
-
-def map_2(dict_map: dict(), atms_a: ase.Atoms):
+def map_LAMMPS_IDs_to_atomic_symbols(dict_map: dict(), atms_a: ase.Atoms):
+# Traversing by atom is faster than traversing atoms by key value in the map,
+# since there will be fewer map values than atoms
+# See https://github.com/d-SEAMS/pyseams/pull/11#issuecomment-2243986351
+# for benchmarks
     for pt in atms_a:
         if pt.number in dict_map.keys():
             pt.symbol = dict_map[pt.number]

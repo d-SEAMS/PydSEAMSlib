@@ -22,7 +22,7 @@ resCloud = cyoda.readLammpsTrjreduced(
 atms = aseread(trajectory)
 # In ASE, we want to work with atomic symbols instead of LAMMPS types
 lammps_to_ase = {1: 'H', 2: 'O'}
-atms = _ase.map_2(lammps_to_ase, atms)
+atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
 openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
 only_O_mask = [x.symbol == 'O' for x in atms]
 # user has to provide proper molID for inslice, each molecule must have one molID. for eg: In H2O, both H atoms and O atom must have same molID. 

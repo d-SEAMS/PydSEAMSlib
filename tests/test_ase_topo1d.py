@@ -25,7 +25,7 @@ def test_nlist():
     atms = aseread(trajectory)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: 'H', 2: 'O'}
-    atms = _ase.map_2(lammps_to_ase, atms)
+    atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
     openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
@@ -80,7 +80,7 @@ def test_hbnlist():
     atms = aseread(trajectory)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: 'H', 2: 'O'}
-    atms = _ase.map_2(lammps_to_ase, atms)
+    atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
     openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
@@ -136,7 +136,7 @@ def test_hbnlist1():
     atms = aseread(trajectory)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: 'H', 2: 'O'}
-    atms = _ase.map_2(lammps_to_ase, atms)
+    atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
     openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
@@ -201,7 +201,7 @@ def test_rings():
     atms = aseread(trajectory)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: 'H', 2: 'O'}
-    atms = _ase.map_2(lammps_to_ase, atms)
+    atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == 'O' for x in atms]
     molOID = np.repeat(np.arange(1,sum(only_O_mask)+1),1)
     openfile = 'subprojects/seams-core/input/traj/exampleTraj.lammpstrj'
