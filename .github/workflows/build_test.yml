@@ -23,7 +23,13 @@ jobs:
           meson setup bbdir
           meson compile -C bbdir
 
-      - name: Run a test
+      - name: Run an import test
         shell: bash -l {0}
         run: |
           python -c 'import bbdir.cyoda'
+
+      - name: Run standard tests
+        shell: bash -l {0}
+        run: |
+          meson install -C bbdir --destdir $CONDA_PREFIX
+          python -m pytest
