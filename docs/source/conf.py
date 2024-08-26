@@ -27,6 +27,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
 ]
 autosummary_generate = True
 
@@ -66,6 +67,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
 }
 
+bibtex_bibfiles = ['bibtex/pyseamsDocs.bib']
 
 # references
 # [1] https://github.com/HaoZeke/openblas_buildsys_snips/blob/main/docs/source/conf.py

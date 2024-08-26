@@ -33,6 +33,7 @@ docs = [
     "sphinx-design>=0.6.1",
     "sphinxcontrib-napoleon>=0.7",
     "sphinx-book-theme>=1.1.3",
+    "sphinxcontrib-bibtex>=2.6.2",
 ]
 [build-system]
 # These are all that are seen by pip install .
