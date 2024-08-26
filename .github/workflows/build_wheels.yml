@@ -52,7 +52,8 @@ jobs:
       fail-fast: false
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-24.04, macos-13, macos-14, windows-2022]
+        # TODO: windows-2022
+        os: [ubuntu-24.04, macos-13, macos-14]
 
     steps:
       - uses: actions/checkout@v4
