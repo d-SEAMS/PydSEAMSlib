@@ -45,14 +45,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     env: # Boost needs 13.0
       MACOSX_DEPLOYMENT_TARGET: '13.0'
-      # CIBW_BEFORE_ALL: "scripts/cibw_before_build.sh"
+      CIBW_BEFORE_ALL_LINUX: "scripts/cibw_before_build.sh"
+      CIBW_BEFORE_ALL_MACOS: "scripts/cibw_before_build.sh"
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        # TMP: ubuntu-24.04, macos-13, macos-14,
-        os: [windows-2022]
+        os: [ubuntu-24.04, macos-13, macos-14, windows-2022]
 
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +63,7 @@ jobs:
         id: install-boost
         with:
           boost_version: 1.83.0
+          link: static
       - name: Echo build platform
         run: echo Building wheels for ${{ matrix.os }}
       - name: Build wheels
