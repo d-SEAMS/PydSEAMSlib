@@ -34,4 +34,4 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -v .[testing,adapters]
-          python -m pytest -vvv  --approvaltests-add-reporter='PythonNativeReporter'
+          python -m pytest -vvv tests  --approvaltests-add-reporter='PythonNativeReporter'
