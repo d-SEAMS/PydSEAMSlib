@@ -11,12 +11,14 @@ from pyseams import cyoda
 from pyseams.adapters import _ase
 from pathlib import Path
 
+TRAJ = Path("subprojects/seams-core/input/traj/exampleTraj.lammpstrj")
+strTRJ = str(TRAJ.absolute())
+
 
 def test_nlist():
-    trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     # Get the frame
     resCloud = cyoda.readLammpsTrjreduced(
-        filename=trajectory,
+        filename=strTRJ,
         targetFrame=1,
         typeI=2,  # oxygenAtomType
         isSlice=False,
@@ -25,15 +27,14 @@ def test_nlist():
     )
 
     # Construct a pointcloud
-    atms = aseread(trajectory)
+    atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
     atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == "O" for x in atms]
     molOID = np.repeat(np.arange(1, sum(only_O_mask) + 1), 1)
-    openfile = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     pcd = _ase.to_pointcloud(
-        atms, lammps_to_ase, only_O_mask, molOID, openfile, currentFrame=[1]
+        atms, lammps_to_ase, only_O_mask, molOID, TRAJ, currentFrame=[1]
     )
     assert pcd.box == resCloud.box
     assert pcd.nop == resCloud.nop
@@ -61,17 +62,18 @@ def test_nlist():
         yCloud=pcd,
         typeI=2,  # oxygenAtomType
     )
+
+    # Needs nList and nl for this
     for idx in range(len(nList)):
         assert nList[idx] == nl[idx]
 
-    verify(pprint.pformat(nList))
+    verify(pprint.pformat(nl))
 
 
 def test_hbnlist():
-    trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     # Get the frame
     resCloud = cyoda.readLammpsTrjreduced(
-        filename=trajectory,
+        filename=strTRJ,
         targetFrame=1,
         typeI=2,  # oxygenAtomType
         isSlice=False,
@@ -80,15 +82,14 @@ def test_hbnlist():
     )
 
     # Construct a pointcloud
-    atms = aseread(trajectory)
+    atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
     atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == "O" for x in atms]
     molOID = np.repeat(np.arange(1, sum(only_O_mask) + 1), 1)
-    openfile = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     pcd = _ase.to_pointcloud(
-        atms, lammps_to_ase, only_O_mask, molOID, openfile, currentFrame=[1]
+        atms, lammps_to_ase, only_O_mask, molOID, TRAJ, currentFrame=[1]
     )
 
     # Calculate the neighborlist by ID
@@ -105,14 +106,14 @@ def test_hbnlist():
 
     # Get the hydrogen-bonded network for the current frame
     hbnList = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=resCloud,
         nList=nList,
         targetFrame=1,
         Htype=1,  # hydrogen atom type
     )
     hl = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=pcd,
         nList=nl,
         targetFrame=1,
@@ -125,10 +126,9 @@ def test_hbnlist():
 
 
 def test_hbnlist1():
-    trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     # Get the frame
     resCloud = cyoda.readLammpsTrjreduced(
-        filename=trajectory,
+        filename=strTRJ,
         targetFrame=1,
         typeI=2,  # oxygenAtomType
         isSlice=False,
@@ -137,15 +137,14 @@ def test_hbnlist1():
     )
 
     # Construct a pointcloud
-    atms = aseread(trajectory)
+    atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
     atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == "O" for x in atms]
     molOID = np.repeat(np.arange(1, sum(only_O_mask) + 1), 1)
-    openfile = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     pcd = _ase.to_pointcloud(
-        atms, lammps_to_ase, only_O_mask, molOID, openfile, currentFrame=[1]
+        atms, lammps_to_ase, only_O_mask, molOID, TRAJ, currentFrame=[1]
     )
 
     # Calculate the neighborlist by ID
@@ -162,14 +161,14 @@ def test_hbnlist1():
 
     # Get the hydrogen-bonded network for the current frame
     hbnList = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=resCloud,
         nList=nList,
         targetFrame=1,
         Htype=1,  # hydrogen atom type
     )
     hl = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=pcd,
         nList=nl,
         targetFrame=1,
@@ -191,10 +190,9 @@ def test_hbnlist1():
 
 
 def test_rings():
-    trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     # Get the frame
     resCloud = cyoda.readLammpsTrjreduced(
-        filename=trajectory,
+        filename=strTRJ,
         targetFrame=1,
         typeI=2,  # oxygenAtomType
         isSlice=False,
@@ -203,15 +201,14 @@ def test_rings():
     )
 
     # Construct a pointcloud
-    atms = aseread(trajectory)
+    atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
     atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == "O" for x in atms]
     molOID = np.repeat(np.arange(1, sum(only_O_mask) + 1), 1)
-    openfile = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     pcd = _ase.to_pointcloud(
-        atms, lammps_to_ase, only_O_mask, molOID, openfile, currentFrame=[1]
+        atms, lammps_to_ase, only_O_mask, molOID, TRAJ, currentFrame=[1]
     )
 
     # Calculate the neighborlist by ID
@@ -228,14 +225,14 @@ def test_rings():
 
     # Get the hydrogen-bonded network for the current frame
     hbnList = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=resCloud,
         nList=nList,
         targetFrame=1,
         Htype=1,  # hydrogen atom type
     )
     hl = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=pcd,
         nList=nl,
         targetFrame=1,
@@ -266,17 +263,15 @@ def test_rings():
 
 
 def test_prisms():
-    trajectory = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     # Construct a pointcloud
-    atms = aseread(trajectory)
+    atms = aseread(strTRJ)
     # TODO(ruhi): How should these be passed
     lammps_to_ase = {1: "H", 2: "O"}
     atms = _ase.map_LAMMPS_IDs_to_atomic_symbols(lammps_to_ase, atms)
     only_O_mask = [x.symbol == "O" for x in atms]
     molOID = np.repeat(np.arange(1, sum(only_O_mask) + 1), 1)
-    openfile = "subprojects/seams-core/input/traj/exampleTraj.lammpstrj"
     pcd = _ase.to_pointcloud(
-        atms, lammps_to_ase, only_O_mask, molOID, openfile, currentFrame=[1]
+        atms, lammps_to_ase, only_O_mask, molOID, TRAJ, currentFrame=[1]
     )
     # Calculate the neighborlist by ID
     nl = cyoda.neighListO(
@@ -286,7 +281,7 @@ def test_prisms():
     )
     # Get the hydrogen-bonded network for the current frame
     hl = cyoda.populateHbonds(
-        filename=trajectory,
+        filename=strTRJ,
         yCloud=pcd,
         nList=nl,
         targetFrame=1,
