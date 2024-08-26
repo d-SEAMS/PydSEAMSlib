@@ -8,7 +8,11 @@ on:
       - main
 jobs:
   build_test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-13, macos-14]
     steps:
       - uses: actions/checkout@v3
 
@@ -31,5 +35,5 @@ jobs:
       - name: Run standard tests
         shell: bash -l {0}
         run: |
-          pip install -vvv .[testing,adapters]
+          pip install -v .[testing,adapters]
           python -m pytest
