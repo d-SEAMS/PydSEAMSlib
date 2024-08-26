@@ -42,7 +42,7 @@ build-backend = "mesonpy"
 # Important, tells pip how to install the package
 [tool.meson-python.args]
 setup = [
-#'-Dwrap_mode=forcefallback',
+'-Dwrap_mode=forcefallback',
 # ^-- collects subprojects, see https://github.com/ERGO-Code/HiGHS/pull/1343#discussion_r1252446966
 ]
 # Skip during installation to prevent local RPATH stripping issues
@@ -51,5 +51,20 @@ install = ['--skip-subprojects']
 # Include so auditwheel on the CI can correctly generate wheels
 # See: https://github.com/ERGO-Code/HiGHS/pull/1343/files
 dist = ['--include-subprojects']
+
+[tool.cibuildwheel]
+skip = [ "pp*" ]
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+musllinux-x86_64-image = "musllinux_1_2"
+
+[tool.cibuildwheel.macos]
+archs = [ "auto64" ]
+
+[tool.cibuildwheel.windows]
+archs = [ "auto64" ]
 
 [tool.pdm]
