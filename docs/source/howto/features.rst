@@ -116,16 +116,17 @@ their atomic numbers as ``c_type``. ``ion_environment`` reads those codes.
 
 #skip_lint_end
 
-Those atomic-number codes classify each ion from its first water
-shell. The return is the water count within ``cutoff``, the ice fraction
-of that shell, and a class. ``ION_ICE`` means every neighbour in the
-shell is ice. ``ION_LIQUID`` means none of it is. ``ION_FRONT`` is the
-rest. ``ion_types`` adds ``n_ion_ice``, ``n_ion_front``, ``n_ion_liquid`` and
-the mean shell ice fraction to the feature vector.
+``ion_types=(3, 4)`` names LAMMPS types on that dump (water is type 1).
+They are ``c_type`` codes, not atomic numbers. The codes classify each
+ion from its first water shell. The return is the water count within
+``cutoff``, the ice fraction of that shell, and a class. ``ION_ICE``
+means every neighbour in the shell is ice. ``ION_LIQUID`` means none of
+it is. ``ION_FRONT`` is the rest. ``ion_types`` adds ``n_ion_ice``,
+``n_ion_front``, ``n_ion_liquid`` and the mean shell ice fraction to the
+feature vector.
 
-The same first-shell class is available on ``Frame`` as a compiled
-path. That method passes ``ring_adjacent`` through to
-``seeded_affiliation``.
+``Frame.ion_environment`` is the compiled path for the same first-shell
+class. It passes ``ring_adjacent`` through to ``seeded_affiliation``.
 
 See also
 --------

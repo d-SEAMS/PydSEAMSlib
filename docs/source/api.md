@@ -168,7 +168,7 @@ directly for the raw engine.
 | `countAllRingsFromIndex` | Find all possible rings (including non-shortest-path) up to `maxDepth`. |
 | `ringNetwork` | Find all primitive (shortest-path) rings up to `maxDepth`. |
 | `cageAffiliation` | Order-free per-ring cage classification: `(hc, ddc)` flag vectors. |
-| `seededCageAffiliation` | Seeded (hysteresis) per-atom cage flags: strict-graph seeds, permissive-graph completion. `ring_adjacent` fills the last vertex of a six-ring whose other vertices carry a label. |
+| `seededCageAffiliation` | Seeded (hysteresis) per-atom cage flags: strict-graph seeds, permissive-graph completion. `ringAdjacentCompletion` fills the last vertex of a six-ring whose other vertices carry a label. |
 | `RingUpdater` | Exact incremental primitive rings for a neighbour list. |
 | `AffiliationUpdater` | Exact incremental per-ring cage classification for one frame. |
 | `populateGraphFromIndices` | Create a graph object from an index-based neighbour list. |

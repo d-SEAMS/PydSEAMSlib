@@ -130,7 +130,11 @@ counts.
 
 Default ``cages()`` is the seeded (hysteresis) construction. Pass
 ``seeded=False`` for cutoff-graph affiliation on this frame's
-six-rings.
+six-rings. Pass ``ring_adjacent`` on ``cages`` or
+``seeded_affiliation`` to fill the last vertex of a six-ring whose
+other vertices carry a label. ``IceFeaturizer`` turns that flag on by
+default. Mixed water-salt ASE input uses ``from_ase`` with
+``select=("O", "Na", "Cl")``.
 
 CHILL+ and cages answer different questions on the same cloud.
 CHILL+ is a four-neighbour local label. Cages require a finished

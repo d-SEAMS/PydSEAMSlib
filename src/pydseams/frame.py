@@ -589,7 +589,7 @@ class Frame:
 
     @classmethod
     def from_ase(cls, atoms, select="O", cutoff=None, bonded="auto"):
-        """Load an ASE ``Atoms``. ``select`` is a symbol, atomic number, or None.
+        """Load an ASE ``Atoms``. ``select`` is a symbol, atomic number, sequence, or None.
 
         Parameters
         ----------
