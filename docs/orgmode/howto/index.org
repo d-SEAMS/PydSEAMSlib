@@ -11,6 +11,7 @@ problem.
 |-------+-------------|
 | [[file:install.org][Install pydseams]] | pip, pixi, extras, checkout |
 | [[file:ase.org][Classify ASE Atoms]] | ~from_ase~, ~to_ase~, select, bonding |
+| [[file:features.org][Features and ions]] | ~IceFeaturizer~, deeptime, PyEMMA, ions |
 | [[file:solvis.org][View a frame in solvis]] | ~to_solvis~ extra |
 | [[file:faq.org][FAQ]] | Names, extras, formats |
 | [[file:troubleshooting.org][Troubleshooting]] | Import errors, cells, hydrogens |
@@ -22,6 +23,7 @@ problem.
    install
    ase
    solvis
+   features
    faq
    troubleshooting
 #+end_export

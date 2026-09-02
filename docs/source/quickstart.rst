@@ -61,6 +61,11 @@ Pass ``all_atoms=True`` for mixed-type site analyses such as
 ``yoda`` is the compiled module. ``_core`` and ``cyoda`` are aliases of
 ``yoda``. Helpers (``Frame``, ``read``, ASE, solvis) stay in Python.
 
-ASE ``Atoms``: ``ds.from_ase(atoms)``. See the `ASE
+Those ASE helpers take ``ds.from_ase(atoms)``. A sequence such as
+``select=("O", "Na", "Cl")`` keeps listed species in the cloud and
+analyses the first, so ions ride along. ``cages()`` calls
+``seeded_affiliation``; ``ring_adjacent`` fills the last vertex of
+a six-ring whose other vertices carry a label. See the `ASE
 how-to <howto/ase.rst>`_. A worked mixed ice-water dump is the
-`classify-ice tutorial <tutorials/classify-ice.rst>`_.
+`classify-ice tutorial <tutorials/classify-ice.rst>`_. The kinetic
+vector path is the `features how-to <howto/features.rst>`_.

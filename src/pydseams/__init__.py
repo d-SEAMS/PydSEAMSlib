@@ -47,9 +47,12 @@ def from_ase(atoms, select="O", cutoff=None, bonded="auto"):
     ----------
     atoms : ase.Atoms
         Configuration with a nonsingular cell periodic in all three directions.
-    select : str or int, optional
+    select : str, int or sequence, optional
         Chemical symbol or atomic number of the species to analyse.
-        Default ``"O"``. ``None`` keeps every atom.
+        Default ``"O"``. ``None`` keeps every atom. A sequence such
+        as ``("O", "Na", "Cl")`` keeps the listed species and
+        analyses the first, so ions ride along for
+        :func:`pydseams.features.ion_environment`.
     cutoff : float, optional
         Neighbour cutoff in Angstroms. Default ``SEAMS_CUTOFF`` or ``3.5``.
     bonded : {"auto", "hbond", "cutoff"}, optional

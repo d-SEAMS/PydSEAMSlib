@@ -128,9 +128,12 @@ finished HC or DDC, so every oxygen stays water under the cage
 score. ``n_ih``, ``n_ic``, and ``n_water`` are atom counts, not cage
 counts.
 
-Default ``cages()`` is the seeded (hysteresis) construction. Pass
-``seeded=False`` for cutoff-graph affiliation on this frame's
-six-rings.
+Default ``cages()`` is the seeded (hysteresis) construction. That
+path calls ``seeded_affiliation``. ``ring_adjacent`` fills the last
+vertex of a six-ring whose other vertices carry a label. Pass
+``seeded=0`` for cutoff-graph affiliation on this frame's
+six-rings. For an ASE cloud that must keep ions, pass a sequence:
+``Frame.from_ase(atoms, select=("O", "Na", "Cl"))``.
 
 CHILL+ and cages answer different questions on the same cloud.
 CHILL+ is a four-neighbour local label. Cages require a finished
@@ -195,6 +198,9 @@ Next Steps
 
 `Classify ASE Atoms <../howto/ase.rst>`_
     ``from_ase`` / ``to_ase``
+
+`Features and ions <../howto/features.rst>`_
+    ``IceFeaturizer``, ``ring_adjacent``, sequence ``select``
 
 `View a frame in solvis <../howto/solvis.rst>`_
     optional extra

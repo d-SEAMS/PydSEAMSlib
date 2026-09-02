@@ -86,9 +86,10 @@ How do I keep every atom, not just oxygen?
     frame = ds.from_ase(atoms, select=None)
 
 Default ``select="O"``. A symbol or an atomic number keeps that
-species. A mixed selection containing ``H`` uses cutoff bonding;
-hydrogen-bond topology requires a heavy-atom selection such as
-``select="O"``.
+species. A sequence such as ``select=("O", "Na", "Cl")`` keeps
+listed species and analyses the first. A mixed selection containing
+``H`` uses cutoff bonding; hydrogen-bond topology requires a
+heavy-atom selection such as ``select="O"``.
 
 How do I view a classified frame?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -4,9 +4,9 @@
 Lookup of the live Python names, then Napoleon autodoc.
 
 - [[file:python.org][Python surface]] :: ~Frame~, ~IceCounts~,
-  ~CageScore~, ~read~, ASE
-- [[file:../../source/api.md][API]] :: ~automodule~ of the helpers
-  and the ~yoda~ name table
+  ~CageScore~, ~read~, ASE, ~pydseams.features~
+- [[file:../../source/api.md][API]] :: ~automodule~ of the helpers,
+  ~pydseams.features~, and the ~yoda~ name table
 
 #+begin_export rst
 .. toctree::

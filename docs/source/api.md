@@ -1,12 +1,13 @@
 # API reference
 
-Napoleon autodoc of the Python helpers. Human lookup of
+Napoleon autodoc of the Python helpers. The [Python surface](reference/python)
+page is the human lookup for
 {class}`~pydseams.frame.Frame`, {class}`~pydseams.frame.IceCounts`,
 {class}`~pydseams.frame.CageScore`,
 {class}`~pydseams.frame.DensityProfile`,
 {class}`~pydseams.frame.ContactPairs`,
-{class}`~pydseams.frame.DomainStats`, {func}`~pydseams.io.read`, and
-ASE is the [Python surface](reference/python) page.
+{class}`~pydseams.frame.DomainStats`, {func}`~pydseams.io.read`, ASE, and
+{mod}`pydseams.features`.
 
 The public constructors live on the {mod}`pydseams` package:
 {func}`~pydseams.from_ase`, {func}`~pydseams.from_arrays`,
@@ -69,6 +70,18 @@ Implementation of {func}`~pydseams.to_solvis` and
 
 ```{eval-rst}
 .. automodule:: pydseams.solvis
+   :members:
+   :member-order: bysource
+```
+
+## Features
+
+Per-frame kinetic vectors, per-molecule states, and ion environment.
+How-to: [Features and ions](howto/features). Human lookup is the
+[Python surface](reference/python) page.
+
+```{eval-rst}
+.. automodule:: pydseams.features
    :members:
    :member-order: bysource
 ```
@@ -154,7 +167,7 @@ directly for the raw engine.
 | `countAllRingsFromIndex` | Find all possible rings (including non-shortest-path) up to `maxDepth`. |
 | `ringNetwork` | Find all primitive (shortest-path) rings up to `maxDepth`. |
 | `cageAffiliation` | Order-free per-ring cage classification: `(hc, ddc)` flag vectors. |
-| `seededCageAffiliation` | Seeded (hysteresis) per-atom cage flags: strict-graph seeds, permissive-graph completion. |
+| `seededCageAffiliation` | Seeded (hysteresis) per-atom cage flags: strict-graph seeds, permissive-graph completion. `ring_adjacent` extends accepted labels over union-graph six-rings that share an edge with an accepted ring. |
 | `RingUpdater` | Exact incremental primitive rings for a neighbour list. |
 | `AffiliationUpdater` | Exact incremental per-ring cage classification for one frame. |
 | `populateGraphFromIndices` | Create a graph object from an index-based neighbour list. |
