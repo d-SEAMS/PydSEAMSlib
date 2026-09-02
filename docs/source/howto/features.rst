@@ -99,7 +99,11 @@ analysed water:
 
 ``select=("O", "Na", "Cl")`` keeps oxygen, sodium, and chlorine. The
 analysed species is oxygen (atomic number 8). Sodium and chlorine keep
-their atomic numbers as ``c_type``. ``ion_environment`` reads those codes.
+their atomic numbers as ``c_type``. ``pydseams.features.ion_environment``
+and ``Frame.ion_environment`` read those codes.
+
+A LAMMPS dump stores integer type codes, not atomic numbers. Keep every
+type with ``all_atoms`` on and pass those codes as ``ion_types``:
 
 #skip_lint_start
 
@@ -109,22 +113,24 @@ their atomic numbers as ``c_type``. ``ion_environment`` reads those codes.
     from pydseams.features import ION_ICE, IceFeaturizer, ion_environment
 
     traj = Trajectory("brine.lammpstrj", frame=1, atom_type=1, all_atoms=True)
-    feat = IceFeaturizer(traj, ion_types=(3, 4))
+    feat = IceFeaturizer(traj, ion_types=(3, 4))  # LAMMPS types
     x, states = feat.frame_features()
     ions, shell, fraction, ion_states = ion_environment(traj, states, (3, 4))
     trapped = ions[ion_states == ION_ICE]
 
 #skip_lint_end
 
-Those atomic-number codes classify each ion from its first water
-shell. The return is the water count within ``cutoff``, the ice fraction
-of that shell, and a class. ``ION_ICE`` means every neighbour in the
-shell is ice. ``ION_LIQUID`` means none of it is. ``ION_FRONT`` is the
-rest. ``ion_types`` adds ``n_ion_ice``, ``n_ion_front``, ``n_ion_liquid`` and
-the mean shell ice fraction to the feature vector.
+Those LAMMPS type codes classify each ion from its first water
+shell. Water is type 1 on this dump; 3 and 4 are the ions, not atomic
+numbers (Na is 11, Cl is 17). The return is the water count within
+``cutoff``, the ice fraction of that shell, and a class. ``ION_ICE``
+means every neighbour in the shell is ice. ``ION_LIQUID`` means none of
+it is. ``ION_FRONT`` is the rest. ``ion_types`` adds ``n_ion_ice``,
+``n_ion_front``, ``n_ion_liquid`` and the mean shell ice fraction to the
+feature vector.
 
-The same first-shell class is available on ``Frame`` as a compiled
-path. That method passes ``ring_adjacent`` through to
+``Frame.ion_environment`` is the compiled first-shell class on one
+frame. That method passes ``ring_adjacent`` through to
 ``seeded_affiliation``.
 
 See also

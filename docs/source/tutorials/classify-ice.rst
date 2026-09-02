@@ -74,7 +74,7 @@ Step 3: Load the frame
     print(frame.atom_type)
 
 ``ds.read`` looks at the suffix and calls the matching constructor.
-=.lammpstrj~ goes through ``Frame.from_file``, which keeps LAMMPS type
+``.lammpstrj`` goes through ``Frame.from_file``, which keeps LAMMPS type
 2 (oxygen) when that type is present.
 
 Expected output:
@@ -129,10 +129,15 @@ score. ``n_ih``, ``n_ic``, and ``n_water`` are atom counts, not cage
 counts.
 
 Default ``cages()`` is the seeded (hysteresis) construction. Pass
-``seeded=False`` for cutoff-graph affiliation on this frame's
+``seeded`` off for cutoff-graph affiliation on this frame's
 six-rings.
 
-CHILL+ and cages answer different questions on the same cloud.
+``Frame.seeded_affiliation`` is that construction on its own. Pass
+``ring_adjacent`` on to fill the last vertex of a six-ring whose
+other vertices carry a label. Mixed water-salt ASE input uses
+``from_ase(atoms, select=("O", "Na", "Cl"))``.
+
+Cage scores and CHILL+ answer different questions on the same cloud.
 CHILL+ is a four-neighbour local label. Cages require a finished
 HC or DDC.
 
