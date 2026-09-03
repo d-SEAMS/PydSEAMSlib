@@ -10,6 +10,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## 2.9.1 (2026-09-02)
+
+- Engine pinned at seams-core v2.9.2: threaded cell-list neighbour lists.
+
 ## [2.9.0] - 2026-09-02
 
 ### Added
