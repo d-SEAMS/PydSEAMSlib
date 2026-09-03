@@ -1371,6 +1371,15 @@ NB_MODULE(yoda, m) {
           nb::arg("cages"),
           nb::arg("guestIndices"),
           nb::arg("radius"));
+    m.def("guestOccupancyInside",
+          &site::guestOccupancyInside,
+          "Assign each guest to a cage whose fan-triangulated faces contain it "
+          "(ray parity); among such cages the nearest centroid wins. cageFaces[c] "
+          "indexes rings.",
+          nb::arg("yCloud"),
+          nb::arg("rings"),
+          nb::arg("cageFaces"),
+          nb::arg("guestIndices"));
     m.def("periodicCentroid",
           &site::periodicCentroid,
           "Centroid of a set of atoms with every atom unwrapped to its minimum image "

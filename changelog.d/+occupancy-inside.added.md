@@ -1,0 +1,1 @@
+`Frame.guest_occupancy_both(signature, guest_types, radius)` returns the radius and ray-parity occupancy of the same guests in the same signature cages, and `yoda.guestOccupancyInside` binds the engine's inside assignment.

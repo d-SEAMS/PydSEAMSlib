@@ -43,6 +43,14 @@ class IceCounts(dict):
         return "IceCounts(" + ", ".join(parts) + ")"
 
 
+@dataclass(frozen=True)
+class DualOccupancy:
+    """Radius and inside occupancy of the same guests in the same cages."""
+
+    radius: object
+    inside: object
+
+
 class CageScore:
     """Per-atom hexagonal-cage (HC) and double-diamond-cage (DDC) flags.
 
@@ -1191,6 +1199,49 @@ class Frame:
         guests = [i for i, p in enumerate(self.cloud.pts) if p.c_type in wanted]
         return yoda.guestOccupancy(
             self.cloud, [list(map(int, c)) for c in cages], guests, float(radius)
+        )
+
+    def guest_occupancy_both(
+        self, signature, guest_types, radius=4.0, max_ring_size=None
+    ):
+        """Radius and ray-parity occupancy of guests in signature cages.
+
+        The cages are :meth:`cages_by_signature` on the bonded graph. The
+        radius assignment is :func:`pydseams.yoda.guestOccupancy` (nearest
+        periodic cage centroid within ``radius``); the inside assignment is
+        :func:`pydseams.yoda.guestOccupancyInside` (the guest lies inside
+        the cage's fan-triangulated faces).
+
+        Parameters
+        ----------
+        signature : str
+            Cage signature, for example ``"512"``.
+        guest_types : iterable of int
+            ``c_type`` codes of the guests.
+        radius : float, optional
+            Radius of the centroid assignment in Angstrom. Default ``4.0``.
+        max_ring_size : int, optional
+            Largest primitive ring searched. Default ``8``.
+
+        Returns
+        -------
+        DualOccupancy
+            ``radius`` and ``inside``, each a
+            :class:`pydseams.yoda.GuestOccupancy` on the same cages, in
+            the order :func:`pydseams.yoda.findBySignature` returns them.
+        """
+        depth = 8 if max_ring_size is None else int(max_ring_size)
+        rings = yoda.ringNetwork(self.bonds_by_index, depth)
+        found = yoda.findBySignature(rings, self.bonds_by_index, str(signature))
+        cages = [list(map(int, c["vertices"])) for c in found]
+        faces = [list(map(int, c["faces"])) for c in found]
+        wanted = set(int(t) for t in guest_types)
+        guests = [i for i, p in enumerate(self.cloud.pts) if p.c_type in wanted]
+        return DualOccupancy(
+            radius=yoda.guestOccupancy(self.cloud, cages, guests, float(radius)),
+            inside=yoda.guestOccupancyInside(
+                self.cloud, [list(map(int, r)) for r in rings], faces, guests
+            ),
         )
 
     def find_prisms(self, output_dir="output/", max_depth=6, shape_matching=False):
