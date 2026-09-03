@@ -5,6 +5,8 @@
 
 import os
 import sys
+import tomllib
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath("../../src"))
 autodoc_mock_imports = ["pydseams.yoda"]
@@ -24,11 +26,8 @@ autodoc_member_order = "bysource"
 project = "pydseams"
 # the release string is the wheel version in pyproject.toml, so the docs
 # cannot drift from the package
-import tomllib as _tomllib
-from pathlib import Path as _Path
-
-with (_Path(__file__).resolve().parents[2] / "pyproject.toml").open("rb") as _fh:
-    release = _tomllib.load(_fh)["project"]["version"]
+with (Path(__file__).resolve().parents[2] / "pyproject.toml").open("rb") as _fh:
+    release = tomllib.load(_fh)["project"]["version"]
 copyright = "2023--present, d-SEAMS developers"
 author = "Ruhila S"
 
