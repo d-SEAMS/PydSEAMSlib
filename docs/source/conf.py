@@ -22,7 +22,13 @@ autodoc_member_order = "bysource"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "pydseams"
-release = "2.6.0"
+# the release string is the wheel version in pyproject.toml, so the docs
+# cannot drift from the package
+import tomllib as _tomllib
+from pathlib import Path as _Path
+
+with (_Path(__file__).resolve().parents[2] / "pyproject.toml").open("rb") as _fh:
+    release = _tomllib.load(_fh)["project"]["version"]
 copyright = "2023--present, d-SEAMS developers"
 author = "Ruhila S"
 
