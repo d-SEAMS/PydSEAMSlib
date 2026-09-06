@@ -254,8 +254,7 @@ NB_MODULE(yoda, m) {
           nb::arg("nList"),
           nb::arg("mask"));
     using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
-    using KnnTypeI = std::vector<std::vector<int>> (*)(
-        const Cloud &, int, double, int, bool);
+    using KnnTypeI = std::vector<std::vector<int>> (*)(const Cloud &, int, double, int, bool);
     using KnnTypes = std::vector<std::vector<int>> (*)(
         const Cloud &, int, double, const std::vector<int> &, bool);
     m.def("kNearestNeighbourList",
