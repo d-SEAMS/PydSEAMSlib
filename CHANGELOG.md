@@ -10,6 +10,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## 2.10.0 (2026-09-06)
+
+- Engine pinned at seams-core v2.10.0: F4 and Zeron q12, water-type CHILL, incomplete cages, TUM offload.
+
+
 ## 2.9.1 (2026-09-02)
 
 - Engine pinned at seams-core v2.9.2: threaded cell-list neighbour lists.
