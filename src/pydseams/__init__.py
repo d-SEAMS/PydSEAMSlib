@@ -34,7 +34,7 @@ from .frame import (
 )
 from .io import available_readers
 
-__version__ = "2.6.0"
+__version__ = "2.10.0"
 
 # Drop-in name used in the 2.0 docs and tests
 Trajectory = Frame

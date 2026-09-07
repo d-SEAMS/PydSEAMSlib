@@ -253,14 +253,26 @@ NB_MODULE(yoda, m) {
           nb::arg("yCloud"),
           nb::arg("nList"),
           nb::arg("mask"));
+    using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+    using KnnTypeI = std::vector<std::vector<int>> (*)(const Cloud &, int, double, int, bool);
+    using KnnTypes = std::vector<std::vector<int>> (*)(
+        const Cloud &, int, double, const std::vector<int> &, bool);
     m.def("kNearestNeighbourList",
-          &nneigh::kNearestNeighbourList,
+          static_cast<KnnTypeI>(&nneigh::kNearestNeighbourList),
           "Exact k-nearest bonded graph, union- or mutually-symmetrized "
           "(cell-list candidates with a brute-force fallback).",
           nb::arg("yCloud"),
           nb::arg("k"),
           nb::arg("candidateCutoff"),
           nb::arg("typeI"),
+          nb::arg("mutual") = true);
+    m.def("kNearestNeighbourList",
+          static_cast<KnnTypes>(&nneigh::kNearestNeighbourList),
+          "k-nearest bonded graph restricted to a type set.",
+          nb::arg("yCloud"),
+          nb::arg("k"),
+          nb::arg("candidateCutoff"),
+          nb::arg("types"),
           nb::arg("mutual") = true);
     m.def("shellSeparation",
           &nneigh::shellSeparation,
