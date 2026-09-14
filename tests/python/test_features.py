@@ -102,6 +102,17 @@ def test_ion_in_ice_sees_an_ice_shell():
     assert names["ion_shell_ice"] == 1.0
 
 
+def test_ion_environment_numpy_fallback_rejects_tilted_box(monkeypatch):
+    import pydseams.features as feat
+    from pydseams.frame import Frame
+
+    monkeypatch.setattr(feat, "yoda", type("YodaStub", (), {})())
+    pos = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=float)
+    frame = Frame.from_arrays(pos, [10.0, 10.0, 10.0, 2.0, 0.0, 0.0], numbers=[1, 3])
+    with pytest.raises(ValueError, match="orthorhombic only"):
+        ion_environment(frame, np.zeros(2, dtype=np.int8), (3,), cutoff=3.5)
+
+
 def test_ion_without_water_shell_is_liquid():
     from pydseams.frame import Frame
 

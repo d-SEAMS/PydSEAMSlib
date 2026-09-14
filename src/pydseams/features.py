@@ -114,7 +114,13 @@ def ion_environment(frame, states, ion_types, cutoff=None):
             ion_states,
         )
     pos = np.array([[p.x, p.y, p.z] for p in pts], dtype=float)
-    box = np.asarray(frame.box, dtype=float)[:3]
+    box_full = np.asarray(frame.box, dtype=float)
+    if box_full.size >= 6 and np.max(np.abs(box_full[3:6])) > 1e-12:
+        raise ValueError(
+            "ion_environment NumPy fallback is orthorhombic only; "
+            "use yoda.ionEnvironment for a tilted box"
+        )
+    box = box_full[:3]
     water = np.nonzero(types == frame.atom_type)[0]
     ice_water = states[water] != STATE_WATER
     water_pos = pos[water]

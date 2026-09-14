@@ -111,7 +111,13 @@ NB_MODULE(yoda, m) {
     nb::class_<molSys::PointCloud<molSys::Point<double>, double>>(
         m, "PointCloudDouble", "Collection of points for a single frame, with box dimensions.")
         .def(nb::init<>())
-        .def_rw("pts", &molSys::PointCloud<molSys::Point<double>, double>::pts)
+        .def_prop_rw(
+            "pts",
+            [](const molSys::PointCloud<molSys::Point<double>, double> &c) {
+              return c.pts;
+            },
+            [](molSys::PointCloud<molSys::Point<double>, double> &c,
+               std::vector<molSys::Point<double>> v) { c.pts = std::move(v); })
         .def_rw("currentFrame", &molSys::PointCloud<molSys::Point<double>, double>::currentFrame)
         .def_rw("nop", &molSys::PointCloud<molSys::Point<double>, double>::nop)
         .def_rw("box", &molSys::PointCloud<molSys::Point<double>, double>::box)
