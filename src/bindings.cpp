@@ -284,8 +284,8 @@ NB_MODULE(yoda, m) {
     m.def("halfNeighList",
           &nneigh::halfNeighList,
           "Build a half neighbour list (each pair stored once) for one atom type.",
-          nb::arg("yCloud"),
           nb::arg("rcutoff"),
+          nb::arg("yCloud"),
           nb::arg("typeI"));
     m.def("neighbourListByIndex",
           &nneigh::neighbourListByIndex,
@@ -295,8 +295,8 @@ NB_MODULE(yoda, m) {
     m.def("neighList",
           &nneigh::neighList,
           "Build a full neighbour list for two atom types within a cutoff.",
-          nb::arg("yCloud"),
           nb::arg("rcutoff"),
+          nb::arg("yCloud"),
           nb::arg("typeI"),
           nb::arg("typeJ"));
     m.def("neighListO",
