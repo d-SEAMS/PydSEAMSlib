@@ -59,9 +59,7 @@ def ice_states(frame, data, oxygen_type=None, cutoff=3.5, k=4, ring_adjacent=Tru
     else:
         mask = np.asarray(particles.particle_types) == int(oxygen_type)
     box, box_low = _cell_box(data.cell)
-    fr = Frame.from_arrays(
-        positions[mask], box, cutoff=cutoff, box_low=box_low
-    )
+    fr = Frame.from_arrays(positions[mask], box, cutoff=cutoff, box_low=box_low)
     _, states = IceFeaturizer(
         fr, k=k, ring_adjacent=ring_adjacent, chill=False
     ).frame_features()

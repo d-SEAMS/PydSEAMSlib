@@ -74,25 +74,25 @@ class TestRingProperties:
                 b = ring[(k + 1) % n]
                 a_neighbors = set(self.nListIdx[a]) if a < len(self.nListIdx) else set()
                 b_neighbors = set(self.nListIdx[b]) if b < len(self.nListIdx) else set()
-                assert (
-                    b in a_neighbors or a in b_neighbors
-                ), f"Ring {ri}: edge ({a},{b}) not in H-bond neighbor list"
+                assert b in a_neighbors or a in b_neighbors, (
+                    f"Ring {ri}: edge ({a},{b}) not in H-bond neighbor list"
+                )
 
     def test_ring_indices_in_bounds(self):
         """All atom indices in rings must be valid point cloud indices."""
         n_atoms = self.cloud.nop
         for ring in self.rings:
             for idx in ring:
-                assert (
-                    0 <= idx < n_atoms
-                ), f"Ring index {idx} out of range [0, {n_atoms})"
+                assert 0 <= idx < n_atoms, (
+                    f"Ring index {idx} out of range [0, {n_atoms})"
+                )
 
     def test_no_self_loops_in_rings(self):
         """No ring should contain the same atom index twice."""
         for i, ring in enumerate(self.rings):
-            assert len(ring) == len(
-                set(ring)
-            ), f"Ring {i} has duplicate indices: {ring}"
+            assert len(ring) == len(set(ring)), (
+                f"Ring {i} has duplicate indices: {ring}"
+            )
 
 
 class TestRingDepthVariation:
@@ -105,6 +105,6 @@ class TestRingDepthVariation:
         # Rings of size 3-4 should be a subset; overall count should not decrease
         sizes_4 = {frozenset(r) for r in rings_4}
         sizes_6 = {frozenset(r) for r in rings_6}
-        assert sizes_4.issubset(
-            sizes_6
-        ), "Rings found at maxDepth=4 should also be found at maxDepth=6"
+        assert sizes_4.issubset(sizes_6), (
+            "Rings found at maxDepth=4 should also be found at maxDepth=6"
+        )
