@@ -69,23 +69,29 @@ class IceStates:
                 self.ring_adjacent = bool(ring_adjacent)
                 self.chill = bool(chill)
 
-            def _frame(self):
-                ts = self.water.universe.trajectory.ts
-                box = _box_from_dimensions(ts.dimensions)
-                pos = np.asarray(self.water.positions, dtype=float)
-                numbers = [1] * len(pos)
-                if self.ions is not None and len(self.ions):
-                    pos = np.vstack([pos, np.asarray(self.ions.positions, dtype=float)])
-                    numbers += [2] * len(self.ions)
-                return Frame.from_arrays(
-                    pos % np.asarray(box), box, numbers=numbers, cutoff=self.cutoff
-                )
-
             def _prepare(self):
+                n_water = len(self.water)
+                self._numbers = [1] * n_water
+                if self.ions is not None and len(self.ions):
+                    self._numbers = self._numbers + [2] * len(self.ions)
                 self._states = []
                 self._features = []
                 self._ion_states = []
                 self.results.names = None
+
+            def _frame(self):
+                ts = self.water.universe.trajectory.ts
+                box = _box_from_dimensions(ts.dimensions)
+                pos = np.asarray(self.water.positions, dtype=float)
+                if self.ions is not None and len(self.ions):
+                    pos = np.concatenate(
+                        [pos, np.asarray(self.ions.positions, dtype=float)], axis=0
+                    )
+                box_arr = np.asarray(box, dtype=float)
+                wrapped = np.remainder(pos, box_arr)
+                return Frame.from_arrays(
+                    wrapped, box, numbers=self._numbers, cutoff=self.cutoff
+                )
 
             def _single_frame(self):
                 frame = self._frame()
