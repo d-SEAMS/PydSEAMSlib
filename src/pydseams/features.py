@@ -238,12 +238,10 @@ class IceFeaturizer:
         """
         t = self.trajectory
         n = t.n_atoms
-        cut = t.cutoff + 1.5
         cloud = t.cloud
-        union = yoda.neighbourListByIndex(
-            cloud, yoda.kNearestNeighbourList(cloud, self.k, cut, t.atom_type, False)
-        )
         score = t.seeded_affiliation(k=self.k, ring_adjacent=self.ring_adjacent)
+        union = score.union
+        six = int(score.n_six) if score.n_six is not None else 0
         hc = np.asarray(score.hc, dtype=bool)
         ddc = np.asarray(score.ddc, dtype=bool)
         states = np.zeros(n, dtype=np.int8)
@@ -257,7 +255,6 @@ class IceFeaturizer:
         n_mixed = int((states == STATE_MIXED).sum())
         n_ice = int(ice.sum())
         cubicity = (n_ic + n_mixed) / n_ice if n_ice else 0.0
-        six = sum(1 for r in yoda.ringNetwork(union, 6) if len(r) == 6)
 
         chill = dict.fromkeys(
             (

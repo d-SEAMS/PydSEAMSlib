@@ -64,9 +64,11 @@ class CageScore:
         Per-atom DDC membership.
     """
 
-    def __init__(self, hc, ddc):
+    def __init__(self, hc, ddc, union=None, n_six=None):
         self.hc = list(hc)
         self.ddc = list(ddc)
+        self.union = union
+        self.n_six = n_six
 
     @property
     def n_ih(self):
@@ -949,7 +951,7 @@ class Frame:
         six_s = [r for r in yoda.ringNetwork(strict, 6) if len(r) == 6]
         six_u = [r for r in yoda.ringNetwork(union, 6) if len(r) == 6]
         hc, ddc = yoda.seededCageAffiliation(six_s, strict, six_u, union, ring_adjacent)
-        return CageScore(hc, ddc)
+        return CageScore(hc, ddc, union=union, n_six=len(six_u))
 
     def fingerprint(self, hops=2, max_ring_size=7, colour_types=False):
         """Label-independent topology keys of the bonded graph.
