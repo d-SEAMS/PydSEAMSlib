@@ -15,6 +15,7 @@ seams = subproject(
         'with_tests=false',
         'with_cli=false',
         'with_lua=disabled',
+        'with_ira=auto',
     ],
 )
 yds_dep = seams.get_variable('yds_dep')
