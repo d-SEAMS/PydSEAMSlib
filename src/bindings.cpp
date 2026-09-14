@@ -40,6 +40,7 @@
 #include <seams_output.hpp>
 #include <selection.hpp>
 #include <site.hpp>
+#include <stdexcept>
 #include <structure_desc.hpp>
 #include <topo_fingerprint.hpp>
 #include <topo_one_dim.hpp>
@@ -110,7 +111,13 @@ NB_MODULE(yoda, m) {
     nb::class_<molSys::PointCloud<molSys::Point<double>, double>>(
         m, "PointCloudDouble", "Collection of points for a single frame, with box dimensions.")
         .def(nb::init<>())
-        .def_rw("pts", &molSys::PointCloud<molSys::Point<double>, double>::pts)
+        .def_prop_rw(
+            "pts",
+            [](molSys::PointCloud<molSys::Point<double>, double> &c)
+                -> std::vector<molSys::Point<double>> & { return c.pts; },
+            [](molSys::PointCloud<molSys::Point<double>, double> &c,
+               std::vector<molSys::Point<double>> v) { c.pts = std::move(v); },
+            nb::rv_policy::reference_internal)
         .def_rw("currentFrame", &molSys::PointCloud<molSys::Point<double>, double>::currentFrame)
         .def_rw("nop", &molSys::PointCloud<molSys::Point<double>, double>::nop)
         .def_rw("box", &molSys::PointCloud<molSys::Point<double>, double>::box)
@@ -227,10 +234,12 @@ NB_MODULE(yoda, m) {
 #endif
 
     // Neighbours
-    m.def("clearNeighbourList",
-          &nneigh::clearNeighbourList,
-          "Free memory for a neighbour list.",
-          nb::arg("nList"));
+    m.def(
+        "clearNeighbourList",
+        [](const std::vector<std::vector<int>> &) { return std::vector<std::vector<int>>{}; },
+        "Return an empty neighbour list. Assign the result; a copied "
+        "argument cannot be cleared in place.",
+        nb::arg("nList"));
     m.def("getNewNeighbourListByIndex",
           &nneigh::getNewNeighbourListByIndex,
           "Build a neighbour list by index using a distance cutoff.",
@@ -265,7 +274,8 @@ NB_MODULE(yoda, m) {
           nb::arg("k"),
           nb::arg("candidateCutoff"),
           nb::arg("typeI"),
-          nb::arg("mutual") = true);
+          nb::arg("mutual") = true,
+          nb::call_guard<nb::gil_scoped_release>());
     m.def("kNearestNeighbourList",
           static_cast<KnnTypes>(&nneigh::kNearestNeighbourList),
           "k-nearest bonded graph restricted to a type set.",
@@ -273,7 +283,19 @@ NB_MODULE(yoda, m) {
           nb::arg("k"),
           nb::arg("candidateCutoff"),
           nb::arg("types"),
-          nb::arg("mutual") = true);
+          nb::arg("mutual") = true,
+          nb::call_guard<nb::gil_scoped_release>());
+    m.def("kNearestNeighbourPair",
+          static_cast<std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> (*)(
+              const molSys::PointCloud<molSys::Point<double>, double> &, int, double, int)>(
+              &nneigh::kNearestNeighbourPair),
+          "Mutual and union k-nearest graphs from one candidate search. "
+          "Returns (mutual, union).",
+          nb::arg("yCloud"),
+          nb::arg("k"),
+          nb::arg("candidateCutoff"),
+          nb::arg("typeI"),
+          nb::call_guard<nb::gil_scoped_release>());
     m.def("shellSeparation",
           &nneigh::shellSeparation,
           "Certificate pair (max k-th distance, min (k+1)-th distance) for "
@@ -284,8 +306,8 @@ NB_MODULE(yoda, m) {
     m.def("halfNeighList",
           &nneigh::halfNeighList,
           "Build a half neighbour list (each pair stored once) for one atom type.",
-          nb::arg("yCloud"),
           nb::arg("rcutoff"),
+          nb::arg("yCloud"),
           nb::arg("typeI"));
     m.def("neighbourListByIndex",
           &nneigh::neighbourListByIndex,
@@ -295,8 +317,8 @@ NB_MODULE(yoda, m) {
     m.def("neighList",
           &nneigh::neighList,
           "Build a full neighbour list for two atom types within a cutoff.",
-          nb::arg("yCloud"),
           nb::arg("rcutoff"),
+          nb::arg("yCloud"),
           nb::arg("typeI"),
           nb::arg("typeJ"));
     m.def("neighListO",
@@ -392,7 +414,8 @@ NB_MODULE(yoda, m) {
           &primitive::ringNetwork,
           "Find all primitive (shortest-path) rings up to maxDepth.",
           nb::arg("nList"),
-          nb::arg("maxDepth"));
+          nb::arg("maxDepth"),
+          nb::call_guard<nb::gil_scoped_release>());
     nb::class_<primitive::RingUpdater>(m, "RingUpdater")
         .def(nb::init<int>(), nb::arg("maxDepth"))
         .def("update",
@@ -505,10 +528,12 @@ NB_MODULE(yoda, m) {
           nb::arg("ringType"),
           nb::arg("atomTypes"),
           nb::arg("atomState"));
-    m.def("clearRingList",
-          &ring::clearRingList,
-          "Free memory for a list of rings.",
-          nb::arg("rings"));
+    m.def(
+        "clearRingList",
+        [](const std::vector<std::vector<int>> &) { return std::vector<std::vector<int>>{}; },
+        "Return an empty ring list. Assign the result; a copied "
+        "argument cannot be cleared in place.",
+        nb::arg("rings"));
     m.def("compareRings",
           &ring::compareRings,
           "Check whether two unordered rings contain the same elements.",
@@ -540,9 +565,9 @@ NB_MODULE(yoda, m) {
           nb::arg("nPerfectPrisms"),
           nb::arg("nImperfectPrisms"),
           nb::arg("nList"),
+          nb::arg("yCloud"),
           nb::arg("rmsdPerAtom"),
-          nb::arg("doShapeMatching"),
-          nb::arg("yCloud"));
+          nb::arg("doShapeMatching"));
     m.def("findsCommonElements",
           &ring::findsCommonElements,
           "Return the common elements shared by two rings.",
@@ -734,9 +759,9 @@ NB_MODULE(yoda, m) {
           nb::arg("rings"),
           nb::arg("oCloud"),
           nb::arg("yCloud"),
-          nb::arg("identicalCloud"),
           nb::arg("coordLow"),
-          nb::arg("coordHigh"));
+          nb::arg("coordHigh"),
+          nb::arg("identicalCloud"));
     m.def("printSliceGetEdgeMoleculesInRings",
           &ring::printSliceGetEdgeMoleculesInRings,
           "Select edge molecules in rings and write slice output files.",
@@ -1004,6 +1029,9 @@ NB_MODULE(yoda, m) {
             auto toMat = [](const std::vector<std::vector<double>> &rows) {
                 Eigen::MatrixXd m(static_cast<int>(rows.size()), 3);
                 for (int i = 0; i < static_cast<int>(rows.size()); i++) {
+                    if (rows[static_cast<size_t>(i)].size() != 3) {
+                        throw std::invalid_argument("ira_match points must be n x 3");
+                    }
                     m(i, 0) = rows[static_cast<size_t>(i)][0];
                     m(i, 1) = rows[static_cast<size_t>(i)][1];
                     m(i, 2) = rows[static_cast<size_t>(i)][2];
@@ -1023,6 +1051,9 @@ NB_MODULE(yoda, m) {
         [](const std::vector<std::vector<double>> &pts) {
             Eigen::MatrixXd m(static_cast<int>(pts.size()), 3);
             for (int i = 0; i < static_cast<int>(pts.size()); i++) {
+                if (pts[static_cast<size_t>(i)].size() != 3) {
+                    throw std::invalid_argument("sofi_point_group points must be n x 3");
+                }
                 m(i, 0) = pts[static_cast<size_t>(i)][0];
                 m(i, 1) = pts[static_cast<size_t>(i)][1];
                 m(i, 2) = pts[static_cast<size_t>(i)][2];

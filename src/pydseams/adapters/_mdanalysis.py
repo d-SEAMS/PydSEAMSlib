@@ -9,6 +9,10 @@ from __future__ import annotations
 import numpy as np
 
 from pydseams.features import (
+    ION_FEATURE_NAMES,
+    ION_FRONT,
+    ION_ICE,
+    ION_LIQUID,
     ION_STATE_NAMES,
     STATE_NAMES,
     IceFeaturizer,
@@ -100,19 +104,34 @@ class IceStates:
                     k=self.k,
                     ring_adjacent=self.ring_adjacent,
                     chill=self.chill,
-                    ion_types=(2,) if self.ions is not None and len(self.ions) else (),
+                    ion_types=(),
                 )
                 x, states = feat.frame_features()
-                if self.results.names is None:
-                    self.results.names = list(feat.feature_names)
-                n_water = len(self.water)
-                self._states.append(np.asarray(states[:n_water], dtype=np.int8))
-                self._features.append(np.asarray(x, dtype=float))
+                names = list(feat.feature_names)
+                x = np.asarray(x, dtype=float)
                 if self.ions is not None and len(self.ions):
-                    _, _, _, ion_states = ion_environment(
+                    _, shell, fraction, ion_states = ion_environment(
                         frame, states, (2,), cutoff=self.cutoff
                     )
+                    ion_x = np.array(
+                        [
+                            int((ion_states == ION_ICE).sum()),
+                            int((ion_states == ION_FRONT).sum()),
+                            int((ion_states == ION_LIQUID).sum()),
+                            float(fraction[shell > 0].mean())
+                            if (shell > 0).any()
+                            else 0.0,
+                        ],
+                        dtype=float,
+                    )
+                    x = np.concatenate([x, ion_x])
+                    names += list(ION_FEATURE_NAMES)
                     self._ion_states.append(np.asarray(ion_states, dtype=np.int8))
+                if self.results.names is None:
+                    self.results.names = names
+                n_water = len(self.water)
+                self._states.append(np.asarray(states[:n_water], dtype=np.int8))
+                self._features.append(x)
 
             def _conclude(self):
                 self.results.states = np.array(self._states, dtype=np.int8)

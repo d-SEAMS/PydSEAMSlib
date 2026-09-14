@@ -41,6 +41,27 @@ def test_ovito_modifier_paints_a_cubic_lattice_and_skips_other_types():
     ) // 10
 
 
+def test_ovito_cell_box_uses_dump_bound_spans_for_tilt():
+    from pydseams.adapters._ovito import _cell_box
+
+    # OVITO columns: a=(10,0,0), b=(2,8,0), c=(1,1,6), origin=0
+    h = np.array(
+        [
+            [10.0, 2.0, 1.0, 0.0],
+            [0.0, 8.0, 1.0, 0.0],
+            [0.0, 0.0, 6.0, 0.0],
+        ]
+    )
+    box, box_low = _cell_box(h)
+    xy, xz, yz = 2.0, 1.0, 1.0
+    xmin = min(0.0, xy, xz, xy + xz)
+    xmax = max(0.0, xy, xz, xy + xz)
+    ymin = min(0.0, yz)
+    ymax = max(0.0, yz)
+    assert box == [10.0 + xmax - xmin, 8.0 + ymax - ymin, 6.0, xy, xz, yz]
+    assert box_low == [xmin, ymin, 0.0]
+
+
 def test_mdanalysis_ice_states_over_a_two_frame_lattice():
     mda = pytest.importorskip("MDAnalysis")
     pos, cell = _cubic_diamond(4)
