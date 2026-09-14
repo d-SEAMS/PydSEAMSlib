@@ -238,6 +238,7 @@ class IceFeaturizer:
         """
         t = self.trajectory
         n = t.n_atoms
+        cloud = t.cloud
         score = t.seeded_affiliation(k=self.k, ring_adjacent=self.ring_adjacent)
         union = score.union
         six = int(score.n_six) if score.n_six is not None else 0
