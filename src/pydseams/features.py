@@ -117,11 +117,12 @@ def ion_environment(frame, states, ion_types, cutoff=None):
     box = np.asarray(frame.box, dtype=float)[:3]
     water = np.nonzero(types == frame.atom_type)[0]
     ice_water = states[water] != STATE_WATER
+    water_pos = pos[water]
     shell = np.zeros(len(ions), dtype=int)
     fraction = np.zeros(len(ions), dtype=float)
     ion_states = np.full(len(ions), ION_LIQUID, dtype=np.int8)
     for j, i in enumerate(ions):
-        d = pos[water] - pos[i]
+        d = water_pos - pos[i]
         d -= box * np.round(d / box)
         near = np.sqrt((d**2).sum(axis=1)) < cut
         shell[j] = int(near.sum())
