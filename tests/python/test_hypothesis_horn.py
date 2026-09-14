@@ -73,9 +73,9 @@ def test_rotation_orthogonality(q):
     R = quat_to_rotation(q)
     RRt = R @ R.T
     identity = np.eye(3)
-    assert np.allclose(RRt, identity, atol=1e-10), (
-        f"R*R^T deviates from identity:\n{RRt}"
-    )
+    assert np.allclose(
+        RRt, identity, atol=1e-10
+    ), f"R*R^T deviates from identity:\n{RRt}"
 
 
 @given(q=unit_quaternions())
@@ -87,9 +87,9 @@ def test_rotation_inverse(q):
     R_inv = quat_to_rotation(q_inv)
     product = R @ R_inv
     identity = np.eye(3)
-    assert np.allclose(product, identity, atol=1e-10), (
-        f"R * R_inv deviates from identity:\n{product}"
-    )
+    assert np.allclose(
+        product, identity, atol=1e-10
+    ), f"R * R_inv deviates from identity:\n{product}"
 
 
 @given(q=unit_quaternions())
@@ -147,6 +147,6 @@ def test_rotation_composition(q1, q2):
     )
     R12 = quat_to_rotation(q12)
     R1_R2 = quat_to_rotation(q1) @ quat_to_rotation(q2)
-    assert np.allclose(R12, R1_R2, atol=1e-9), (
-        f"Composition mismatch:\nR(q1*q2):\n{R12}\nR(q1)*R(q2):\n{R1_R2}"
-    )
+    assert np.allclose(
+        R12, R1_R2, atol=1e-9
+    ), f"Composition mismatch:\nR(q1*q2):\n{R12}\nR(q1)*R(q2):\n{R1_R2}"

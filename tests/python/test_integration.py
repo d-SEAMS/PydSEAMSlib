@@ -52,9 +52,9 @@ def test_neighbour_list_consistency():
     # Check symmetry: if j in nListIdx[i], then i in nListIdx[j]
     for i in range(len(nListIdx)):
         for j in nListIdx[i][1:]:  # skip self (first element)
-            assert i in nListIdx[j], (
-                f"Asymmetric neighbour list: {j} in nList[{i}] but {i} not in nList[{j}]"
-            )
+            assert (
+                i in nListIdx[j]
+            ), f"Asymmetric neighbour list: {j} in nList[{i}] but {i} not in nList[{j}]"
 
 
 def test_k_nearest_mutual_is_symmetric():
@@ -76,9 +76,9 @@ def test_k_nearest_mutual_is_symmetric():
         assert 1 <= len(row) <= 5
     for i in range(len(knnIdx)):
         for j in knnIdx[i][1:]:
-            assert i in knnIdx[j], (
-                f"Asymmetric k-nearest list: {j} in knn[{i}] but {i} not in knn[{j}]"
-            )
+            assert (
+                i in knnIdx[j]
+            ), f"Asymmetric k-nearest list: {j} in knn[{i}] but {i} not in knn[{j}]"
 
 
 def test_hydrogen_bond_network():
@@ -165,14 +165,14 @@ def test_full_pipeline_chill_plus():
             classified_count += 1
             # Each c_ij should have a real correlation value
             for cij in pt.c_ij:
-                assert -1.0 <= cij.c_value <= 1.0, (
-                    f"c_ij value {cij.c_value} out of range [-1, 1]"
-                )
+                assert (
+                    -1.0 <= cij.c_value <= 1.0
+                ), f"c_ij value {cij.c_value} out of range [-1, 1]"
 
     # Most atoms should have been classified (they have neighbours)
-    assert classified_count > cloud.nop * 0.5, (
-        f"Only {classified_count}/{cloud.nop} atoms classified"
-    )
+    assert (
+        classified_count > cloud.nop * 0.5
+    ), f"Only {classified_count}/{cloud.nop} atoms classified"
 
 
 # --- Trajectory class tests ---
@@ -229,9 +229,9 @@ def test_trajectory_classify_chill_plus():
 
     # Total should equal number of atoms
     total = sum(counts.values())
-    assert total == traj.n_atoms, (
-        f"Sum of ice type counts ({total}) != n_atoms ({traj.n_atoms})"
-    )
+    assert (
+        total == traj.n_atoms
+    ), f"Sum of ice type counts ({total}) != n_atoms ({traj.n_atoms})"
 
     # At least some atoms should be classified as non-unclassified
     classified = total - counts.get("unclassified", 0)
