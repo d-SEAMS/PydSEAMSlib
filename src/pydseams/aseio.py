@@ -180,11 +180,17 @@ def frame_from_ase(cls, atoms, select="O", cutoff=3.5, bonded="auto"):
     h_cloud = None
     if h_pos:
         if source_mol_ids is None:
-            h_mol_ids = []
-            for h_index in h_indices:
-                distances = atoms.get_distances(h_index, selected_indices, mic=True)
-                nearest = min(range(len(selected_indices)), key=distances.__getitem__)
-                h_mol_ids.append(mol_ids[nearest])
+            import numpy as np
+            from ase.geometry import get_distances
+
+            _, dist = get_distances(
+                np.asarray(h_pos),
+                np.asarray(positions),
+                cell=cell,
+                pbc=True,
+            )
+            nearest = dist.argmin(axis=1)
+            h_mol_ids = [mol_ids[int(j)] for j in nearest]
         else:
             h_mol_ids = [int(source_mol_ids[i]) for i in h_indices]
         h_cloud = _cloud_from_positions(
