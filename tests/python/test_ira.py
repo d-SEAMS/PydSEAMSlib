@@ -1,7 +1,5 @@
 """IRA/SOFI bindings. Skip the overlay when this build did not link libira."""
 
-import math
-
 import pydseams as ds
 import pytest
 
