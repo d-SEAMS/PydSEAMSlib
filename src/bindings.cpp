@@ -952,8 +952,10 @@ NB_MODULE(yoda, m) {
         .def_ro("n_feat", &chill::LinearClassifier::nFeat)
         .def("fit", &chill::LinearClassifier::fit, nb::arg("X"), nb::arg("y"))
         .def("predict", &chill::LinearClassifier::predict, nb::arg("x"));
+    using QlVoronoiCut = chill::SteinhardtQl (*)(
+        const molSys::PointCloud<molSys::Point<double>, double> &, double, int);
     m.def("steinhardtQlVoronoi",
-          &chill::steinhardtQlVoronoi,
+          static_cast<QlVoronoiCut>(&chill::steinhardtQlVoronoi),
           "Voronoi facet-area weighted Steinhardt parameters.",
           nb::arg("yCloud"),
           nb::arg("candidateCutoff"),
