@@ -33,6 +33,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <optional>
+#include <stdexcept>
 #include <rdf.hpp>
 #include <rdf2d.hpp>
 #include <ring.hpp>
@@ -228,8 +229,11 @@ NB_MODULE(yoda, m) {
 
     // Neighbours
     m.def("clearNeighbourList",
-          &nneigh::clearNeighbourList,
-          "Free memory for a neighbour list.",
+          [](const std::vector<std::vector<int>> &) {
+              return std::vector<std::vector<int>>{};
+          },
+          "Return an empty neighbour list. Assign the result; a copied "
+          "argument cannot be cleared in place.",
           nb::arg("nList"));
     m.def("getNewNeighbourListByIndex",
           &nneigh::getNewNeighbourListByIndex,
@@ -265,7 +269,8 @@ NB_MODULE(yoda, m) {
           nb::arg("k"),
           nb::arg("candidateCutoff"),
           nb::arg("typeI"),
-          nb::arg("mutual") = true);
+          nb::arg("mutual") = true,
+          nb::call_guard<nb::gil_scoped_release>());
     m.def("kNearestNeighbourList",
           static_cast<KnnTypes>(&nneigh::kNearestNeighbourList),
           "k-nearest bonded graph restricted to a type set.",
@@ -273,7 +278,20 @@ NB_MODULE(yoda, m) {
           nb::arg("k"),
           nb::arg("candidateCutoff"),
           nb::arg("types"),
-          nb::arg("mutual") = true);
+          nb::arg("mutual") = true,
+          nb::call_guard<nb::gil_scoped_release>());
+    m.def("kNearestNeighbourPair",
+          static_cast<std::pair<std::vector<std::vector<int>>,
+                                std::vector<std::vector<int>>> (*)(
+              const molSys::PointCloud<molSys::Point<double>, double> &, int,
+              double, int)>(&nneigh::kNearestNeighbourPair),
+          "Mutual and union k-nearest graphs from one candidate search. "
+          "Returns (mutual, union).",
+          nb::arg("yCloud"),
+          nb::arg("k"),
+          nb::arg("candidateCutoff"),
+          nb::arg("typeI"),
+          nb::call_guard<nb::gil_scoped_release>());
     m.def("shellSeparation",
           &nneigh::shellSeparation,
           "Certificate pair (max k-th distance, min (k+1)-th distance) for "
@@ -392,7 +410,8 @@ NB_MODULE(yoda, m) {
           &primitive::ringNetwork,
           "Find all primitive (shortest-path) rings up to maxDepth.",
           nb::arg("nList"),
-          nb::arg("maxDepth"));
+          nb::arg("maxDepth"),
+          nb::call_guard<nb::gil_scoped_release>());
     nb::class_<primitive::RingUpdater>(m, "RingUpdater")
         .def(nb::init<int>(), nb::arg("maxDepth"))
         .def("update",
@@ -506,8 +525,11 @@ NB_MODULE(yoda, m) {
           nb::arg("atomTypes"),
           nb::arg("atomState"));
     m.def("clearRingList",
-          &ring::clearRingList,
-          "Free memory for a list of rings.",
+          [](const std::vector<std::vector<int>> &) {
+              return std::vector<std::vector<int>>{};
+          },
+          "Return an empty ring list. Assign the result; a copied "
+          "argument cannot be cleared in place.",
           nb::arg("rings"));
     m.def("compareRings",
           &ring::compareRings,
@@ -1004,6 +1026,10 @@ NB_MODULE(yoda, m) {
             auto toMat = [](const std::vector<std::vector<double>> &rows) {
                 Eigen::MatrixXd m(static_cast<int>(rows.size()), 3);
                 for (int i = 0; i < static_cast<int>(rows.size()); i++) {
+                    if (rows[static_cast<size_t>(i)].size() != 3) {
+                        throw std::invalid_argument(
+                            "ira_match points must be n x 3");
+                    }
                     m(i, 0) = rows[static_cast<size_t>(i)][0];
                     m(i, 1) = rows[static_cast<size_t>(i)][1];
                     m(i, 2) = rows[static_cast<size_t>(i)][2];
@@ -1023,6 +1049,10 @@ NB_MODULE(yoda, m) {
         [](const std::vector<std::vector<double>> &pts) {
             Eigen::MatrixXd m(static_cast<int>(pts.size()), 3);
             for (int i = 0; i < static_cast<int>(pts.size()); i++) {
+                if (pts[static_cast<size_t>(i)].size() != 3) {
+                    throw std::invalid_argument(
+                        "sofi_point_group points must be n x 3");
+                }
                 m(i, 0) = pts[static_cast<size_t>(i)][0];
                 m(i, 1) = pts[static_cast<size_t>(i)][1];
                 m(i, 2) = pts[static_cast<size_t>(i)][2];

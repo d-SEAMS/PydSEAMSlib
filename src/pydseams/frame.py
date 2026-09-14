@@ -940,14 +940,11 @@ class Frame:
         CageScore
         """
         cut = self.cutoff + 1.5 if candidate_cutoff is None else candidate_cutoff
-        strict = yoda.neighbourListByIndex(
-            self.cloud,
-            yoda.kNearestNeighbourList(self.cloud, k, cut, self.atom_type, True),
+        mutual, union_knn = yoda.kNearestNeighbourPair(
+            self.cloud, k, cut, self.atom_type
         )
-        union = yoda.neighbourListByIndex(
-            self.cloud,
-            yoda.kNearestNeighbourList(self.cloud, k, cut, self.atom_type, False),
-        )
+        strict = yoda.neighbourListByIndex(self.cloud, mutual)
+        union = yoda.neighbourListByIndex(self.cloud, union_knn)
         six_s = [r for r in yoda.ringNetwork(strict, 6) if len(r) == 6]
         six_u = [r for r in yoda.ringNetwork(union, 6) if len(r) == 6]
         hc, ddc = yoda.seededCageAffiliation(six_s, strict, six_u, union, ring_adjacent)
