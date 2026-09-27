@@ -336,6 +336,38 @@ def test_read_xyz(tmp_path):
     assert frame.n_atoms == 2
 
 
+def test_from_xyz_keeps_a_nitrogen_pair(tmp_path):
+    from pydseams import Frame
+
+    xyz = tmp_path / "sin.xyz"
+    xyz.write_text(
+        "4\n\n"
+        "Si 0.0 0.0 0.0\n"
+        "Si 3.0 0.0 0.0\n"
+        "N 0.0 3.0 0.0\n"
+        "N 1.1 3.0 0.0\n"
+    )
+    frame = Frame.from_xyz(xyz, cutoff=2.0, periodic=False)
+    types = {int(pt.c_type) for pt in frame.cloud.pts}
+    assert types == {1, 2}
+    # N is type 2. Its row must contain the other N, not only silicons.
+    rows = frame.bonds_by_index
+    nitrogen = [i for i, pt in enumerate(frame.cloud.pts) if int(pt.c_type) == 2]
+    assert len(nitrogen) == 2
+    assert nitrogen[1] in rows[nitrogen[0]]
+    assert nitrogen[0] in rows[nitrogen[1]]
+    silicon = [i for i, pt in enumerate(frame.cloud.pts) if int(pt.c_type) == 1]
+    assert silicon[1] not in rows[silicon[0]]
+    for i, row in enumerate(rows):
+        for j in row[1:]:
+            if j <= i:
+                continue
+            a = frame.cloud.pts[i]
+            b = frame.cloud.pts[j]
+            distance = ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2) ** 0.5
+            assert distance <= 2.0
+
+
 def test_to_solvis_optional():
     pytest.importorskip("solvis")
     from pydseams import to_solvis

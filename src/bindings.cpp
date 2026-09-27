@@ -139,7 +139,10 @@ NB_MODULE(yoda, m) {
 
     // I/O (lambdas hide the yCloud* in/out parameter, creating it internally)
     m.def(
-        "readXYZ", &sinp::readXYZ, "Read atom coordinates from an XYZ file.", nb::arg("filename"));
+        "readXYZ",
+        [](const std::string &filename) { return sinp::readXYZ(filename); },
+        "Read atom coordinates from an XYZ file.",
+        nb::arg("filename"));
     m.def(
         "readLammpsTrjreduced",
         [](std::string filename,

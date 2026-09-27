@@ -178,6 +178,40 @@ def _cloud_from_positions(positions, cell, numbers, box_low=None, mol_ids=None):
     return cloud
 
 
+def _open_box(cloud):
+    """Box lengths for which the minimum image is the free-space vector.
+
+    A length must exceed twice the span. ``round(dx / L)`` is then zero
+    for every pair in the cloud. A flat coordinate gets a length of 10.
+    """
+    if cloud.nop == 0:
+        return [10.0, 10.0, 10.0]
+    coords = (
+        [pt.x for pt in cloud.pts],
+        [pt.y for pt in cloud.pts],
+        [pt.z for pt in cloud.pts],
+    )
+    spans = [max(axis) - min(axis) for axis in coords]
+    return [max(2.0 * span + 1.0, 10.0) for span in spans]
+
+
+def _merge_neighbour_lists(parts):
+    """Union of neighbour rows that each begin with the atom's own id."""
+    if not parts:
+        return []
+    merged = []
+    for row_i in range(len(parts[0])):
+        seen = []
+        known = set()
+        for part in parts:
+            for atom_id in part[row_i]:
+                if atom_id not in known:
+                    known.add(atom_id)
+                    seen.append(atom_id)
+        merged.append(seen)
+    return merged
+
+
 def _guess_lammps_type(filename, frame, region):
     low, high = region if region is not None else ([0, 0, 0], [0, 0, 0])
     sliced = region is not None
@@ -257,6 +291,7 @@ class Frame:
         h_cloud=None,
         symbols=None,
         cell_rotation=None,
+        periodic=True,
     ):
         if bonded not in ("hbond", "cutoff", "auto"):
             raise ValueError('bonded must be "hbond", "cutoff", or "auto"')
@@ -271,6 +306,7 @@ class Frame:
         self.frame = frame
         self.cutoff = cutoff
         self.all_atoms = bool(all_atoms)
+        self.periodic = bool(periodic)
         self._h_cloud = h_cloud
         self._symbols = symbols
         self._cell_rotation = cell_rotation
@@ -451,7 +487,9 @@ class Frame:
         )
 
     @classmethod
-    def from_xyz(cls, filename, cutoff=None, bonded="cutoff", atom_type=None):
+    def from_xyz(
+        cls, filename, cutoff=None, bonded="cutoff", atom_type=None, periodic=True
+    ):
         """Load an XYZ file through :func:`pydseams.yoda.readXYZ`.
 
         Parameters
@@ -463,8 +501,13 @@ class Frame:
         bonded : {"auto", "hbond", "cutoff"}, optional
             Graph for rings. Default ``"cutoff"``.
         atom_type : int or None, optional
-            Species to analyse. ``None`` uses the first particle's
-            ``c_type``.
+            Species recorded for single-type routines. ``None`` uses the
+            first particle's ``c_type``. Several elements still enter the
+            neighbour list.
+        periodic : bool, optional
+            When ``False``, the cutoff graph uses free-space distances.
+            The stored box stays the bounding span. Default ``True``
+            keeps the minimum image inside that span.
 
         Returns
         -------
@@ -487,6 +530,7 @@ class Frame:
             cutoff=cutoff,
             bonded=bonded,
             cloud=cloud,
+            periodic=periodic,
         )
 
     @classmethod
@@ -676,15 +720,38 @@ class Frame:
 
     @property
     def neighbor_list(self):
-        """Cutoff neighbour list from :func:`pydseams.yoda.neighListO`.
+        """Cutoff neighbour list.
 
-        Built once per loaded frame and cached. Rows are atom IDs of
-        neighbours within :attr:`cutoff` for :attr:`atom_type`.
+        One atom type uses :func:`pydseams.yoda.neighListO`. Several types
+        use the union of like and unlike lists from
+        :func:`pydseams.yoda.neighList`. Rows are atom IDs within
+        :attr:`cutoff`. :attr:`periodic` ``False`` widens the box for that
+        call so a molecule is not wrapped across its bounding span, then
+        restores the span.
         """
         if self._nlist is None:
-            self._nlist = yoda.neighListO(
-                rcutoff=self.cutoff, yCloud=self.cloud, typeI=self.atom_type
-            )
+            saved_box = None
+            if not self.periodic:
+                saved_box = list(self.cloud.box)
+                self.cloud.box = _open_box(self.cloud)
+            try:
+                types = sorted({int(pt.c_type) for pt in self.cloud.pts})
+                if len(types) <= 1:
+                    self._nlist = yoda.neighListO(
+                        rcutoff=self.cutoff, yCloud=self.cloud, typeI=self.atom_type
+                    )
+                else:
+                    parts = [
+                        yoda.neighList(
+                            rcutoff=self.cutoff, yCloud=self.cloud, typeI=ti, typeJ=tj
+                        )
+                        for i, ti in enumerate(types)
+                        for tj in types[i:]
+                    ]
+                    self._nlist = _merge_neighbour_lists(parts)
+            finally:
+                if saved_box is not None:
+                    self.cloud.box = saved_box
         return self._nlist
 
     @property
