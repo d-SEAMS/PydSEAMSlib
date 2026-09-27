@@ -487,7 +487,9 @@ class Frame:
         )
 
     @classmethod
-    def from_xyz(cls, filename, cutoff=None, bonded="cutoff", atom_type=None, periodic=True):
+    def from_xyz(
+        cls, filename, cutoff=None, bonded="cutoff", atom_type=None, periodic=True
+    ):
         """Load an XYZ file through :func:`pydseams.yoda.readXYZ`.
 
         Parameters
