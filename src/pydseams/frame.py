@@ -178,6 +178,23 @@ def _cloud_from_positions(positions, cell, numbers, box_low=None, mol_ids=None):
     return cloud
 
 
+def _merge_neighbour_lists(parts):
+    """Union of neighbour rows that each begin with the atom's own id."""
+    if not parts:
+        return []
+    merged = []
+    for row_i in range(len(parts[0])):
+        seen = []
+        known = set()
+        for part in parts:
+            for atom_id in part[row_i]:
+                if atom_id not in known:
+                    known.add(atom_id)
+                    seen.append(atom_id)
+        merged.append(seen)
+    return merged
+
+
 def _guess_lammps_type(filename, frame, region):
     low, high = region if region is not None else ([0, 0, 0], [0, 0, 0])
     sliced = region is not None
@@ -463,8 +480,9 @@ class Frame:
         bonded : {"auto", "hbond", "cutoff"}, optional
             Graph for rings. Default ``"cutoff"``.
         atom_type : int or None, optional
-            Species to analyse. ``None`` uses the first particle's
-            ``c_type``.
+            Species recorded for single-type routines. ``None`` uses the
+            first particle's ``c_type``. Several elements still enter the
+            neighbour list.
 
         Returns
         -------
@@ -682,9 +700,20 @@ class Frame:
         neighbours within :attr:`cutoff` for :attr:`atom_type`.
         """
         if self._nlist is None:
-            self._nlist = yoda.neighListO(
-                rcutoff=self.cutoff, yCloud=self.cloud, typeI=self.atom_type
-            )
+            types = sorted({int(pt.c_type) for pt in self.cloud.pts})
+            if len(types) <= 1:
+                self._nlist = yoda.neighListO(
+                    rcutoff=self.cutoff, yCloud=self.cloud, typeI=self.atom_type
+                )
+            else:
+                parts = [
+                    yoda.neighList(
+                        rcutoff=self.cutoff, yCloud=self.cloud, typeI=ti, typeJ=tj
+                    )
+                    for i, ti in enumerate(types)
+                    for tj in types[i:]
+                ]
+                self._nlist = _merge_neighbour_lists(parts)
         return self._nlist
 
     @property
