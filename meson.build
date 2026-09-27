@@ -42,6 +42,7 @@ py.extension_module(
 py.install_sources(
     [
         'src/pydseams/__init__.py',
+        'src/pydseams/band.py',
         'src/pydseams/features.py',
         'src/pydseams/frame.py',
         'src/pydseams/aseio.py',
