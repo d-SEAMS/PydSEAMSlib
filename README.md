@@ -68,7 +68,8 @@ type. A file with more than one element symbol gives each symbol its own
 `c_type`, and the cutoff graph contains like and unlike pairs. Pass
 `periodic=False` for a molecule so pairs are not wrapped across the
 bounding span. `atom_type` is the species single-type ice routines still
-receive.
+receive. `pydseams.band.band_rows` names the pairs that enter or leave
+that graph from one frame to the next.
 ASE adapters accept nonsingular cells periodic in all three directions and
 preserve cell orientation and displacement on roundtrip. Hydrogen donors use
 an ASE ``mol-id`` array when present and periodic nearest-atom ownership
