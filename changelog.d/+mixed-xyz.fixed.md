@@ -1,1 +1,1 @@
-`Frame.from_xyz` puts every element into the cutoff graph. Each symbol gets its own `c_type`. A nitrogen pair inside the cutoff stays bonded.
+`Frame.from_xyz` puts every element into the cutoff graph. Each symbol gets its own `c_type`. A nitrogen pair inside the cutoff stays bonded. `periodic=False` keeps that graph in free space, so a molecule is not wrapped across its bounding span.
