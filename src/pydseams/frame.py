@@ -319,8 +319,12 @@ class Frame:
         self._affiliation_updater = None
 
         if cloud is not None:
+            if cloud.nop == 0:
+                raise ValueError("cloud has no atoms")
             self.cloud = cloud
-            self.atom_type = atom_type
+            self.atom_type = (
+                int(atom_type) if atom_type is not None else int(cloud.pts[0].c_type)
+            )
         elif self.filename is not None:
             if self.all_atoms:
                 self.cloud = self._read(frame)
