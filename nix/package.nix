@@ -26,7 +26,7 @@ let
       RAYON_NUM_THREADS = "8";
       postInstall = ''
         mkdir -p "$out/include" "$out/lib/pkgconfig"
-        cp include/${pname}.h include/${pname}.hpp "$out/include/"
+        cp include/*.h include/*.hpp "$out/include/"
         cat > "$out/lib/pkgconfig/${pname}.pc" <<EOF
         prefix=$out
         libdir=$out/lib
