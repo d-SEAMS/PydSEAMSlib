@@ -437,7 +437,9 @@ NB_MODULE(yoda, m) {
           nb::arg("neighHbondList"),
           nb::arg("maxDepth"));
     m.def("ringNetwork",
-          &primitive::ringNetwork,
+          [](const std::vector<std::vector<int>> &nList, int maxDepth) {
+              return primitive::ringNetwork(nList, maxDepth);
+          },
           "Find all primitive (shortest-path) rings up to maxDepth.",
           nb::arg("nList"),
           nb::arg("maxDepth"),
