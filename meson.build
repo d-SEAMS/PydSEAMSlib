@@ -1,7 +1,7 @@
 project(
     'pydseams',
     'cpp',
-    version: '2.10.0',
+    version: '2.11.0',
     default_options: ['warning_level=1', 'cpp_std=c++20'],
     meson_version: '>=1.3.0',
 )
@@ -12,6 +12,8 @@ seams = subproject(
     default_options: [
         'default_library=static',
         'with_python=false',
+        'with_linkcell=enabled',
+        'with_minimage=enabled',
         'with_tests=false',
         'with_cli=false',
         'with_lua=disabled',

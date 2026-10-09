@@ -10,6 +10,31 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.11.0] - 2026-10-09
+
+### Added
+
+- `pydseams.band.band_rows` names the cutoff pairs that enter or leave between frames, with the shortest same-type distance and the primitive-ring census.
+
+### Changed
+
+- CHANGELOG.md follows Keep a Changelog. Unreleased notes are
+  changelog.d fragments assembled by towncrier.
+- Engine wrap and flake lock follow seams-core 67628524 (v2.10.0 plus ice XXI).
+- Engine wrap follows seams-core 91235ec1 (CHILL+ device-safe target loops).
+- Engine wrap follows seams-core bdc9b74 (RDF MIC-once and ice XXI fingerprint).
+- Engine wrap follows seams-core eb1a4985 (j815 leftover batch).
+- Require minimage and linkcell in the bindings and use seams-core 2.11.0 for periodic distances, threaded neighbour lists, and topology keys.
+- Wrap seams-core fa1c8a7397d0f9b020da07489e4211fa501f8d6d (IRA residual maps target onto ref).
+
+### Fixed
+
+- Band distances respect each frame's periodicity and use Euclidean nearest images for skew cells. Band comparisons require consistent atom IDs, types, and order.
+- Build the Rust geometry libraries inside the wheel containers.
+- `Frame.from_xyz` puts every element into the cutoff graph. Each symbol gets its own `c_type`. A nitrogen pair inside the cutoff stays bonded. `periodic=False` keeps that graph in free space, so a molecule is not wrapped across its bounding span.
+- `pydseams.__version__` is 2.10.0, matching the package. `kNearestNeighbourList` binds both the type-I and type-set overloads so the wrap builds against seams-core after ice XXI.
+
+
 ## 2.10.0 (2026-09-06)
 
 - Engine pinned at seams-core v2.10.0: F4 and Zeron q12, water-type CHILL, incomplete cages, TUM offload.

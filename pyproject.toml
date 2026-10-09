@@ -4,7 +4,7 @@ build-backend = "mesonpy"
 
 [project]
 name = "pydseamslib"
-version = "2.10.0"
+version = "2.11.0"
 description = "Python bindings for the d-SEAMS C++ engine"
 readme = "README.md"
 license = {text = "MIT"}
