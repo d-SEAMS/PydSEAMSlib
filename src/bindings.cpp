@@ -436,14 +436,15 @@ NB_MODULE(yoda, m) {
           "Find all possible rings (including non-shortest-path) up to maxDepth.",
           nb::arg("neighHbondList"),
           nb::arg("maxDepth"));
-    m.def("ringNetwork",
-          [](const std::vector<std::vector<int>> &nList, int maxDepth) {
-              return primitive::ringNetwork(nList, maxDepth);
-          },
-          "Find all primitive (shortest-path) rings up to maxDepth.",
-          nb::arg("nList"),
-          nb::arg("maxDepth"),
-          nb::call_guard<nb::gil_scoped_release>());
+    m.def(
+        "ringNetwork",
+        [](const std::vector<std::vector<int>> &nList, int maxDepth) {
+            return primitive::ringNetwork(nList, maxDepth);
+        },
+        "Find all primitive (shortest-path) rings up to maxDepth.",
+        nb::arg("nList"),
+        nb::arg("maxDepth"),
+        nb::call_guard<nb::gil_scoped_release>());
     nb::class_<primitive::RingUpdater>(m, "RingUpdater")
         .def(nb::init<int>(), nb::arg("maxDepth"))
         .def("update",
