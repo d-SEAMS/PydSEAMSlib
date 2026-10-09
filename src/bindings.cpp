@@ -29,6 +29,7 @@
 #ifdef SEAMS_HAS_IRA
 #    include <Eigen/Core>
 #endif
+#include <cmath>
 #include <cstdint>
 #include <format>
 #include <mol_sys.hpp>
