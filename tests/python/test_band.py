@@ -49,3 +49,50 @@ def test_band_rows_records_a_new_same_type_contact():
     assert (0, 1) in rows[1]["left"]
     assert (1, 2) in rows[1]["entered"]
     assert rows[1]["shortest_within_type"][2] == pytest.approx(1.1)
+
+
+@pytest.mark.parametrize("translation", [0.0, 60.0, -40.0])
+def test_band_distance_uses_periodic_images(translation):
+    frame = Frame.from_arrays(
+        [(0.2, 0.0, 0.0), (19.4 + translation, 0.0, 0.0)],
+        CELL, numbers=[1, 1], cutoff=2.0,
+    )
+    assert band_rows([frame])[0]["shortest_within_type"][1] == pytest.approx(0.8)
+    open_frame = Frame(cloud=frame.cloud, periodic=False, bonded="cutoff", cutoff=2.0)
+    assert band_rows([open_frame])[0]["shortest_within_type"][1] == pytest.approx(
+        abs(19.2 + translation)
+    )
+
+
+def test_band_distance_in_skew_cell_matches_lattice_enumeration():
+    from itertools import product
+    from math import sqrt
+
+    delta = (1.6, 0.9, 0.0)
+    expected = min(
+        sqrt((delta[0] - 4 * i - 3 * j) ** 2
+             + (delta[1] - 2 * j) ** 2 + (delta[2] - 5 * k) ** 2)
+        for i, j, k in product(range(-3, 4), repeat=3)
+    )
+    frame = Frame.from_arrays(
+        [(0.0, 0.0, 0.0), delta], [7.0, 2.0, 5.0, 3.0, 0.0, 0.0],
+        numbers=[1, 1], cutoff=2.0,
+    )
+    assert band_rows([frame])[0]["shortest_within_type"][1] == pytest.approx(expected)
+
+
+def test_band_rejects_changed_atom_identity():
+    first = Frame.from_arrays([(0, 0, 0), (1, 0, 0)], CELL, numbers=[1, 2])
+    changed = Frame.from_arrays([(0, 0, 0), (1, 0, 0)], CELL, numbers=[2, 1])
+    with pytest.raises(ValueError, match="IDs, types, and order"):
+        band_rows([first, changed])
+
+
+def test_periodic_distance_checks_atom_indices():
+    from pydseams import yoda
+
+    frame = Frame.from_arrays([(0, 0, 0), (1, 0, 0)], CELL)
+    with pytest.raises(IndexError):
+        yoda.periodicDistance(frame.cloud, -1, 0)
+    with pytest.raises(IndexError):
+        yoda.periodicDistance(frame.cloud, 0, 2)

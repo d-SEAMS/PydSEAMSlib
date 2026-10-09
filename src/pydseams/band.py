@@ -21,13 +21,18 @@ def bond_pairs(frame):
 
 
 def _distance(frame, i, j):
+    if frame.periodic:
+        return yoda.periodicDistance(frame.cloud, i, j)
     a = frame.cloud.pts[i]
     b = frame.cloud.pts[j]
     return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2) ** 0.5
 
 
 def shortest_within_type(frame, type_code):
-    """Shortest free-space distance between two atoms of ``type_code``.
+    """Shortest distance between two atoms of ``type_code``.
+
+    Periodic frames use the nearest image in the simulation cell; open
+    frames use the Cartesian distance.
 
     Returns ``None`` when fewer than two atoms carry that type.
     """
@@ -58,7 +63,8 @@ def band_rows(frames, max_ring_size=8):
     Parameters
     ----------
     frames : sequence of Frame
-        Images in path order. Each frame uses its own cutoff graph.
+        Images in path order with the same atom IDs and types in the same order.
+        Each frame uses its own cutoff graph and periodicity.
     max_ring_size : int, optional
         Largest primitive ring. Default 8.
 
@@ -71,7 +77,15 @@ def band_rows(frames, max_ring_size=8):
     """
     rows = []
     previous = None
+    identity = None
     for index, frame in enumerate(frames):
+        current_identity = tuple(
+            (int(pt.atomID), int(pt.c_type)) for pt in frame.cloud.pts
+        )
+        if identity is None:
+            identity = current_identity
+        elif current_identity != identity:
+            raise ValueError("band frames must preserve atom IDs, types, and order")
         pairs = bond_pairs(frame)
         if previous is None:
             entered, left = [], []

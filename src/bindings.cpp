@@ -14,6 +14,7 @@
 #include <cluster.hpp>
 #include <density.hpp>
 #include <franzblau.hpp>
+#include <generic.hpp>
 #include <ira_sofi.hpp>
 
 #include <nanobind/nanobind.h>
@@ -235,6 +236,26 @@ NB_MODULE(yoda, m) {
         nb::arg("filename"),
         nb::arg("targetFrame"));
 #endif
+
+    m.def(
+        "periodicDistance",
+        [](const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+           int i, int j) {
+            if (i < 0 || j < 0 || static_cast<std::size_t>(i) >= cloud.pts.size() ||
+                static_cast<std::size_t>(j) >= cloud.pts.size()) {
+                throw std::out_of_range("atom index outside the cloud");
+            }
+            if (cloud.box.size() != 3 && cloud.box.size() != 6) {
+                throw std::invalid_argument("periodic box needs three or six values");
+            }
+            const double distance = gen::periodicDist(cloud, i, j);
+            if (!std::isfinite(distance)) {
+                throw std::invalid_argument("non-finite periodic distance");
+            }
+            return distance;
+        },
+        "Minimum Euclidean distance between cloud-indexed atoms in the periodic cell.",
+        nb::arg("cloud"), nb::arg("i"), nb::arg("j"));
 
     // Neighbours
     m.def(
