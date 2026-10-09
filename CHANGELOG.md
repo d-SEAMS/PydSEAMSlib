@@ -29,6 +29,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- Pin the top-level geometry wraps to the engine versions so Meson resolves the same libraries.
+
 - Band distances respect each frame's periodicity and use Euclidean nearest images for skew cells. Band comparisons require consistent atom IDs, types, and order.
 - Build the Rust geometry libraries inside the wheel containers.
 - `Frame.from_xyz` puts every element into the cutoff graph. Each symbol gets its own `c_type`. A nitrogen pair inside the cutoff stays bonded. `periodic=False` keeps that graph in free space, so a molecule is not wrapped across its bounding span.
