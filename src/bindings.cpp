@@ -239,10 +239,9 @@ NB_MODULE(yoda, m) {
 
     m.def(
         "periodicDistance",
-        [](const molSys::PointCloud<molSys::Point<double>, double> &cloud,
-           int i, int j) {
-            if (i < 0 || j < 0 || static_cast<std::size_t>(i) >= cloud.pts.size() ||
-                static_cast<std::size_t>(j) >= cloud.pts.size()) {
+        [](const molSys::PointCloud<molSys::Point<double>, double> &cloud, int i, int j) {
+            if (i < 0 || j < 0 || static_cast<std::size_t>(i) >= cloud.pts.size()
+                || static_cast<std::size_t>(j) >= cloud.pts.size()) {
                 throw std::out_of_range("atom index outside the cloud");
             }
             if (cloud.box.size() != 3 && cloud.box.size() != 6) {
@@ -255,7 +254,9 @@ NB_MODULE(yoda, m) {
             return distance;
         },
         "Minimum Euclidean distance between cloud-indexed atoms in the periodic cell.",
-        nb::arg("cloud"), nb::arg("i"), nb::arg("j"));
+        nb::arg("cloud"),
+        nb::arg("i"),
+        nb::arg("j"));
 
     // Neighbours
     m.def(

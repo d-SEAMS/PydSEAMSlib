@@ -55,7 +55,9 @@ def test_band_rows_records_a_new_same_type_contact():
 def test_band_distance_uses_periodic_images(translation):
     frame = Frame.from_arrays(
         [(0.2, 0.0, 0.0), (19.4 + translation, 0.0, 0.0)],
-        CELL, numbers=[1, 1], cutoff=2.0,
+        CELL,
+        numbers=[1, 1],
+        cutoff=2.0,
     )
     assert band_rows([frame])[0]["shortest_within_type"][1] == pytest.approx(0.8)
     open_frame = Frame(cloud=frame.cloud, periodic=False, bonded="cutoff", cutoff=2.0)
@@ -70,13 +72,18 @@ def test_band_distance_in_skew_cell_matches_lattice_enumeration():
 
     delta = (1.6, 0.9, 0.0)
     expected = min(
-        sqrt((delta[0] - 4 * i - 3 * j) ** 2
-             + (delta[1] - 2 * j) ** 2 + (delta[2] - 5 * k) ** 2)
+        sqrt(
+            (delta[0] - 4 * i - 3 * j) ** 2
+            + (delta[1] - 2 * j) ** 2
+            + (delta[2] - 5 * k) ** 2
+        )
         for i, j, k in product(range(-3, 4), repeat=3)
     )
     frame = Frame.from_arrays(
-        [(0.0, 0.0, 0.0), delta], [7.0, 2.0, 5.0, 3.0, 0.0, 0.0],
-        numbers=[1, 1], cutoff=2.0,
+        [(0.0, 0.0, 0.0), delta],
+        [7.0, 2.0, 5.0, 3.0, 0.0, 0.0],
+        numbers=[1, 1],
+        cutoff=2.0,
     )
     assert band_rows([frame])[0]["shortest_within_type"][1] == pytest.approx(expected)
 
