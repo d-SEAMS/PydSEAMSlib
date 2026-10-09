@@ -11,10 +11,49 @@
   llvmPackages,
   stdenv,
   fetchFromGitHub,
+  rustPlatform,
   seams-core-src,
 }:
 
 let
+  geometryLibrary = { pname, version, owner, rev, hash }:
+    rustPlatform.buildRustPackage rec {
+      inherit pname version;
+      src = fetchFromGitHub { inherit owner rev hash; repo = pname; };
+      cargoLock.lockFile = "${src}/Cargo.lock";
+      cargoBuildFlags = [ "--package" pname "--lib" ];
+      cargoTestFlags = [ "--package" pname ];
+      RAYON_NUM_THREADS = "8";
+      postInstall = ''
+        mkdir -p "$out/include" "$out/lib/pkgconfig"
+        cp include/${pname}.h include/${pname}.hpp "$out/include/"
+        cat > "$out/lib/pkgconfig/${pname}.pc" <<EOF
+        prefix=$out
+        libdir=$out/lib
+        includedir=$out/include
+        Name: ${pname}
+        Description: Periodic geometry library
+        Version: ${version}
+        Libs: -L$out/lib -l${pname}
+        Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
+        Cflags: -I$out/include
+        EOF
+      '';
+    };
+  minimage = geometryLibrary {
+    pname = "minimage";
+    version = "0.1.4";
+    owner = "lode-org";
+    rev = "ce6dfb175f32459de1ee06dfeb70e8a718f61876";
+    hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
+  };
+  linkcell = geometryLibrary {
+    pname = "linkcell";
+    version = "0.3.11";
+    owner = "d-SEAMS";
+    rev = "2e26b83c0c9bbc07d09eb056011dd8e2cec6f4a5";
+    hash = "sha256-36Zvbw/KgZw0VLUQstRIX27WXoan80JMKJNjkz9RgM0=";
+  };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
     repo = "nanobind";
@@ -30,7 +69,7 @@ let
 in
 python3.pkgs.buildPythonPackage {
   pname = "pydseamslib";
-  version = "2.2.0";
+  version = (builtins.fromTOML (builtins.readFile ../pyproject.toml)).project.version;
   pyproject = true;
 
   src = lib.fileset.toSource {
@@ -61,6 +100,8 @@ python3.pkgs.buildPythonPackage {
     blas
     lapack
     libhwy
+    minimage
+    linkcell
     python3.pkgs.nanobind
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
@@ -70,6 +111,7 @@ python3.pkgs.buildPythonPackage {
   nativeCheckInputs = [
     python3.pkgs.pytest
     python3.pkgs.hypothesis
+    python3.pkgs.ase
   ];
 
   # meson-python drives configure. The meson setup hook would leave
