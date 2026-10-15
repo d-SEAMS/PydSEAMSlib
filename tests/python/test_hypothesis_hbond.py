@@ -40,6 +40,10 @@ class TestHbondProperties:
     def setup_class(cls):
         cls.cloud, cls.nList, cls.hbonds = _load_hbond_network()
 
+    @classmethod
+    def teardown_class(cls):
+        del cls.cloud, cls.nList, cls.hbonds
+
     def test_hbond_list_length(self):
         """H-bond list should have one entry per atom."""
         assert len(self.hbonds) == self.cloud.nop

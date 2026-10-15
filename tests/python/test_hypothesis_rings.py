@@ -43,6 +43,10 @@ class TestRingProperties:
     def setup_class(cls):
         cls.rings, cls.nListIdx, cls.cloud = _load_rings(max_depth=6)
 
+    @classmethod
+    def teardown_class(cls):
+        del cls.rings, cls.nListIdx, cls.cloud
+
     def test_rings_found(self):
         """At least one ring must exist in the test trajectory."""
         assert len(self.rings) > 0
