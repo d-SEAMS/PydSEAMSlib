@@ -89,7 +89,7 @@ nanobind_sources = files('src/nb_combined.cpp')
 # Meson limited_api on the extension does not reach this TU.
 # The library and extension must use the same Python ABI.
 limited_api_args = []
-if py.language_version().version_compare('>=3.12')
+if get_option('python.allow_limited_api') and py.language_version().version_compare('>=3.12')
   limited_api_args = ['-DPy_LIMITED_API=0x030C0000']
 endif
 nanobind_lib = static_library(

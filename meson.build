@@ -2,7 +2,7 @@ project(
     'pydseams',
     'cpp',
     version: '2.11.0',
-    default_options: ['warning_level=1', 'cpp_std=c++20'],
+    default_options: ['warning_level=1', 'cpp_std=c++20', 'python.allow_limited_api=false'],
     meson_version: '>=1.3.0',
 )
 
@@ -22,10 +22,13 @@ seams = subproject(
 )
 yds_dep = seams.get_variable('yds_dep')
 
-nanobind_dep = dependency('nanobind')
+nanobind_dep = dependency(
+    'nanobind',
+    default_options: ['python.allow_limited_api=' + get_option('python.allow_limited_api').to_string()],
+)
 
 py = import('python').find_installation(pure: false)
-# Nanobind uses the full CPython API on 3.11 and the stable ABI on 3.12+.
+# Stable-ABI wheel builds opt in; source builds use the interpreter ABI.
 limited_api = py.language_version().version_compare('>=3.12') ? '3.12' : ''
 
 _link_args = []

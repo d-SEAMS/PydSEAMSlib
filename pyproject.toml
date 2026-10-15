@@ -68,3 +68,7 @@ install = ["--skip-subprojects"]
 # CPython 3.11 uses its own ABI; the 3.12 build serves stable-ABI interpreters.
 build = "cp311-* cp312-*"
 skip = ["pp*", "*musllinux*", "*i686*", "cp3??t-*"]
+
+[[tool.cibuildwheel.overrides]]
+select = "cp312-*"
+config-settings = { setup-args = ["-Dpython.allow_limited_api=true"] }
