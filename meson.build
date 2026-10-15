@@ -25,6 +25,8 @@ yds_dep = seams.get_variable('yds_dep')
 nanobind_dep = dependency('nanobind')
 
 py = import('python').find_installation(pure: false)
+# Nanobind uses the full CPython API on 3.11 and the stable ABI on 3.12+.
+limited_api = py.language_version().version_compare('>=3.12') ? '3.12' : ''
 
 _link_args = []
 if host_machine.system() == 'linux'
@@ -38,7 +40,7 @@ py.extension_module(
     link_args: _link_args,
     install: true,
     subdir: 'pydseams',
-    limited_api: '3.12',
+    limited_api: limited_api,
 )
 
 py.install_sources(

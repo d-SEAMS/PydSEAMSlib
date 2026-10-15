@@ -9,7 +9,7 @@ them to cage membership on the same frame.
 Prerequisites
 -------------
 
-- Python 3.12+
+- Python 3.11+
 
 - ``pydseams`` installed: ``pip install pydseamslib``
 
@@ -50,7 +50,7 @@ Step 1: Install pydseams
     pip install pydseamslib
 
 ``pydseams`` is the Python package. ``import pydseamslib`` is a
-compatibility alias of ``pydseams``. Requires Python 3.12+.
+compatibility alias of ``pydseams``. Requires Python 3.11+.
 
 Step 2: Locate the fixture dump
 -------------------------------

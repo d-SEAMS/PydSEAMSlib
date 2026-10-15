@@ -15,11 +15,12 @@ ASE or solvis extras.
 Requirements
 ------------
 
-- Python 3.12+
+- Python 3.11+
 
 - pip, pixi, or a meson-python checkout
 
-Wheels are the CPython 3.12 limited ABI (one ``abi3`` wheel per
+CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
+the CPython 3.12 limited ABI (one ``abi3`` wheel per
 platform). A wheel already links the d-SEAMS engine. Do not compile
 ``yoda`` to install the package.
 

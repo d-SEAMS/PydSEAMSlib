@@ -87,13 +87,17 @@ nanobind_sources = files('src/nb_combined.cpp')
 # declare_dependency(sources:), which compiled the object but did not put
 # it on the extension_module link line.
 # Meson limited_api on the extension does not reach this TU.
-# Keep the hex in lockstep with meson.build limited_api: '3.12'.
+# The library and extension must use the same Python ABI.
+limited_api_args = []
+if py.language_version().version_compare('>=3.12')
+  limited_api_args = ['-DPy_LIMITED_API=0x030C0000']
+endif
 nanobind_lib = static_library(
   'nanobind',
   nanobind_sources,
   include_directories: [incdir],
   dependencies: [py_dep, robin_map_dep],
-  cpp_args: dep_compile_args + ['-DPy_LIMITED_API=0x030C0000'],
+  cpp_args: dep_compile_args + limited_api_args,
 )
 
 nanobind_dep = declare_dependency(

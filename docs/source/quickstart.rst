@@ -27,8 +27,8 @@ With pixi, add the PyPI package:
 
     pixi add --pypi pydseamslib
 
-Requires Python 3.12+. Wheels are the CPython 3.12 limited ABI (one
-``abi3`` wheel per platform). A wheel already links the engine; do not
+Requires Python 3.11+. CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
+the CPython 3.12 limited ABI (one ``abi3`` wheel per platform). A wheel already links the engine; do not
 compile ``yoda`` to use the package.
 
 ``import pydseamslib`` is a compatibility alias of ``pydseams``.

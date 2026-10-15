@@ -110,7 +110,8 @@ Compatibility
 Which Python versions are supported?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.12+. Wheels are the CPython 3.12 limited ABI. Free-threaded
+Python 3.11+. CPython 3.11 has a version-specific wheel; Python 3.12 and newer
+use the CPython 3.12 limited ABI. Free-threaded
 CPython has no limited ABI and is not a target.
 
 How is this different from ``seams`` and Lua ``dseams``?

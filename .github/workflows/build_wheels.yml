@@ -11,6 +11,7 @@ on:
       - 'scripts/check_installed_api.py'
       - 'src/**'
       - 'subprojects/*.wrap'
+      - 'subprojects/packagefiles/**'
   pull_request:
     paths:
       - '.github/workflows/build_wheels.yml'
@@ -19,6 +20,7 @@ on:
       - 'scripts/check_installed_api.py'
       - 'src/**'
       - 'subprojects/*.wrap'
+      - 'subprojects/packagefiles/**'
   workflow_dispatch:
 
 concurrency:
@@ -90,10 +92,9 @@ jobs:
       - name: Build wheels
         run: uvx --from cibuildwheel cibuildwheel --output-dir wheelhouse
         env:
-          # One CPython 3.12 build per platform. meson limited_api: '3.12'
-          # tags the wheel abi3 (3.12+ GIL). Free-threaded CPython has no
-          # stable ABI; do not add cp31xt here.
-          CIBW_BUILD: "cp312-*"
+          # CPython 3.11 uses its own ABI; 3.12+ uses the stable ABI.
+          # Free-threaded builds require a separate ABI.
+          CIBW_BUILD: "cp311-* cp312-*"
           CIBW_SKIP: "*musllinux* *i686* cp3??t-*"
           CIBW_ARCHS: ${{ matrix.cibw-arch }}
           CIBW_BUILD_VERBOSITY: 1

@@ -82,8 +82,8 @@ the function argument. `pydseams.config` is the reader.
 
 Primary author: Ruhila S. The project started as PSF GSoC 2023 (`pyseams`).
 
-Requires Python 3.12+. Wheels are built against the CPython 3.12 stable
-ABI (one `abi3` wheel per platform). Free-threaded CPython has no
+Requires Python 3.11+. CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
+the CPython 3.12 stable ABI (one `abi3` wheel per platform). Free-threaded CPython has no
 limited ABI and is not a target.
 
 # License

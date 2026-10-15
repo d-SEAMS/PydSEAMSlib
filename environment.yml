@@ -9,7 +9,7 @@ channels:
 dependencies:
   # meson-python refuses the limited API on the 3.14 builds it takes for
   # free-threaded; the wheels are built on 3.12 hosts
-  - python >=3.12,<3.14
+  - python >=3.11,<3.14
   - compilers
   - rust
   - meson
