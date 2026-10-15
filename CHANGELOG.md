@@ -10,6 +10,13 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.11.1] - 2026-10-15
+
+### Fixed
+
+- Build CPython 3.11 wheels with its native API while retaining stable-ABI wheels for Python 3.12 and newer.
+
+
 ## [2.11.0] - 2026-10-09
 
 ### Added
