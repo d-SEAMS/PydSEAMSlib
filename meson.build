@@ -1,7 +1,7 @@
 project(
     'pydseams',
     'cpp',
-    version: '2.11.0',
+    version: '2.11.1',
     default_options: [
         'warning_level=1',
         'cpp_std=c++20',
