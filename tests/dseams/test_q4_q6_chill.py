@@ -12,7 +12,7 @@ except ImportError:
     sys.stderr.write("numpy is not installed\n")
     raise SystemExit(77)
 
-from chill_plus import q4_q6_chill
+from chill_plus import q4_q6, q4_q6_chill
 
 
 def diamond(nrep=2):
@@ -51,6 +51,18 @@ def main():
         raise SystemExit("q6-bar differs from q6 on ideal ice")
     if int(out["counts"][0]) != len(pos):
         raise SystemExit("cubic count")
+    fast = q4_q6(pos, box)
+    if np.max(np.abs(fast["q4"] - out["q4"])) > 1e-12:
+        raise SystemExit("q4_q6 q4 differs from the fused call")
+    if np.max(np.abs(fast["q6"] - out["q6"])) > 1e-12:
+        raise SystemExit("q4_q6 q6 differs from the fused call")
+    if np.max(np.abs(fast["q4bar"] - out["q4bar"])) > 1e-12:
+        raise SystemExit("q4_q6 q4bar differs from the fused call")
+    if np.max(np.abs(fast["q6bar"] - out["q6bar"])) > 1e-12:
+        raise SystemExit("q4_q6 q6bar differs from the fused call")
+    local = q4_q6(pos, box, average=False)
+    if "q4bar" in local or "q6bar" in local:
+        raise SystemExit("average=False still returned q-bar")
     print("q4_q6_chill", len(pos), "cubic", int(out["counts"][0]))
 
 
