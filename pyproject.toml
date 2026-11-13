@@ -1,13 +1,37 @@
 [build-system]
-requires = ["meson-python>=0.16", "nanobind>=2.0", "numpy"]
-build-backend = "mesonpy"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "dseams"
+name = "seams"
 version = "2.14.0"
-description = "d-SEAMS stable C API for Python"
-requires-python = ">=3.10"
-dependencies = ["numpy"]
+description = "ctypes bindings for the d-SEAMS C API in include/seams.h"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Rohit Goswami", email = "rgoswami@ieee.org"}]
+dependencies = ["numpy>=1.24"]
 
-[tool.meson-python.args]
-setup = ["-Dwith_python=true", "-Dwith_tests=false", "-Dwith_cli=false"]
+[project.optional-dependencies]
+dev = ["pytest>=8", "mypy>=1.8", "pyright>=1.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+seams = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --import-mode=importlib"
+testpaths = ["tests/test_seams_package.py", "src/seams"]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
+
+[tool.mypy]
+strict = true
+packages = ["seams"]
+mypy_path = "src"
+warn_unused_ignores = true
+
+[tool.pyright]
+include = ["src/seams"]
+typeCheckingMode = "strict"
+pythonVersion = "3.11"
