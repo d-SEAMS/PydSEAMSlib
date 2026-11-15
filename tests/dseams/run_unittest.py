@@ -17,12 +17,12 @@ src = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[2]))
 # A conda python and the extension must share a stable ABI tag. A module
 # built for another interpreter is a skip, not a failed import.
 tag = sys.implementation.cache_tag  # cpython-312
-# With python.allow_limited_api (the Meson default) the module is
-# _core.abi3.so, which any CPython from 3.12 loads.
+# With python.allow_limited_api the module is _core.abi3.so, which any
+# CPython from 3.12 loads.
 abi3 = sys.version_info >= (3, 12)
 cores = [
     path
-    for path in build.rglob("_core*.so")
+    for path in (build / "src" / "dseams").glob("_core*.so")
     if tag in path.name or (abi3 and ".abi3." in path.name)
 ]
 if not cores:
@@ -33,39 +33,25 @@ if not cores:
 stage = build / "python-stage"
 pkg = stage / "dseams"
 pkg.mkdir(parents=True, exist_ok=True)
-root = src / "bindings" / "python"
-for name in ("__init__.py", "__main__.py", "userframe.py"):
-    shutil.copy(root / "dseams" / name, pkg / name)
-shutil.copy(root / "frames.py", pkg / "frames.py")
+package = src / "src" / "dseams"
+for name in ("__init__.py", "__main__.py", "frames.py", "userframe.py"):
+    shutil.copy(package / name, pkg / name)
 for so in cores:
-    dest = pkg / so.name
-    if so.resolve() != dest.resolve():
-        shutil.copy(so, dest)
-    # The unittest loader puts bindings/python on sys.path ahead of the
-    # staged tree. The extension has to sit next to that package too.
-    sibling = root / "dseams" / so.name
-    if so.resolve() != sibling.resolve():
-        shutil.copy(so, sibling)
+    shutil.copy(so, pkg / so.name)
 
 if os.environ.get("DSEAMS_PY_READY") != "1":
     env = os.environ.copy()
-    lib = build / "src"
-    env["LD_LIBRARY_PATH"] = str(lib) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
-    ctypes_src = root / "src"
+    engine = build / "subprojects" / "seams-core"
+    libs = [str(engine / "src"), str(engine / "bindings")]
+    env["LD_LIBRARY_PATH"] = os.pathsep.join(libs + [env.get("LD_LIBRARY_PATH", "")])
     env["PYTHONPATH"] = os.pathsep.join(
-        [str(stage), str(ctypes_src), env.get("PYTHONPATH", "")]
+        [str(stage), str(src / "src"), env.get("PYTHONPATH", "")]
     )
     env["DSEAMS_PY_READY"] = "1"
     os.execve(sys.executable, [sys.executable, __file__], env)
 
 import unittest
 
-try:
-    suite = unittest.defaultTestLoader.discover(str(root / "tests"), pattern="test_*.py")
-    result = unittest.TextTestRunner(verbosity=1).run(suite)
-    sys.exit(0 if result.wasSuccessful() else 1)
-finally:
-    for so in cores:
-        sibling = root / "dseams" / so.name
-        if sibling.is_file() and so.resolve() != sibling.resolve():
-            sibling.unlink()
+suite = unittest.defaultTestLoader.discover(str(src / "tests" / "dseams"), pattern="test_*.py")
+result = unittest.TextTestRunner(verbosity=1).run(suite)
+sys.exit(0 if result.wasSuccessful() else 1)

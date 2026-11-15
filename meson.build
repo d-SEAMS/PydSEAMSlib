@@ -116,3 +116,82 @@ py.install_sources(
 
 # The 2.14 API: import dseams.
 subdir('src/dseams')
+
+# Development-tree tests: `meson test -C <builddir>`. The wheel and CI
+# run the same files with pytest against the installed package.
+_engine_src = meson.project_source_root() / 'subprojects' / 'seams-core'
+_dseams_env = environment()
+_dseams_env.set('DSEAMS_BUILD', meson.project_build_root())
+_dseams_env.set('DSEAMS_SRC', meson.project_source_root())
+_dseams_env.set('SEAMS_CORE_SRC', _engine_src)
+_dseams_env.set('SEAMS_LIB', seams_api_lib.full_path())
+_dseams_env.set('SEAMS_LANG_LIB', seams_lang_lib.full_path())
+test(
+    'python_dseams',
+    py,
+    args: [files('tests/dseams/run_unittest.py')],
+    env: _dseams_env,
+    depends: [dseams_core, seams_lang_lib],
+    timeout: 180,
+)
+_ctypes_env = environment()
+_ctypes_env.set('PYTHONPATH', meson.project_source_root() / 'src')
+_ctypes_env.set('SEAMS_LIB', seams_api_lib.full_path())
+_ctypes_env.set('SEAMS_CORE_SRC', _engine_src)
+test(
+    'python_seams_ctypes',
+    py,
+    args: [
+        '-m', 'pytest', '-q', '-p', 'no:cacheprovider',
+        meson.project_source_root() / 'tests' / 'dseams' / 'test_seams_package.py',
+        '--doctest-modules',
+        meson.project_source_root() / 'src' / 'seams',
+    ],
+    env: _ctypes_env,
+    depends: [seams_api_lib],
+    timeout: 180,
+)
+_lang_env = environment()
+_lang_env.set('SEAMS_LANG_LIB', seams_lang_lib.full_path())
+test(
+    'python_chill_plus_ctypes',
+    py,
+    args: [files('tests/dseams/test_chill_plus_ctypes.py')],
+    env: _lang_env,
+    depends: [seams_lang_lib],
+    timeout: 60,
+)
+_examples_env = environment()
+_examples_env.set('SEAMS_CORE_SRC', _engine_src)
+_examples_env.set('SEAMS_LIBDIR', meson.project_build_root() / 'subprojects' / 'seams-core' / 'src')
+test(
+    'docs_api_python',
+    py,
+    args: [
+        files('examples/python/python_api.py'),
+        meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
+    ],
+    env: _examples_env,
+    depends: [seams_api_lib],
+    timeout: 60,
+)
+test(
+    'docs_minimal_python',
+    py,
+    args: [
+        files('examples/python/minimal_py.py'),
+        _engine_src / 'input' / 'traj' / 'genice_sI.lammpstrj',
+        meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
+    ],
+    env: _examples_env,
+    depends: [seams_api_lib],
+    timeout: 60,
+)
+test(
+    'docs_core_counts',
+    py,
+    args: [files('examples/python/core_counts.py')],
+    env: _examples_env,
+    depends: [seams_api_lib],
+    timeout: 120,
+)
