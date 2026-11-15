@@ -1,7 +1,7 @@
 project(
-    'pydseams',
+    'pydseamslib',
     'cpp',
-    version: '2.11.1',
+    version: '2.14.0',
     default_options: [
         'warning_level=1',
         'cpp_std=c++20',
@@ -11,20 +11,50 @@ project(
 )
 
 # C++ engine. Bindings live here; seams-core is the library, not a monolith.
+# libseams (the C API) and libseams_lang are shared and ship in the wheel;
+# libyodaLib and the Rust neighbour crates are static inside them.
 seams = subproject(
     'seams-core',
     default_options: [
         'default_library=static',
         'with_python=false',
-        'with_linkcell=enabled',
-        'with_minimage=enabled',
         'with_tests=false',
         'with_cli=false',
+        'with_linkcell=enabled',
+        'with_minimage=enabled',
+        'with_blas=disabled',
+        'with_chemfiles=disabled',
+        'with_readcon=disabled',
+        'with_gpulite=disabled',
+        'with_openmp_offload=disabled',
+        'with_mpi=disabled',
         'with_lua=disabled',
-        'with_ira=auto',
+        'with_fortran=disabled',
+        'with_lammps=disabled',
+        'with_gromacs=disabled',
+        'with_openmm=disabled',
+        'with_plumed=disabled',
+        'with_ira=disabled',
+        'with_spglib=disabled',
+        'with_sphericart=disabled',
+        'with_nauty=disabled',
+        'with_csm=disabled',
     ],
 )
 yds_dep = seams.get_variable('yds_dep')
+seams_api_lib = seams.get_variable('seams_api_lib')
+seams_lang_lib = seams.get_variable('seams_lang')
+
+# seams.h, and the seams_version.h it includes from the subproject build
+# tree. seams-core declares no dependency object for libseams, and
+# include_directories() into a subproject is a sandbox violation.
+dseams_api_dep = declare_dependency(
+    link_with: seams_api_lib,
+    compile_args: [
+        '-I' + meson.project_source_root() / 'subprojects' / 'seams-core' / 'include',
+        '-I' + meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
+    ],
+)
 
 nanobind_dep = dependency(
     'nanobind',
@@ -83,3 +113,6 @@ py.install_sources(
     pure: false,
     subdir: 'pydseamslib',
 )
+
+# The 2.14 API: import dseams.
+subdir('src/dseams')
