@@ -6,7 +6,7 @@ from pydseams import yoda
 
 def test_version():
     assert hasattr(pydseams, "__version__")
-    assert pydseams.__version__ == "2.11.1"
+    assert pydseams.__version__ == "2.14.0"
 
 
 def test_import_yoda():
