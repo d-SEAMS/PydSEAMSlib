@@ -40,7 +40,10 @@ def test_compat_imports():
     import pydseamslib
 
     assert pydseamslib.__version__ == dseams.__version__
-    assert pydseamslib.Frame is dseams.Frame
+    assert pydseams.__version__ == dseams.__version__
+    # pydseamslib re-exports pydseams, as in 2.11.
+    assert pydseamslib.Frame is pydseams.Frame
+    assert pydseamslib.yoda is pydseams.yoda
     assert callable(pydseams.read)
 
 
@@ -52,19 +55,32 @@ def test_lang_library_resolves():
 
 
 def test_frame_api_parity():
-    """pydseamslib.Frame is the in-tree Frame; pydseams.Frame agrees on cubic ice."""
+    """dseams.Frame, dseams.userframe.Frame and the 2.11 pydseams.Frame agree on cubic ice."""
+    import os
+
     import pydseams
     import pydseamslib
     from dseams import userframe
+    from pydseams import frame as frame211
 
-    assert pydseamslib.Frame is dseams.Frame
-    assert pydseams.Frame is userframe.Frame
+    assert pydseamslib.Frame is pydseams.Frame
+    assert pydseams.Frame is frame211.Frame
     for name in (
         "chill_plus",
         "cages",
         "cages_by_signature",
         "steinhardt",
         "ring_census",
+        "rdf_2d",
+        "monolayer_rings",
+        "find_prisms",
+    ):
+        assert callable(getattr(userframe.Frame, name)), name
+    for name in (
+        "chill_plus",
+        "cages",
+        "cages_by_signature",
+        "steinhardt",
         "rdf_2d",
         "monolayer_rings",
         "find_prisms",
@@ -81,15 +97,18 @@ def test_frame_api_parity():
     assert np.all(labels == 0)
 
     path = _write_dump(pos, box[0])
-    legacy = pydseams.read(path, all_atoms=True)
     try:
-        named = legacy.chill_plus()
+        legacy = userframe.read(path, all_atoms=True)
+        try:
+            named = legacy.chill_plus()
+        finally:
+            legacy.close()
+        frame = pydseams.read(path, all_atoms=True)
+        named211 = frame.chill_plus()
     finally:
-        legacy.close()
-        import os
-
         os.unlink(path)
     assert named["cubic"] == int(counts[0])
+    assert named211["cubic"] == int(counts[0])
 
 
 def _write_dump(pos, length):
