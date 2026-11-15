@@ -19,7 +19,7 @@ def read_dump(path):
             if line.startswith("ITEM: BOX BOUNDS"):
                 import sys
                 from pathlib import Path
-                root = Path(__file__).resolve().parents[2]
+                root = Path(os.environ.get("SEAMS_CORE_SRC", Path(__file__).resolve().parents[2] / "subprojects" / "seams-core"))
                 if str(root / "scripts") not in sys.path:
                     sys.path.insert(0, str(root / "scripts"))
                 from lammps_box import cell_from_bounds

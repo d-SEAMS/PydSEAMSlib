@@ -17,19 +17,25 @@ from seams import CUTOFF, OVITO, PUBLISHED, SEEDED, SeamsError, System
 
 
 def repo_root() -> Path:
-    here = Path(__file__).resolve()
-    for parent in here.parents:
-        if (parent / "include" / "seams.h").is_file():
-            return parent
-    raise RuntimeError("include/seams.h was not found")
+    """The PydSEAMSlib checkout: src/seams, examples and docs."""
+    return Path(__file__).resolve().parents[2]
+
+
+def engine_root() -> Path:
+    """seams-core sources (input/, include/): SEAMS_CORE_SRC, else the subproject."""
+    env = os.environ.get("SEAMS_CORE_SRC")
+    root = Path(env) if env else repo_root() / "subprojects" / "seams-core"
+    if not (root / "include" / "seams.h").is_file():
+        raise RuntimeError(f"include/seams.h was not found under {root}")
+    return root
 
 
 def _library() -> None:
     if os.environ.get("SEAMS_LIB"):
         return
     root = repo_root()
-    for rel in ("bbdir/src/libseams.so", "build/src/libseams.so", "bbdir-py/src/libseams.so"):
-        path = root / rel
+    for rel in ("bbdir", "build"):
+        path = root / rel / "subprojects" / "seams-core" / "src" / "libseams.so"
         if path.is_file():
             os.environ["SEAMS_LIB"] = str(path)
             return
@@ -125,7 +131,7 @@ def test_seeded_graph_is_rejected_for_neighbours() -> None:
 
 
 def test_read_known_trajectories() -> None:
-    root = repo_root()
+    root = engine_root()
     expect = {
         "input/traj/ice1h.lammpstrj": 128,
         "input/traj/genice_sI.lammpstrj": 46,
@@ -142,7 +148,7 @@ def test_read_known_trajectories() -> None:
 
 
 def test_signature_on_si() -> None:
-    path = repo_root() / "input/traj/genice_sI.lammpstrj"
+    path = engine_root() / "input/traj/genice_sI.lammpstrj"
     with System(path, type_filter=1) as sys:
         found = sys.signature("512")
     assert found.n_cages == 2
@@ -151,15 +157,15 @@ def test_signature_on_si() -> None:
 
 def test_documented_quickstart_output() -> None:
     root = repo_root()
-    script = root / "docs" / "examples" / "seams_ctypes_quick.py"
+    script = root / "examples" / "python" / "seams_ctypes_quick.py"
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(root / "bindings" / "python" / "src")
+    env["PYTHONPATH"] = str(root / "src")
     out = subprocess.check_output(
         [sys.executable, str(script), env["SEAMS_LIB"]],
         env=env,
         text=True,
     )
-    page = (root / "docs" / "api" / "python.md").read_text()
+    page = (root / "docs" / "source" / "reference" / "dseams.md").read_text()
     assert out.strip() in page
 
 

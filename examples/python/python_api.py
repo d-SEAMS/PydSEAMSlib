@@ -192,7 +192,7 @@ def via_ctypes(libdir, xyz, edge):
         raise SystemExit("ctypes result")
     exercise(lib, sys_handle)
     lib.seams_system_destroy(sys_handle)
-    root = Path(__file__).resolve().parents[2]
+    root = Path(os.environ.get("SEAMS_CORE_SRC", Path(__file__).resolve().parents[2] / "subprojects" / "seams-core"))
     expect = {
         "input/traj/ice1h.lammpstrj": (128, -1),
         "input/traj/genice_sI.lammpstrj": (46, 1),
