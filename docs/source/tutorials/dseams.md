@@ -1,10 +1,10 @@
-# Python tutorial
+# dseams tutorial
 
 The nanobind module reads a C-contiguous NumPy array in place. This is the eight-atom diamond cell (nearest-neighbour spacing 2.75 Å). Every oxygen is cubic.
 
-`meson test python_dseams` runs this method. On the eight-atom cell `counts[0]` equals the atom count and every label is 0. `docs/examples/core_counts.py` checks Ice Ih and sII through `libseams`. Sphinx doctest and `meson test docs_core_counts` run it.
+`meson test python_dseams` runs this method. On the eight-atom cell `counts[0]` equals the atom count and every label is 0. `examples/python/core_counts.py` checks Ice Ih and sII through `libseams`. `meson test docs_core_counts` runs it.
 
-```{literalinclude} ../../../bindings/python/tests/test_dseams.py
+```{literalinclude} ../../../tests/dseams/test_dseams.py
 :language: python
 :lines: 39-62
 ```
@@ -15,7 +15,7 @@ An ASE `Atoms` or an MDAnalysis universe becomes the same arrays:
 import ase.io
 import dseams
 
-atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
+atoms = ase.io.read("tests/data/exampleTraj.lammpstrj", format="lammps-dump-text")
 pos, box = dseams.from_ase(atoms)
 
 
@@ -37,7 +37,7 @@ assert int(counts.sum()) == len(atoms)
 ```
 
 ```bash
-PYTHONPATH=bindings/python python -m unittest -v bindings/python/tests/test_dseams.py
+python -m unittest -v tests/dseams/test_dseams.py
 python -m dseams
 ```
 
@@ -45,7 +45,7 @@ The verbose run reports three cases: both CHILL+ rules with q4/q6 and rings, ASE
 
 ## The rest of the call set
 
-`docs/examples/python_api.py` is the program `meson test docs_api_python` runs.
+`examples/python/python_api.py` is the program `meson test docs_api_python` runs.
 When the nanobind module is absent it calls `libseams` through ctypes.
 On the eight-atom cell that program prints:
 
@@ -72,14 +72,3 @@ On `input/traj/genice_sI.lammpstrj` the `512` signature prints:
 ```
 python call sig 2 40
 ```
-
-
-## Structure still
-
-```{figure} ../tutorials/molecules/python/overlay-web.png
-:alt: Molecule still for this front
-:width: 480px
-
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug python` writes the 2400 by 1800 PNG.
-```
-

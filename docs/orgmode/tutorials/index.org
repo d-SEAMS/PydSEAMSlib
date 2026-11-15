@@ -10,6 +10,7 @@ Tutorials are learning-oriented. Follow them in order to learn the
 | Tutorial | Description |
 |----------+-------------|
 | [[file:classify-ice.org][Classify ice]] | Load a mixed ice-water dump, print CHILL+, score cages |
+| [[file:dseams.md][dseams]] | CHILL+, q4/q6 and rings on NumPy arrays through ~import dseams~ |
 
 * What a tutorial covers
 

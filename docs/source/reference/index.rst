@@ -13,8 +13,12 @@ Lookup of the live Python names, then Napoleon autodoc.
     ``automodule`` of the helpers,
     ``pydseams.features``, and the ``yoda`` name table
 
+`dseams and the C API <dseams.md>`_
+    ``import dseams``, the ``seams`` ctypes package, and the symbol table
+
 .. toctree::
    :maxdepth: 1
 
    python
    ../api
+   dseams

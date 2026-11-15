@@ -7,6 +7,8 @@ Lookup of the live Python names, then Napoleon autodoc.
   ~CageScore~, ~read~, ASE, ~pydseams.features~
 - [[file:../../source/api.md][API]] :: ~automodule~ of the helpers,
   ~pydseams.features~, and the ~yoda~ name table
+- [[file:dseams.md][dseams and the C API]] :: ~import dseams~, the ~seams~
+  ctypes package, and the symbol table
 
 #+begin_export rst
 .. toctree::
@@ -14,4 +16,5 @@ Lookup of the live Python names, then Napoleon autodoc.
 
    python
    ../api
+   dseams
 #+end_export

@@ -1,13 +1,14 @@
-# Python
+# dseams and the C API
 
 Three packages call the same engine.
 
-`seams` is the ctypes package in `bindings/python`. It wraps `include/seams.h`.
+`seams` is the ctypes package in `src/seams`. It wraps seams-core's `include/seams.h`.
+It is not in the wheel; put `src` on `PYTHONPATH` and set `SEAMS_LIB`.
 NumPy arrays go in and come back out. Results are frozen dataclasses.
 A failing call raises `seams.SeamsError`. `status` is the `seams_status`
 code and `message` is the Python copy of `seams_handle_error`.
 
-`dseams` is the in-tree nanobind module over `seams.h`. It covers
+`dseams` is the nanobind module over `seams.h`. It covers
 `chill_plus`, `q4q6`, neighbours, rings, and `Frame`. NumPy arrays are
 C-contiguous and are read in place. `pydseamslib` (`import pydseams`) is the
 trajectory package on PyPI. `seams.from_pydseams(frame)` copies
@@ -41,7 +42,7 @@ with System() as sys:
     assert abs(float(order.q6.mean()) - 0.628539) < 1e-6
 ```
 
-`docs/examples/seams_ctypes_quick.py` runs that cell. The program prints:
+`examples/python/seams_ctypes_quick.py` runs that cell. The program prints:
 
 ```
 version 2.14.0
@@ -158,36 +159,34 @@ separate frames may run them in separate threads. `set_num_threads` is process-g
 Docstrings are numpydoc. `sphinx.ext.napoleon` and `sphinx.ext.autodoc`
 render `seams` when the package imports, the same split rgpot uses
 between the narrative page and the generated API. The generated page is
-{doc}`seams_ctypes`. `mypy --strict` and `pyright` check
-`bindings/python/src/seams`. `py.typed` ships with the package.
+the docstrings of `src/seams`. `mypy --strict` and `pyright` check
+`src/seams`. `py.typed` ships with the package.
 Doctests cover `as_box9` and `SeamsError`.
 
 The nanobind module and the language-binding examples stay below.
 
-```{literalinclude} ../../../docs/examples/seams_ctypes_quick.py
+```{literalinclude} ../../../examples/python/seams_ctypes_quick.py
 :language: python
 ```
 
-`docs/examples/core_counts.py` is the Ice Ih and sII census. Sphinx
-doctest and `meson test docs_core_counts` both run it. `SEAMS_LIBDIR`
+`examples/python/core_counts.py` is the Ice Ih and sII census.
+`meson test docs_core_counts` runs it. `SEAMS_LIBDIR`
 is the directory that holds `libseams.so`.
 
-```{eval-rst}
-.. doctest::
-
-   >>> import core_counts
-   >>> core_counts.check()
-   hexagonal 128
-   rings6 256
-   clathrate 136
-   rings5 144
+```pycon
+>>> import core_counts
+>>> core_counts.check()
+hexagonal 128
+rings6 256
+clathrate 136
+rings5 144
 ```
 
-`docs/examples/minimal_py.py` reads
+`examples/python/minimal_py.py` reads
 `input/traj/genice_sI.lammpstrj` and calls the C API for neighbours, q6,
-CHILL+, and rings. `meson test docs_examples` runs it.
+CHILL+, and rings. `meson test docs_minimal_python` runs it.
 
-```{literalinclude} ../../../docs/examples/minimal_py.py
+```{literalinclude} ../../../examples/python/minimal_py.py
 :language: python
 ```
 
@@ -196,12 +195,12 @@ positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 `universe.dimensions` (lengths and angles) and `universe.atoms.positions`.
 
 ```python
-# excerpt: bindings/python/dseams/__init__.py
+# excerpt: src/dseams/__init__.py
 def from_ase(atoms):
 ```
 
 ```python
-# excerpt: bindings/python/dseams/__init__.py
+# excerpt: src/dseams/__init__.py
 def from_mdanalysis(universe, select="all"):
 ```
 
@@ -219,24 +218,18 @@ The ctypes fallback calls those two and also `seams_system_read`,
 `seams_hbonds`, `seams_density_axis`, `seams_fingerprint`,
 `seams_contact_pairs`, `seams_domains`, `seams_prisms`, `seams_monolayer`,
 `seams_rings_vertices`, and `seams_site_table`.
-`meson test python_dseams` runs `bindings/python/tests/test_dseams.py`.
-`tests/test_frames_abi.py` is the `frames_abi` check inside
-`tests/run_language_fronts.sh` (`meson test language_fronts`).
+`meson test python_dseams` runs `tests/dseams/test_dseams.py`.
 
 
-```{literalinclude} ../../../docs/examples/python_api.py
+```{literalinclude} ../../../examples/python/python_api.py
 :language: python
 ```
 
-```{literalinclude} ../../../bindings/python/tests/test_dseams.py
+```{literalinclude} ../../../tests/dseams/test_dseams.py
 :language: python
 :lines: 41-74,80-93
 ```
 
-```{literalinclude} ../../../tests/test_frames_abi.py
-:language: python
-:lines: 50-57
-```
 
 <!-- API_SYMBOLS_BEGIN -->
 
@@ -256,7 +249,7 @@ Errors: None.
 
 Units: dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame
 
@@ -272,7 +265,7 @@ Errors: None on construction. Later methods raise RuntimeError with seams_last_e
 
 Units: object
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.chill_plus
 
@@ -288,7 +281,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.count
 
@@ -304,7 +297,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.neighbours
 
@@ -320,7 +313,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.q4q6
 
@@ -336,7 +329,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.rings
 
@@ -352,7 +345,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### Frame.set_frame
 
@@ -368,7 +361,7 @@ Errors: ValueError when box is not 3 lengths or 9 LAMMPS numbers. RuntimeError w
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### MUTUAL
 
@@ -384,7 +377,7 @@ Errors: None.
 
 Units: dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### OVITO
 
@@ -400,7 +393,7 @@ Errors: None.
 
 Units: dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### PUBLISHED
 
@@ -416,7 +409,7 @@ Errors: None.
 
 Units: dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### cages
 
@@ -432,7 +425,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom; counts are dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### chill_plus
 
@@ -448,7 +441,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### count
 
@@ -464,7 +457,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: dimensionless count
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### from_ase
 
@@ -480,7 +473,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: positions and box lengths in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### from_mdanalysis
 
@@ -496,7 +489,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: positions in angstrom; angles inside the universe are degrees
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### neighbours
 
@@ -512,7 +505,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### num_threads
 
@@ -528,7 +521,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: dimensionless thread count
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### q4q6
 
@@ -544,7 +537,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom; q4 and q6 are dimensionless
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### rings
 
@@ -560,7 +553,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom; max_depth is a dimensionless ring size
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### set_frame
 
@@ -576,7 +569,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### set_num_threads
 
@@ -592,7 +585,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: dimensionless thread count; 0 restores the library default
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### signature_cages
 
@@ -608,7 +601,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom; spec is text such as 512
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### symmetry
 
@@ -624,7 +617,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: coordinates and cutoff in angstrom; labels are dimensionless codes
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 
 ### userframe.CageScore
 
@@ -1024,7 +1017,7 @@ Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 
 
 Units: text
 
-Example: `docs/examples/minimal_py.py`
+Example: `examples/python/minimal_py.py`
 <!-- API_SYMBOLS_END -->
 
 

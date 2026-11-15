@@ -130,6 +130,7 @@ framework.
 
    tutorials/index
    tutorials/classify-ice
+   tutorials/dseams
 
 .. toctree::
    :maxdepth: 2
