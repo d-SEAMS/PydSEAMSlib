@@ -4,9 +4,10 @@
 You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
-The runnable copy is =docs/tutorials/test_ice_and_clathrate.py=.
+~tests/dseams/test_doc_snippets.py~ runs the Python blocks on this page.
 Python is ~pip install 'pydseamslib==2.14.0'~.
-The import is ~pydseams~.
+The mixed-frame census uses ~pydseams~; the signature cages use the 2.14
+frame, ~dseams.userframe~, which takes the ~edge~ window.
 
 * The mixed TIP4P frame
 
@@ -42,14 +43,14 @@ These dumps are angstroms, and that window covers the oxygen-oxygen contacts of 
 The CLI ~--cage-edge~ and ~seams_frame_signature_edge~ take that window.
 ~none~ turns the window off: every ring the neighbour list already accepted can be a face, and the cage bound is the face census alone.
 On sI, sII, the sI 2×2×2 cell and the sII 10×10×10 cell the default and ~none~ return the same cages.
-The installed Python ~Frame.cages_by_signature~ takes the signature, an optional ~max_ring_size~, and an optional ~edge~.
+~dseams.userframe.Frame.cages_by_signature~ takes the signature, an optional ~max_ring_size~, and an optional ~edge~.
 ~edge="none"~ is the CLI ~--cage-edge none~.
 Lua passes cutoff, graph, and edge.
 
 #+begin_src python
-import pydseams as ds
+from dseams import userframe
 
-frame = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
+frame = userframe.read("input/traj/genice_sI.lammpstrj", atom_type=1)
 found = frame.cages_by_signature("512")
 assert len(found) == 2 and found.n_atoms == 40
 found = frame.cages_by_signature("512", edge="none")

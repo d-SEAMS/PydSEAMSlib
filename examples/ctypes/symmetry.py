@@ -1,7 +1,7 @@
 # Copyright (c) d-SEAMS developers
-"""Local symmetry from libyodaLib, loaded with ctypes.
+"""Local symmetry from libseams, loaded with ctypes.
 
-Set ``SEAMS_CORE_LIB`` to the built ``libyodaLib``. Template ids are
+Set ``SEAMS_CORE_LIB`` to ``libseams`` (or a shared ``libyodaLib``). Template ids are
 ``ice-Ih``, ``ice-Ic``, ``ice-Isd``, ``5^12``, ``5^12 6^2``,
 ``5^12 6^4``, ``ring-5`` and ``ring-6``.
 """

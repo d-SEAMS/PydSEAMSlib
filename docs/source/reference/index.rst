@@ -22,3 +22,5 @@ Lookup of the live Python names, then Napoleon autodoc.
    python
    ../api
    dseams
+   ../lang/python
+   ../lang/task-python

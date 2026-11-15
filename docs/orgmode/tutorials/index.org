@@ -11,6 +11,12 @@ Tutorials are learning-oriented. Follow them in order to learn the
 |----------+-------------|
 | [[file:classify-ice.org][Classify ice]] | Load a mixed ice-water dump, print CHILL+, score cages |
 | [[file:dseams.md][dseams]] | CHILL+, q4/q6 and rings on NumPy arrays through ~import dseams~ |
+| [[file:bulk-ice.org][Bulk ice]] | CHILL+ and cages on the mixed TIP4P frame, CLI and Python |
+| [[file:ice-and-clathrate.org][Ice and clathrate]] | CHILL+ stars and signature cages on sI |
+| [[file:rings.org][Primitive rings]] | Hydrogen-bond and cutoff ring census |
+| [[file:order-parameters.org][Order parameters]] | Steinhardt q_l and the Lechner-Dellago average |
+| [[file:confined-water.org][Confined water]] | In-plane RDF, monolayer rings, prisms |
+| [[file:paper-figures.org][Paper figures]] | The 2020 JCIM figure calls on in-tree dumps |
 
 * What a tutorial covers
 

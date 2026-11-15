@@ -9,6 +9,8 @@ import tomllib
 from pathlib import Path
 
 sys.path.insert(0, os.path.abspath("../../src"))
+# dseams imports without its extension module for autodoc.
+os.environ.setdefault("DSEAMS_DOC_BUILD", "1")
 autodoc_mock_imports = ["pydseams.yoda"]
 
 # Napoleon: NumPy docstrings in src/pydseams/*.py. yoda is mocked.
@@ -42,6 +44,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
     "sphinx.ext.napoleon",
     "sphinx_contributors",
     "sphinx_copybutton",

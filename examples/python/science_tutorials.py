@@ -6,7 +6,13 @@ Python and the C program in science_tutorials.c both call libseams.
 Layer period, layer kind, and cubicity follow scripts/science_render.py
 at 702d85b2454e459dd14d9ec5fa3bd6b331e73862.
 
-Usage: science_tutorials.py ROOT [BUILD]
+Usage: science_tutorials.py [ROOT [BUILD]]
+
+ROOT is a seams-core checkout (default SEAMS_CORE_SRC, else
+subprojects/seams-core); the inputs, the C and R programs, toolchain.py
+and the render helpers are read from it. BUILD holds src/libseams.so
+(default SEAMS_BUILD, else ROOT/bbdir). Figures go to SEAMS_FIGURES,
+else ROOT/docs/source/science/figures.
 """
 
 from __future__ import annotations
@@ -22,7 +28,13 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ENGINE = Path(
+    os.environ.get(
+        "SEAMS_CORE_SRC",
+        Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
+    )
+)
+sys.path.insert(0, str(ENGINE / "docs"))
 from toolchain import c_compiler, link_command  # noqa: E402
 
 import numpy as np
@@ -43,10 +55,8 @@ BRINE_URL = (
     "https://huggingface.co/datasets/d-SEAMS/brine-front-230K/resolve/" + BRINE_REV
 )
 BRINE_FILES = {
-    "data/frames/T230_m20_r0_t0.xyz":
-        "dc55832fcae664aa5e528283b3be88762efdf1dabf4db1520bb1c806401b6128",
-    "data/frames/T230_m20_r0_tend.xyz":
-        "dcbc05f81f321b45195d259cd4c22e69340f9c1ae57d93c47a74c995c58dd05d",
+    "data/frames/T230_m20_r0_t0.xyz": "dc55832fcae664aa5e528283b3be88762efdf1dabf4db1520bb1c806401b6128",
+    "data/frames/T230_m20_r0_tend.xyz": "dcbc05f81f321b45195d259cd4c22e69340f9c1ae57d93c47a74c995c58dd05d",
 }
 SKIP = (
     "brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K "
@@ -59,7 +69,10 @@ def _lib(libdir: Path):
     lib.seams_system_create.restype = ctypes.c_void_p
     lib.seams_system_destroy.argtypes = [ctypes.c_void_p]
     lib.seams_system_read.argtypes = [
-        ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int
+        ctypes.c_void_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     lib.seams_system_read.restype = ctypes.c_int
     lib.seams_system_count.argtypes = [ctypes.c_void_p]
@@ -184,7 +197,9 @@ def layer_kinds(pos, chill, axis) -> list[int]:
     axis = axis / np.linalg.norm(axis)
     projection = pos[chosen] @ axis
     kinds = chill[chosen]
-    bins = np.floor((projection - projection.min()) / layer_period(projection)).astype(int)
+    bins = np.floor((projection - projection.min()) / layer_period(projection)).astype(
+        int
+    )
     letters = []
     for index in range(int(bins.max()) + 1):
         selected = kinds[bins == index]
@@ -222,9 +237,12 @@ def signature(lib, path: Path, spec: str) -> int:
         raise SystemExit(lib.seams_last_error())
     cages = ctypes.c_size_t()
     atoms = ctypes.c_size_t()
-    if lib.seams_cages_signature(
-        system, 3.5, 0, 0, spec.encode(), ctypes.byref(cages), ctypes.byref(atoms)
-    ) != 0:
+    if (
+        lib.seams_cages_signature(
+            system, 3.5, 0, 0, spec.encode(), ctypes.byref(cages), ctypes.byref(atoms)
+        )
+        != 0
+    ):
         raise SystemExit(lib.seams_last_error())
     lib.seams_system_destroy(system)
     return int(cages.value)
@@ -261,7 +279,9 @@ def brine_frame(lib, path: Path):
         types.append(type_of[species])
     count = len(rows)
     points = (ctypes.c_double * len(xyz))(*xyz)
-    box9 = (ctypes.c_double * 9)(box[0], box[1], box[2], box[3], box[4], box[5], 0, 0, 0)
+    box9 = (ctypes.c_double * 9)(
+        box[0], box[1], box[2], box[3], box[4], box[5], 0, 0, 0
+    )
     kinds = (ctypes.c_int * count)(*types)
     system = lib.seams_system_create()
     if lib.seams_system_set_frame(system, points, count, box9, kinds, None) != 0:
@@ -280,23 +300,40 @@ def brine_frame(lib, path: Path):
     )
     front = ctypes.c_void_p()
     # water type 1, sodium type 3, 20 bins, axis z.
-    if lib.seams_brine_analyse(system, ice, count, 1, 3, 20, 2, ctypes.byref(front)) != 0:
+    if (
+        lib.seams_brine_analyse(system, ice, count, 1, 3, 20, 2, ctypes.byref(front))
+        != 0
+    ):
         raise SystemExit(lib.seams_last_error())
     enter = ctypes.c_double()
     leave = ctypes.c_double()
     thick = ctypes.c_double()
     found = ctypes.c_int()
-    if lib.seams_brine_fronts(
-        front, ctypes.byref(enter), ctypes.byref(leave), ctypes.byref(thick), ctypes.byref(found)
-    ) != 0:
+    if (
+        lib.seams_brine_fronts(
+            front,
+            ctypes.byref(enter),
+            ctypes.byref(leave),
+            ctypes.byref(thick),
+            ctypes.byref(found),
+        )
+        != 0
+    ):
         raise SystemExit("fronts")
     c_ice = ctypes.c_double()
     c_liquid = ctypes.c_double()
     coeff = ctypes.c_double()
     defined = ctypes.c_int()
-    if lib.seams_brine_rejection(
-        front, ctypes.byref(c_ice), ctypes.byref(c_liquid), ctypes.byref(coeff), ctypes.byref(defined)
-    ) != 0:
+    if (
+        lib.seams_brine_rejection(
+            front,
+            ctypes.byref(c_ice),
+            ctypes.byref(c_liquid),
+            ctypes.byref(coeff),
+            ctypes.byref(defined),
+        )
+        != 0
+    ):
         raise SystemExit("rejection")
     lib.seams_brine_destroy(front)
     lib.seams_system_destroy(system)
@@ -559,7 +596,9 @@ def run_c(root: Path, build: Path, mode: str, extra: list[str]):
         )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = src + os.pathsep + env.get("LD_LIBRARY_PATH", "")
-    out = subprocess.check_output([str(binary), mode, *extra], cwd=root, env=env, text=True)
+    out = subprocess.check_output(
+        [str(binary), mode, *extra], cwd=root, env=env, text=True
+    )
     return out
 
 
@@ -568,7 +607,13 @@ def _language_env(libdir: Path):
     # Meson exports the sanitizer options into every test. Julia's JIT and
     # R's startup free through their own allocators and abort before any
     # seams call, so the language fronts run without that runtime.
-    for key in ("ASAN_OPTIONS", "UBSAN_OPTIONS", "MSAN_OPTIONS", "TSAN_OPTIONS", "LD_PRELOAD"):
+    for key in (
+        "ASAN_OPTIONS",
+        "UBSAN_OPTIONS",
+        "MSAN_OPTIONS",
+        "TSAN_OPTIONS",
+        "LD_PRELOAD",
+    ):
         env.pop(key, None)
     env["SEAMS_LIB"] = str(libdir / "libseams.so")
     env["LD_LIBRARY_PATH"] = str(libdir) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
@@ -586,7 +631,10 @@ def _expect_languages(text, frames):
     ):
         expect(line in text, text)
     if frames is not None:
-        expect("brine t0 hexagonal 733" in text and "brine tend hexagonal 741" in text, text)
+        expect(
+            "brine t0 hexagonal 733" in text and "brine tend hexagonal 741" in text,
+            text,
+        )
     else:
         expect("brine tutorial skipped" in text, text)
 
@@ -600,13 +648,20 @@ def run_julia(root: Path, libdir: Path, frames):
     if frames is not None:
         args.extend(str(path) for path in frames)
     proc = subprocess.run(
-        args, cwd=root, env=_language_env(libdir), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        args,
+        cwd=root,
+        env=_language_env(libdir),
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     text = proc.stdout
     # Julia 1.13 can fault in ijl_process_events after the script has
     # printed. The census is the result; a later teardown signal is not.
     if proc.returncode != 0 and "cages sH 512 12" not in text:
-        raise subprocess.CalledProcessError(proc.returncode, args, output=text, stderr=proc.stderr)
+        raise subprocess.CalledProcessError(
+            proc.returncode, args, output=text, stderr=proc.stderr
+        )
     _expect_languages(text, frames)
     print("julia tutorials ok")
 
@@ -639,7 +694,12 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
             ],
         )
     )
-    args = [rscript, str(root / "docs" / "examples" / "science_tutorials.R"), str(root), str(shared)]
+    args = [
+        rscript,
+        str(root / "docs" / "examples" / "science_tutorials.R"),
+        str(root),
+        str(shared),
+    ]
     if frames is not None:
         args.extend(str(path) for path in frames)
     text = subprocess.check_output(args, cwd=root, env=_language_env(libdir), text=True)
@@ -648,8 +708,12 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
 
 
 def main():
-    root = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parents[2])
-    build = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(os.environ.get("SEAMS_BUILD", root / "bbdir"))
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else ENGINE
+    build = (
+        Path(sys.argv[2])
+        if len(sys.argv) > 2
+        else Path(os.environ.get("SEAMS_BUILD", root / "bbdir"))
+    )
     # docs_science_tutorials and the science snippet pages write the same
     # figures; a reader between two writers sees a half-written png.
     import fcntl
@@ -665,7 +729,11 @@ def tutorials(root: Path, build: Path):
     libdir = Path(os.environ.get("SEAMS_LIBDIR", str(build / "src")))
     lib = _lib(libdir)
     traj = root / "input" / "traj"
-    figures = root / "docs" / "source" / "science" / "figures"
+    figures = Path(
+        os.environ.get(
+            "SEAMS_FIGURES", root / "docs" / "source" / "science" / "figures"
+        )
+    )
     figures.mkdir(parents=True, exist_ok=True)
 
     interface = traj / "interface_f0.lammpstrj"
@@ -673,7 +741,10 @@ def tutorials(root: Path, build: Path):
     _labels, counts = chill_file(lib, interface)
     kinds = layer_kinds(pos, _labels, np.array([0.0, 0.0, 1.0]))
     stacking = "".join("C" if kind == 0 else "H" for kind in kinds)
-    expect(counts[1] == 352 and counts[2] == 434 and counts[3] == 49 and counts[0] == 1, counts)
+    expect(
+        counts[1] == 352 and counts[2] == 434 and counts[3] == 49 and counts[0] == 1,
+        counts,
+    )
     expect(stacking == "HHHHHHHHC", stacking)
     expect(abs(cubicity(kinds) - 1.0 / 9.0) < 1e-12, cubicity(kinds))
     print("interface hexagonal 352 water 434 interfacial 49 cubic 1")
@@ -689,12 +760,25 @@ def tutorials(root: Path, build: Path):
     axis_name, axis = strongest_axis(npos, nlabels)
     nkinds = layer_kinds(npos, nlabels, axis)
     nstack = "".join("C" if kind == 0 else "H" for kind in nkinds)
-    expect(ncounts[0] == 47 and ncounts[1] == 62 and ncounts[2] == 3589 and ncounts[3] == 240, ncounts)
+    expect(
+        ncounts[0] == 47
+        and ncounts[1] == 62
+        and ncounts[2] == 3589
+        and ncounts[3] == 240,
+        ncounts,
+    )
     expect(axis_name == "x", axis_name)
     expect(nstack == "CHHHCHHHHHHHHH", nstack)
     expect(abs(cubicity(nkinds) - 2.0 / 14.0) < 1e-12, cubicity(nkinds))
     print("nucleus cubic 47 hexagonal 62 water 3589 interfacial 240")
-    print("nucleus axis", axis_name, "layers", nstack, "cubicity", f"{cubicity(nkinds):.6f}")
+    print(
+        "nucleus axis",
+        axis_name,
+        "layers",
+        nstack,
+        "cubicity",
+        f"{cubicity(nkinds):.6f}",
+    )
     edge = []
     with interface.open() as handle:
         for line in handle:
@@ -710,7 +794,9 @@ def tutorials(root: Path, build: Path):
     sh_small = signature(lib, traj / "genice_sH.lammpstrj", "512")
     sh_medium = signature(lib, traj / "genice_sH.lammpstrj", "sh")
     sh_large = signature(lib, traj / "genice_sH.lammpstrj", "51268")
-    expect((sii, sii_large, sh_small, sh_medium, sh_large) == (16, 8, 12, 8, 4), "cages")
+    expect(
+        (sii, sii_large, sh_small, sh_medium, sh_large) == (16, 8, 12, 8, 4), "cages"
+    )
     print("cages sII 512 16")
     print("cages sII 51264 8")
     print("cages sH 512 12")
@@ -721,17 +807,35 @@ def tutorials(root: Path, build: Path):
     cache = root / "docs" / ".cache" / "brine-front-230K" / BRINE_REV
     frames = fetch_brine(cache)
     if frames is None:
-        _bars("Brine frames were not fetched", [("cached", 0), ("fetched", 0)], figures / "brine.svg")
+        _bars(
+            "Brine frames were not fetched",
+            [("cached", 0), ("fetched", 0)],
+            figures / "brine.svg",
+        )
         print(SKIP)
     else:
         early = brine_frame(lib, frames[0])
         late = brine_frame(lib, frames[1])
         expect(early["agree"] == early["oxygen"] == 1496, early)
         expect(late["agree"] == 1496, late)
-        expect(early["histogram"]["hexagonal"] == 733 and early["histogram"]["water"] == 619, early)
-        expect(early["histogram"]["cubic"] == 1 and early["histogram"]["interfacial"] == 91, early)
-        expect(late["histogram"]["hexagonal"] == 741 and late["histogram"]["water"] == 621, late)
-        expect(late["histogram"]["cubic"] == 0 and late["histogram"]["interfacial"] == 89, late)
+        expect(
+            early["histogram"]["hexagonal"] == 733
+            and early["histogram"]["water"] == 619,
+            early,
+        )
+        expect(
+            early["histogram"]["cubic"] == 1
+            and early["histogram"]["interfacial"] == 91,
+            early,
+        )
+        expect(
+            late["histogram"]["hexagonal"] == 741 and late["histogram"]["water"] == 621,
+            late,
+        )
+        expect(
+            late["histogram"]["cubic"] == 0 and late["histogram"]["interfacial"] == 89,
+            late,
+        )
         expect(early["found"] == 1 and late["found"] == 1, "front")
         expect(early["defined"] == 1 and late["defined"] == 1, "defined")
         expect(early["c_ice"] == 0.0 and late["c_ice"] == 0.0, "c_ice")
@@ -748,7 +852,10 @@ def tutorials(root: Path, build: Path):
         c_interface = run_c(root, build, "interface", [])
         expect("interface hexagonal 352" in c_interface, c_interface)
         expect("interface layers HHHHHHHHC" in c_interface, c_interface)
-        expect("nucleus cubic 47" in c_interface and "CHHHCHHHHHHHHH" in c_interface, c_interface)
+        expect(
+            "nucleus cubic 47" in c_interface and "CHHHCHHHHHHHHH" in c_interface,
+            c_interface,
+        )
         c_cages = run_c(root, build, "cages", [])
         for line in (
             "cages sII 512 16",

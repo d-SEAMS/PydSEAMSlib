@@ -131,6 +131,12 @@ framework.
    tutorials/index
    tutorials/classify-ice
    tutorials/dseams
+   tutorials/bulk-ice
+   tutorials/ice-and-clathrate
+   tutorials/rings
+   tutorials/order-parameters
+   tutorials/confined-water
+   tutorials/paper-figures
 
 .. toctree::
    :maxdepth: 2
@@ -140,6 +146,8 @@ framework.
    howto/install
    howto/ase
    howto/solvis
+   howto/ase-integration
+   howto/solvis-dseams
    howto/features
    howto/tools
    howto/faq

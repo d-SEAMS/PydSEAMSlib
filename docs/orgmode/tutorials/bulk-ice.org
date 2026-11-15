@@ -115,7 +115,7 @@ On this mixed frame the cutoff list labels 9 oxygens interClathrate, and the mut
 TUM finds no complete HC or DDC.
 A three-eclipsed star is not cage membership.
 
-The longer argument is [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].
+The longer argument is [[https://docs.dseams.info][CHILL+ versus cages]].
 
 * Step 5: A cubic crystal
 
@@ -175,8 +175,8 @@ Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
 
 * Next steps
 
-- [[file:../howto/classify-cli.org][Classify a dump you already have]] (frame ranges, ~--graph~, ~--jobs~)
-- [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]]
+- [[https://docs.dseams.info][Classify a dump you already have]] (frame ranges, ~--graph~, ~--jobs~)
+- [[https://docs.dseams.info][CHILL+ versus cages]]
 - [[https://d-seams.github.io/PydSEAMSlib/][pydseams Frame tutorial]]
 - [[https://d-seams.github.io/yodaStruct/][Lua read-and-classify]]
 

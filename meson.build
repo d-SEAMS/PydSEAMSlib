@@ -207,3 +207,38 @@ test(
     depends: [seams_api_lib],
     timeout: 120,
 )
+_wrappers_env = environment()
+_wrappers_env.set('SEAMS_LANG_LIB', seams_lang_lib.full_path())
+_wrappers_env.set('SEAMS_CORE_LIB', seams_api_lib.full_path())
+_wrappers_env.set('DSEAMS_ROOT', _engine_src)
+foreach _script : [
+    ['python_q4_q6_chill', 'tests/dseams/test_q4_q6_chill.py'],
+    ['python_frames_abi', 'tests/dseams/test_frames_abi.py'],
+    ['python_symmetry_ctypes', 'tests/dseams/test_symmetry_ctypes.py'],
+    ['docs_lang_python', 'examples/python/lang_tasks_python.py'],
+]
+    test(
+        _script[0],
+        py,
+        args: [files(_script[1])],
+        env: _wrappers_env,
+        depends: [seams_api_lib, seams_lang_lib],
+        timeout: 120,
+    )
+endforeach
+_science_env = environment()
+_science_env.set('SEAMS_CORE_SRC', _engine_src)
+_science_env.set('SEAMS_LIBDIR', meson.project_build_root() / 'subprojects' / 'seams-core' / 'src')
+_science_env.set('SEAMS_FIGURES', meson.project_build_root() / 'docs-science' / 'figures')
+test(
+    'docs_science_tutorials',
+    py,
+    args: [
+        files('examples/python/science_tutorials.py'),
+        _engine_src,
+        meson.project_build_root() / 'subprojects' / 'seams-core',
+    ],
+    env: _science_env,
+    depends: [seams_api_lib],
+    timeout: 300,
+)

@@ -9,7 +9,9 @@ try:
 except ImportError:
     raise SystemExit(77)
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "bindings", "python"))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "..", "..", "examples", "ctypes")
+)
 
 import symmetry
 
