@@ -1014,8 +1014,11 @@ NB_MODULE(yoda, m) {
           nb::arg("yCloud"),
           nb::arg("candidateCutoff"),
           nb::arg("orderL"));
+    using ClassifyTemplatesRows = std::vector<chill::TemplateHit> (*)(
+        const molSys::PointCloud<molSys::Point<double>, double> &,
+        const std::vector<std::vector<int>> &, int);
     m.def("classifyTemplates",
-          &chill::classifyTemplates,
+          static_cast<ClassifyTemplatesRows>(&chill::classifyTemplates),
           "IRA/Horn overlay onto FCC, HCP, BCC and SC neighbour shells.",
           nb::arg("yCloud"),
           nb::arg("nList"),
@@ -1276,8 +1279,11 @@ NB_MODULE(yoda, m) {
         .def_ro("nIce", &site::IonEnvironment::nIce)
         .def_ro("nFront", &site::IonEnvironment::nFront)
         .def_ro("nLiquid", &site::IonEnvironment::nLiquid);
+    using IonEnvironmentOneType = site::IonEnvironment (*)(
+        const molSys::PointCloud<molSys::Point<double>, double> &,
+        const std::vector<bool> &, const std::vector<int> &, int, double);
     m.def("ionEnvironment",
-          &site::ionEnvironment,
+          static_cast<IonEnvironmentOneType>(&site::ionEnvironment),
           "Class each ion by its first water shell against iceFlag: every "
           "shell molecule labelled is ice, none is liquid, otherwise front.",
           nb::arg("yCloud"),
@@ -1308,13 +1314,15 @@ NB_MODULE(yoda, m) {
         .def_ro("classes", &topo::FrameFingerprint::classes)
         .def_ro("ringCensus", &topo::FrameFingerprint::ringCensus)
         .def_ro("hops", &topo::FrameFingerprint::hops)
-        .def_ro("coloured", &topo::FrameFingerprint::coloured);
+        .def_ro("colored", &topo::FrameFingerprint::colored)
+        .def_ro("coloured", &topo::FrameFingerprint::colored);
     nb::class_<topo::KeyLibrary>(
         m, "KeyLibrary", "Local keys of reference structures with their labels.")
         .def(nb::init<>())
         .def_ro("method", &topo::KeyLibrary::method)
         .def_ro("hops", &topo::KeyLibrary::hops)
-        .def_ro("coloured", &topo::KeyLibrary::coloured)
+        .def_ro("colored", &topo::KeyLibrary::colored)
+        .def_ro("coloured", &topo::KeyLibrary::colored)
         .def_ro("labelOf", &topo::KeyLibrary::labelOf);
     nb::class_<topo::LibraryMatch>(m, "LibraryMatch", "Atoms named by a key library.")
         .def_ro("labels", &topo::LibraryMatch::labels)
