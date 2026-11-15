@@ -1,5 +1,7 @@
 [wrap-git]
 directory = seams-core
 url = https://github.com/d-SEAMS/seams-core.git
-revision = 9f963b725b6665b162a7487840574446a47fe408
+# release/2.14.0. Replace with the tag v2.14.0 once d-SEAMS/seams-core
+# publishes it.
+revision = 2b5c3e00f60aeb7fda6e1e705d6cc61ec6d2c31c
 depth = 1
