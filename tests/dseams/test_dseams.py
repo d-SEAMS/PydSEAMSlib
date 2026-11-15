@@ -85,7 +85,12 @@ class ApiTest(unittest.TestCase):
         pos, length = diamond()
         if Atoms is None:
             self.skipTest("ASE is not installed")
-        atoms = Atoms(symbols=["O"] * len(pos), positions=pos, cell=[length, length, length], pbc=True)
+        atoms = Atoms(
+            symbols=["O"] * len(pos),
+            positions=pos,
+            cell=[length, length, length],
+            pbc=True,
+        )
         apos, box = dseams.from_ase(atoms)
         labels, _ = dseams.chill_plus(apos, box)
         self.assertTrue(np.all(labels == 0))

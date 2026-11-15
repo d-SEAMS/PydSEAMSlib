@@ -232,9 +232,13 @@ def from_ase(atoms):
 
 def from_mdanalysis(universe, select="all"):
     """Positions and a LAMMPS cell from an MDAnalysis universe or atom group."""
-    group = universe.select_atoms(select) if hasattr(universe, "select_atoms") else universe
-    dims = np.asarray(universe.dimensions if hasattr(universe, "dimensions") else group.dimensions,
-                      dtype=np.float64)
+    group = (
+        universe.select_atoms(select) if hasattr(universe, "select_atoms") else universe
+    )
+    dims = np.asarray(
+        universe.dimensions if hasattr(universe, "dimensions") else group.dimensions,
+        dtype=np.float64,
+    )
     if dims.shape[0] < 6:
         raise ValueError("universe.dimensions needs lengths and angles")
     a, b, c, alpha, beta, gamma = (float(v) for v in dims[:6])
@@ -257,6 +261,8 @@ def from_mdanalysis(universe, select="all"):
     lz2 = c * c - xz * xz - yz * yz
     if ly <= 0.0 or lz2 <= 0.0:
         raise ValueError("cell volume is not positive")
-    box = np.array([0.0, 0.0, 0.0, a, ly, float(np.sqrt(lz2)), xy, xz, yz], dtype=np.float64)
+    box = np.array(
+        [0.0, 0.0, 0.0, a, ly, float(np.sqrt(lz2)), xy, xz, yz], dtype=np.float64
+    )
     pos = np.ascontiguousarray(group.positions, dtype=np.float64)
     return pos, box

@@ -19,10 +19,19 @@ def read_dump(path):
             if line.startswith("ITEM: BOX BOUNDS"):
                 import sys
                 from pathlib import Path
-                root = Path(os.environ.get("SEAMS_CORE_SRC", Path(__file__).resolve().parents[2] / "subprojects" / "seams-core"))
+
+                root = Path(
+                    os.environ.get(
+                        "SEAMS_CORE_SRC",
+                        Path(__file__).resolve().parents[2]
+                        / "subprojects"
+                        / "seams-core",
+                    )
+                )
                 if str(root / "scripts") not in sys.path:
                     sys.path.insert(0, str(root / "scripts"))
                 from lammps_box import cell_from_bounds
+
                 rows = [handle.readline().split() for _ in range(3)]
                 _origin, recovered, _tilts = cell_from_bounds(rows)
                 edges.extend(recovered)
@@ -117,9 +126,12 @@ def main():
     sys_handle = lib.seams_system_create()
     if lib.seams_set_num_threads(1) != 0:
         raise SystemExit("threads")
-    if lib.seams_system_set_ortho(
-        sys_handle, points, n, 0, 0, 0, edges[0], edges[1], edges[2], None, None
-    ) != 0:
+    if (
+        lib.seams_system_set_ortho(
+            sys_handle, points, n, 0, 0, 0, edges[0], edges[1], edges[2], None, None
+        )
+        != 0
+    ):
         raise SystemExit("frame")
     nb = ctypes.c_void_p()
     if lib.seams_neighbours_build(sys_handle, 3.5, 0, 0, ctypes.byref(nb)) != 0:
@@ -144,7 +156,12 @@ def main():
         raise SystemExit("histogram")
     if counts[4] != 46 or hist[5] != 48 or hist[6] != 54 or mean <= 0.5:
         raise SystemExit("result")
-    print("python example ok", lib.seams_version_string().decode(), "rings", hist[5] + hist[6])
+    print(
+        "python example ok",
+        lib.seams_version_string().decode(),
+        "rings",
+        hist[5] + hist[6],
+    )
     lib.seams_rings_destroy(rings)
     lib.seams_system_destroy(sys_handle)
 

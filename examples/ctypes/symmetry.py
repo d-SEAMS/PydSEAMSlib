@@ -181,7 +181,10 @@ def template(ident):
         ident = _NAMES.index(ident)
     lib = _library()
     count = ctypes.c_int(0)
-    if lib.seams_symmetry_template(ctypes.c_int(ident), None, 0, ctypes.byref(count)) != 0:
+    if (
+        lib.seams_symmetry_template(ctypes.c_int(ident), None, 0, ctypes.byref(count))
+        != 0
+    ):
         raise RuntimeError("unknown template")
     buf = np.empty((count.value, 3), dtype=np.float64)
     code = lib.seams_symmetry_template(
@@ -222,7 +225,16 @@ def crystal(which):
     lib = _library()
     count = ctypes.c_int(0)
     lattice = np.empty(9, dtype=np.float64)
-    if lib.seams_symmetry_crystal(index, lattice.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), None, 0, ctypes.byref(count)) != 0:
+    if (
+        lib.seams_symmetry_crystal(
+            index,
+            lattice.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            None,
+            0,
+            ctypes.byref(count),
+        )
+        != 0
+    ):
         raise RuntimeError("crystal query failed")
     xyz = np.empty((count.value, 3), dtype=np.float64)
     code = lib.seams_symmetry_crystal(

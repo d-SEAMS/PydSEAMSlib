@@ -32,7 +32,9 @@ if dist.is_dir():
     for child in sorted(dist.iterdir()):
         src = source / child.name
         if child.is_dir() and (src / ".git").exists():
-            changed = _git(src, "ls-files", "-z", "--modified", "--others", "--exclude-standard")
+            changed = _git(
+                src, "ls-files", "-z", "--modified", "--others", "--exclude-standard"
+            )
             deleted = set(_git(src, "ls-files", "-z", "--deleted"))
             for rel in changed:
                 if rel in deleted:

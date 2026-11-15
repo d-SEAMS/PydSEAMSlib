@@ -20,9 +20,15 @@ def _lang_library():
     path = os.environ.get("SEAMS_LANG_LIB")
     if path:
         return path
-    name = {"darwin": "libseams_lang.dylib", "win32": "seams_lang.dll"}.get(sys.platform, "libseams_lang.so")
+    name = {"darwin": "libseams_lang.dylib", "win32": "seams_lang.dll"}.get(
+        sys.platform, "libseams_lang.so"
+    )
     here = Path(__file__).resolve().parent
-    for folder in (here, here.parent / ".pydseamslib.mesonpy.libs", Path(sys.prefix) / "lib"):
+    for folder in (
+        here,
+        here.parent / ".pydseamslib.mesonpy.libs",
+        Path(sys.prefix) / "lib",
+    ):
         if (folder / name).is_file():
             return str(folder / name)
     return ctypes.util.find_library("seams_lang") or name

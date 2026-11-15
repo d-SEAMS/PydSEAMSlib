@@ -12,7 +12,12 @@ import sys
 from pathlib import Path
 
 # seams-core sources: SEAMS_CORE_SRC, else the Meson subproject checkout.
-ROOT = Path(os.environ.get("SEAMS_CORE_SRC", Path(__file__).resolve().parents[2] / "subprojects" / "seams-core"))
+ROOT = Path(
+    os.environ.get(
+        "SEAMS_CORE_SRC",
+        Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
+    )
+)
 sys.path.insert(0, str(ROOT / "scripts"))
 from lammps_box import cell_from_bounds
 

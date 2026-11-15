@@ -136,7 +136,9 @@ def test_frame_matches_pydseamslib_211():
         cutoff = {int(k): v for k, v in oracle["mono_cutoff"].items()}
         for size, row in cutoff.items():
             assert mono[size]["count"] == row["count"]
-            assert mono[size]["coverage_xy"] == pytest.approx(row["coverage_xy"], rel=1e-4, abs=1e-3)
+            assert mono[size]["coverage_xy"] == pytest.approx(
+                row["coverage_xy"], rel=1e-4, abs=1e-3
+            )
         # The default 2.11.1 sheet uses the hydrogen-bond rings, so its
         # counts are the 1/230/4/192 census, not the cutoff kernel.
         default = {int(k): v["count"] for k, v in oracle["mono_default"].items()}
@@ -157,7 +159,9 @@ def test_frame_matches_pydseamslib_211():
     import ase.io
 
     atoms = ase.io.read(str(TRAJ / "exampleTraj.lammpstrj"), format="lammps-dump-text")
-    atoms.set_chemical_symbols(["O" if int(t) == 2 else "H" for t in atoms.arrays["type"]])
+    atoms.set_chemical_symbols(
+        ["O" if int(t) == 2 else "H" for t in atoms.arrays["type"]]
+    )
     ase_frame = ds.from_ase(atoms)
     assert ase_frame.n_atoms == oracle["ase_n"] == 250
     ase_ice = ase_frame.chill_plus()

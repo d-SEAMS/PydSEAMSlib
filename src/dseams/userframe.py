@@ -90,9 +90,15 @@ def _lang_library():
     path = os.environ.get("SEAMS_LANG_LIB")
     if path:
         return path
-    name = {"darwin": "libseams_lang.dylib", "win32": "seams_lang.dll"}.get(sys.platform, "libseams_lang.so")
+    name = {"darwin": "libseams_lang.dylib", "win32": "seams_lang.dll"}.get(
+        sys.platform, "libseams_lang.so"
+    )
     here = Path(__file__).resolve().parent
-    for folder in (here, here.parent / ".pydseamslib.mesonpy.libs", Path(sys.prefix) / "lib"):
+    for folder in (
+        here,
+        here.parent / ".pydseamslib.mesonpy.libs",
+        Path(sys.prefix) / "lib",
+    ):
         if (folder / name).is_file():
             return str(folder / name)
     return ctypes.util.find_library("seams_lang") or name
@@ -300,7 +306,9 @@ class Frame:
     @property
     def box(self):
         raw = np.zeros(9, dtype=np.float64)
-        _library().seams_frame_box(self._ptr, raw.ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
+        _library().seams_frame_box(
+            self._ptr, raw.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        )
         if np.any(raw[6:] != 0.0):
             return raw.copy()
         return raw[3:6].copy()
@@ -319,7 +327,10 @@ class Frame:
             counts.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
         )
         _check(_library(), code)
-        self._labels = [ _NAMES[int(label)] if 0 <= int(label) < len(_NAMES) else "unclassified" for label in labels ]
+        self._labels = [
+            _NAMES[int(label)] if 0 <= int(label) < len(_NAMES) else "unclassified"
+            for label in labels
+        ]
         named = IceCounts({name: int(counts[i]) for i, name in enumerate(_NAMES)})
         return named
 
@@ -497,11 +508,17 @@ class Frame:
             ctypes.c_int(counts.size),
         )
         _check(_library(), code)
-        return {size: int(counts[size]) for size in range(3, depth + 1) if int(counts[size])}
+        return {
+            size: int(counts[size]) for size in range(3, depth + 1) if int(counts[size])
+        }
 
     def rdf_2d(self, output_dir, cutoff=12.0, binwidth=0.05):
         """In-plane g(r) from seams_frame_rdf2d."""
-        nbin = int(_library().seams_frame_rdf2d_nbin(ctypes.c_double(cutoff), ctypes.c_double(binwidth)))
+        nbin = int(
+            _library().seams_frame_rdf2d_nbin(
+                ctypes.c_double(cutoff), ctypes.c_double(binwidth)
+            )
+        )
         radius = np.zeros(nbin, dtype=np.float64)
         values = np.zeros(nbin, dtype=np.float64)
         code = _library().seams_frame_rdf2d(
@@ -563,7 +580,11 @@ class Frame:
         )
         _check(_library(), code)
         return [
-            {"size": int(row.size), "perfect": int(row.perfect), "imperfect": int(row.imperfect)}
+            {
+                "size": int(row.size),
+                "perfect": int(row.perfect),
+                "imperfect": int(row.imperfect),
+            }
             for row in rows
         ]
 
@@ -629,7 +650,12 @@ def _select_mask(atoms, select):
         return symbols == select
     if isinstance(select, (list, tuple, set, frozenset)):
         wanted = {item if isinstance(item, str) else int(item) for item in select}
-        return np.array([sym in wanted or int(z) in wanted for sym, z in zip(symbols, atoms.numbers)])
+        return np.array(
+            [
+                sym in wanted or int(z) in wanted
+                for sym, z in zip(symbols, atoms.numbers)
+            ]
+        )
     return np.array([int(z) == int(select) for z in atoms.numbers])
 
 

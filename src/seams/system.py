@@ -103,7 +103,9 @@ def _positions(positions: ArrayLike) -> tuple[npt.NDArray[np.float64], int]:
     return flat, int(pos.shape[0])
 
 
-def _optional_i32(values: ArrayLike | None, n: int, name: str) -> npt.NDArray[np.int32] | None:
+def _optional_i32(
+    values: ArrayLike | None, n: int, name: str
+) -> npt.NDArray[np.int32] | None:
     if values is None:
         return None
     arr = np.ascontiguousarray(values, dtype=np.int32).reshape(-1)
@@ -428,7 +430,13 @@ class System(_Owned):
     True
     """
 
-    def __init__(self, path: str | os.PathLike[str] | None = None, *, frame: int = 1, type_filter: int = -1) -> None:
+    def __init__(
+        self,
+        path: str | os.PathLike[str] | None = None,
+        *,
+        frame: int = 1,
+        type_filter: int = -1,
+    ) -> None:
         ptr = _lib.api().create()
         super().__init__(ptr, _lib.api().destroy_system)
         if path is not None:
@@ -456,7 +464,9 @@ class System(_Owned):
         """
         return _lib.api().count(self._live())
 
-    def read(self, path: str | os.PathLike[str], *, frame: int = 1, type_filter: int = -1) -> int:
+    def read(
+        self, path: str | os.PathLike[str], *, frame: int = 1, type_filter: int = -1
+    ) -> int:
         """Read one frame from a trajectory.
 
         Parameters
@@ -544,7 +554,9 @@ class System(_Owned):
             raise ValueError("n does not fit in a C int; use set_frame")
         _lib.api().set_ortho(self._live(), flat, n, origin, lengths)
 
-    def neighbours(self, cutoff: float = 3.5, *, type: int = 0, graph: int = CUTOFF) -> Neighbours:
+    def neighbours(
+        self, cutoff: float = 3.5, *, type: int = 0, graph: int = CUTOFF
+    ) -> Neighbours:
         """Build a cutoff or mutual neighbour list.
 
         Parameters
@@ -566,7 +578,9 @@ class System(_Owned):
         ptr = _lib.api().neighbours_build(self._live(), float(cutoff), type, graph)
         return Neighbours(ptr, _lib.api().destroy_neighbours)
 
-    def knn(self, k: int = 4, cutoff: float = 3.5, *, type: int = 0, mutual: bool = True) -> Neighbours:
+    def knn(
+        self, k: int = 4, cutoff: float = 3.5, *, type: int = 0, mutual: bool = True
+    ) -> Neighbours:
         """Build a k-nearest neighbour list.
 
         Parameters
@@ -614,7 +628,9 @@ class System(_Owned):
             Labels and nine population counts.
         """
         n = self.count()
-        labels, counts = _lib.api().chill(self._live(), float(cutoff), type, graph, rule, n)
+        labels, counts = _lib.api().chill(
+            self._live(), float(cutoff), type, graph, rule, n
+        )
         return ChillResult(labels, counts)
 
     def chill_plus(
@@ -644,7 +660,9 @@ class System(_Owned):
         ChillResult
         """
         n = self.count()
-        labels, counts = _lib.api().chill_plus(self._live(), float(cutoff), type, graph, rule, n)
+        labels, counts = _lib.api().chill_plus(
+            self._live(), float(cutoff), type, graph, rule, n
+        )
         return ChillResult(labels, counts)
 
     def ql(
@@ -681,7 +699,9 @@ class System(_Owned):
         run this in separate threads.
         """
         n = self.count()
-        ql, bar = _lib.api().ql(self._live(), float(cutoff), type, order, graph, n, average)
+        ql, bar = _lib.api().ql(
+            self._live(), float(cutoff), type, order, graph, n, average
+        )
         return OrderResult(ql, bar)
 
     def steinhardt(
@@ -710,7 +730,9 @@ class System(_Owned):
         OrderResult
         """
         n = self.count()
-        ql, bar = _lib.api().steinhardt(self._live(), float(cutoff), type, order, n, average)
+        ql, bar = _lib.api().steinhardt(
+            self._live(), float(cutoff), type, order, n, average
+        )
         return OrderResult(ql, bar)
 
     def q4q6(self, cutoff: float = 3.5, *, type: int = 0) -> Q4Q6:
@@ -731,7 +753,14 @@ class System(_Owned):
         q4, q6 = _lib.api().q4q6(self._live(), float(cutoff), type, n)
         return Q4Q6(q4, q6)
 
-    def q6bar(self, cutoff: float = 3.5, *, type: int = 0, ice_cut: float = 0.36, values: bool = True) -> Q6Bar:
+    def q6bar(
+        self,
+        cutoff: float = 3.5,
+        *,
+        type: int = 0,
+        ice_cut: float = 0.36,
+        values: bool = True,
+    ) -> Q6Bar:
         """Lechner-Dellago q6-bar and the ice count above a cut.
 
         Parameters
@@ -750,10 +779,19 @@ class System(_Owned):
         Q6Bar
         """
         n = self.count()
-        stored, mean, median, n_ice = _lib.api().q6bar(self._live(), float(cutoff), type, float(ice_cut), n, values)
+        stored, mean, median, n_ice = _lib.api().q6bar(
+            self._live(), float(cutoff), type, float(ice_cut), n, values
+        )
         return Q6Bar(stored, mean, median, n_ice)
 
-    def rings(self, cutoff: float = 3.5, *, type: int = 0, graph: int = CUTOFF, max_depth: int = 6) -> Rings:
+    def rings(
+        self,
+        cutoff: float = 3.5,
+        *,
+        type: int = 0,
+        graph: int = CUTOFF,
+        max_depth: int = 6,
+    ) -> Rings:
         """Find primitive rings up to a maximum size.
 
         Parameters
@@ -803,10 +841,19 @@ class System(_Owned):
         -------
         CageSet
         """
-        ptr = _lib.api().cages(self._live(), float(cutoff), type, graph, k, 1 if complete else 0)
+        ptr = _lib.api().cages(
+            self._live(), float(cutoff), type, graph, k, 1 if complete else 0
+        )
         return CageSet(ptr, _lib.api().destroy_cages)
 
-    def signature(self, spec: str = "512", cutoff: float = 3.5, *, type: int = 0, graph: int = CUTOFF) -> Signature:
+    def signature(
+        self,
+        spec: str = "512",
+        cutoff: float = 3.5,
+        *,
+        type: int = 0,
+        graph: int = CUTOFF,
+    ) -> Signature:
         """Count closed cages whose ring census matches ``spec``.
 
         Parameters
@@ -825,7 +872,9 @@ class System(_Owned):
         -------
         Signature
         """
-        n_cages, n_atoms = _lib.api().signature(self._live(), float(cutoff), type, graph, spec.encode())
+        n_cages, n_atoms = _lib.api().signature(
+            self._live(), float(cutoff), type, graph, spec.encode()
+        )
         return Signature(n_cages, n_atoms)
 
     def symmetry(self, shell_rmsd: float = 0.0) -> npt.NDArray[np.int32]:
@@ -880,7 +929,9 @@ class System(_Owned):
         ptr = _lib.api().brine(self._live(), flags, water_type, ion_type, n_bins, axis)
         return Brine(ptr, _lib.api().destroy_brine)
 
-    def rdf(self, rmax: float = 6.0, bins: int = 0, *, type_i: int = 0, type_j: int = 0) -> Radial:
+    def rdf(
+        self, rmax: float = 6.0, bins: int = 0, *, type_i: int = 0, type_j: int = 0
+    ) -> Radial:
         """Partial radial distribution.
 
         Parameters
@@ -896,10 +947,14 @@ class System(_Owned):
         -------
         Radial
         """
-        r, g, count, volume = _lib.api().rdf(self._live(), float(rmax), bins, type_i, type_j)
+        r, g, count, volume = _lib.api().rdf(
+            self._live(), float(rmax), bins, type_i, type_j
+        )
         return Radial(r, g, count, volume)
 
-    def running_cn(self, rmax: float = 6.0, bins: int = 0, *, type_i: int = 0, type_j: int = 0) -> RunningCN:
+    def running_cn(
+        self, rmax: float = 6.0, bins: int = 0, *, type_i: int = 0, type_j: int = 0
+    ) -> RunningCN:
         """Running coordination number along the partial RDF.
 
         Parameters
@@ -918,7 +973,9 @@ class System(_Owned):
         r, cn = _lib.api().running_cn(self._live(), float(rmax), bins, type_i, type_j)
         return RunningCN(r, cn)
 
-    def coordination(self, rmax: float = 3.5, bins: int = 8, *, type_i: int = 0, type_j: int = 0) -> float:
+    def coordination(
+        self, rmax: float = 3.5, bins: int = 8, *, type_i: int = 0, type_j: int = 0
+    ) -> float:
         """Coordination number integrated to ``rmax``.
 
         Parameters
@@ -965,7 +1022,14 @@ class System(_Owned):
         -------
         int
         """
-        return _lib.api().hbonds(self._live(), float(cutoff), oxygen_type, hydrogen_type, float(dist), float(angle))
+        return _lib.api().hbonds(
+            self._live(),
+            float(cutoff),
+            oxygen_type,
+            hydrogen_type,
+            float(dist),
+            float(angle),
+        )
 
     def density(self, *, type: int = 0, bins: int = 0, axis: int = 2) -> Density:
         """Number density along one cell axis.
@@ -1053,7 +1117,9 @@ class System(_Owned):
         -------
         Domains
         """
-        n_subset, largest, percolation = _lib.api().domains(self._live(), float(cutoff), spec.encode(), subset)
+        n_subset, largest, percolation = _lib.api().domains(
+            self._live(), float(cutoff), spec.encode(), subset
+        )
         return Domains(n_subset, largest, percolation)
 
     def prisms(self, cutoff: float = 3.5, *, type: int = 0) -> Prisms:
@@ -1073,7 +1139,14 @@ class System(_Owned):
         perfect, imperfect = _lib.api().prisms(self._live(), float(cutoff), type)
         return Prisms(perfect, imperfect)
 
-    def monolayer(self, cutoff: float = 3.5, *, type: int = 0, max_depth: int = 6, sheet_area: float = 100.0) -> npt.NDArray[np.int32]:
+    def monolayer(
+        self,
+        cutoff: float = 3.5,
+        *,
+        type: int = 0,
+        max_depth: int = 6,
+        sheet_area: float = 100.0,
+    ) -> npt.NDArray[np.int32]:
         """Primitive-ring histogram of a monolayer.
 
         Parameters
@@ -1092,7 +1165,9 @@ class System(_Owned):
         numpy.ndarray
             ``counts[k]`` is the number of rings of size ``k``.
         """
-        return _lib.api().monolayer(self._live(), float(cutoff), type, max_depth, float(sheet_area))
+        return _lib.api().monolayer(
+            self._live(), float(cutoff), type, max_depth, float(sheet_area)
+        )
 
     def site_table(self, spec: str) -> npt.NDArray[np.int32]:
         """Per-atom site kind.

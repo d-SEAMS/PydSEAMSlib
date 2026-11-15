@@ -83,34 +83,66 @@ def via_ctypes(libdir, xyz, edge):
     lib.seams_system_count.restype = ctypes.c_int
     lib.seams_handle_error.argtypes = [ctypes.c_void_p]
     lib.seams_handle_error.restype = ctypes.c_char_p
-    lib.seams_system_read.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+    lib.seams_system_read.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_int,
+    ]
     lib.seams_system_read.restype = ctypes.c_int
     lib.seams_chill.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_int), ctypes.c_size_t, ctypes.POINTER(ctypes.c_int),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_int),
     ]
     lib.seams_chill.restype = ctypes.c_int
     lib.seams_steinhardt.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_double), ctypes.c_size_t,
-        ctypes.POINTER(ctypes.c_double), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_size_t,
     ]
     lib.seams_steinhardt.restype = ctypes.c_int
     lib.seams_cages.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.c_int, ctypes.POINTER(ctypes.c_void_p),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_void_p),
     ]
     lib.seams_cages.restype = ctypes.c_int
-    lib.seams_cages_counts.argtypes = [ctypes.c_void_p] + [ctypes.POINTER(ctypes.c_int)] * 4
+    lib.seams_cages_counts.argtypes = [ctypes.c_void_p] + [
+        ctypes.POINTER(ctypes.c_int)
+    ] * 4
     lib.seams_cages_counts.restype = ctypes.c_int
     lib.seams_cages_destroy.argtypes = [ctypes.c_void_p]
     lib.seams_signature_cages.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_char_p,
-        ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.POINTER(ctypes.c_size_t),
     ]
     lib.seams_signature_cages.restype = ctypes.c_int
     lib.seams_neighbours_knn.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_double, ctypes.c_int, ctypes.c_int,
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
         ctypes.POINTER(ctypes.c_void_p),
     ]
     lib.seams_neighbours_knn.restype = ctypes.c_int
@@ -118,59 +150,104 @@ def via_ctypes(libdir, xyz, edge):
     lib.seams_rdf.restype = ctypes.c_int
     lib.seams_running_cn.restype = ctypes.c_int
     lib.seams_coordination.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
         ctypes.POINTER(ctypes.c_double),
     ]
     lib.seams_coordination.restype = ctypes.c_int
     lib.seams_hbonds.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_double,
-        ctypes.c_double, ctypes.POINTER(ctypes.c_int),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_int),
     ]
     lib.seams_hbonds.restype = ctypes.c_int
     lib.seams_density_axis.restype = ctypes.c_int
     lib.seams_fingerprint.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_void_p),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_void_p),
     ]
     lib.seams_fingerprint.restype = ctypes.c_int
     lib.seams_fingerprint_destroy.argtypes = [ctypes.c_void_p]
     lib.seams_fingerprint_key.argtypes = [
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t),
+        ctypes.c_void_p,
+        ctypes.c_void_p,
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_size_t),
     ]
     lib.seams_fingerprint_key.restype = ctypes.c_int
     lib.seams_contact_pairs.argtypes = [
-        ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t),
-        ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int),
+        ctypes.c_void_p,
+        ctypes.c_char_p,
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
     ]
     lib.seams_contact_pairs.restype = ctypes.c_int
     lib.seams_domains.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_double),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_double),
     ]
     lib.seams_domains.restype = ctypes.c_int
     lib.seams_prisms.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_int),
-        ctypes.POINTER(ctypes.c_int), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_size_t,
     ]
     lib.seams_prisms.restype = ctypes.c_int
     lib.seams_monolayer.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_double,
-        ctypes.POINTER(ctypes.c_int), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_size_t,
     ]
     lib.seams_monolayer.restype = ctypes.c_int
     lib.seams_rings_find.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
         ctypes.POINTER(ctypes.c_void_p),
     ]
     lib.seams_rings_find.restype = ctypes.c_int
     lib.seams_rings_destroy.argtypes = [ctypes.c_void_p]
     lib.seams_rings_vertices.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_size_t,
         ctypes.POINTER(ctypes.c_size_t),
     ]
     lib.seams_rings_vertices.restype = ctypes.c_int
     lib.seams_site_table.argtypes = [
-        ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_int), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_char_p,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_size_t,
     ]
     lib.seams_site_table.restype = ctypes.c_int
     if lib.seams_set_num_threads(1) != 0 or lib.seams_get_num_threads() != 1:
@@ -181,7 +258,12 @@ def via_ctypes(libdir, xyz, edge):
     q4 = (ctypes.c_double * 8)()
     q6 = (ctypes.c_double * 8)()
     sys_handle = lib.seams_system_create()
-    if lib.seams_system_set_ortho(sys_handle, points, 8, 0, 0, 0, edge, edge, edge, None, None) != 0:
+    if (
+        lib.seams_system_set_ortho(
+            sys_handle, points, 8, 0, 0, 0, edge, edge, edge, None, None
+        )
+        != 0
+    ):
         raise SystemExit("ctypes frame")
     if lib.seams_chill_plus(sys_handle, 3.5, 0, 0, 0, labels, counts) != 0:
         raise SystemExit("ctypes chill+")
@@ -192,7 +274,12 @@ def via_ctypes(libdir, xyz, edge):
         raise SystemExit("ctypes result")
     exercise(lib, sys_handle)
     lib.seams_system_destroy(sys_handle)
-    root = Path(os.environ.get("SEAMS_CORE_SRC", Path(__file__).resolve().parents[2] / "subprojects" / "seams-core"))
+    root = Path(
+        os.environ.get(
+            "SEAMS_CORE_SRC",
+            Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
+        )
+    )
     expect = {
         "input/traj/ice1h.lammpstrj": (128, -1),
         "input/traj/genice_sI.lammpstrj": (46, 1),
@@ -271,16 +358,30 @@ def exercise(lib, sys_handle):
     r = (ctypes.c_double * 16)()
     g = (ctypes.c_double * 16)()
     lib.seams_rdf.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_void_p,
-        ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_double),
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_void_p,
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.POINTER(ctypes.c_double),
     ]
     volume = ctypes.c_double()
     if lib.seams_rdf(sys_handle, 6.0, 8, 0, 0, r, g, None, 16, n_out, volume) != 0:
         fail(lib, sys_handle, "rdf")
     lib.seams_running_cn.argtypes = [
-        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_size_t,
         ctypes.POINTER(ctypes.c_size_t),
     ]
     if lib.seams_running_cn(sys_handle, 6.0, 8, 0, 0, r, g, 16, n_out) != 0:
@@ -288,8 +389,13 @@ def exercise(lib, sys_handle):
     z = (ctypes.c_double * 8)()
     rho = (ctypes.c_double * 8)()
     lib.seams_density_axis.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_size_t,
         ctypes.POINTER(ctypes.c_size_t),
     ]
     if lib.seams_density_axis(sys_handle, 0, 4, 2, z, rho, 8, n_out) != 0:
@@ -303,12 +409,20 @@ def exercise(lib, sys_handle):
     n_pairs = ctypes.c_size_t()
     n_cation = ctypes.c_int()
     n_anion = ctypes.c_int()
-    if lib.seams_contact_pairs(sys_handle, b"1=cationHead", n_pairs, n_cation, n_anion) != 0:
+    if (
+        lib.seams_contact_pairs(sys_handle, b"1=cationHead", n_pairs, n_cation, n_anion)
+        != 0
+    ):
         fail(lib, sys_handle, "pairs")
     n_subset = ctypes.c_int()
     largest = ctypes.c_int()
     percolation = ctypes.c_double()
-    if lib.seams_domains(sys_handle, 3.5, b"1=waterO", 0, n_subset, largest, percolation) != 0:
+    if (
+        lib.seams_domains(
+            sys_handle, 3.5, b"1=waterO", 0, n_subset, largest, percolation
+        )
+        != 0
+    ):
         fail(lib, sys_handle, "domains")
     perfect = (ctypes.c_int * 7)()
     imperfect = (ctypes.c_int * 7)()

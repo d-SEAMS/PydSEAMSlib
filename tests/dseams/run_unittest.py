@@ -52,6 +52,8 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
 
 import unittest
 
-suite = unittest.defaultTestLoader.discover(str(src / "tests" / "dseams"), pattern="test_*.py")
+suite = unittest.defaultTestLoader.discover(
+    str(src / "tests" / "dseams"), pattern="test_*.py"
+)
 result = unittest.TextTestRunner(verbosity=1).run(suite)
 sys.exit(0 if result.wasSuccessful() else 1)
