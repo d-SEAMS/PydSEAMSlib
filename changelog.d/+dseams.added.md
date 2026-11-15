@@ -1,0 +1,1 @@
+`import dseams` ships in the `pydseamslib` wheel: the nanobind module over the seams-core 2.14 C API (`chill_plus`, `q4q6`, `neighbours`, `rings`, `dseams.Frame`), `cages`, `signature_cages` and `symmetry` through `libseams_lang`, and `dseams.userframe`. The sources and tests move here from seams-core with their history; `libseams` and `libseams_lang` are inside the wheel.

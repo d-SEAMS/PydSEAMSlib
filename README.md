@@ -11,11 +11,22 @@
 Python bindings for the [d-SEAMS](https://dseams.info) C++ engine
 ([`seams-core`](https://github.com/d-SEAMS/seams-core)).
 
-This repository is the Python package `pydseams`. The C++ engine and
-`seams` CLI live in [`seams-core`](https://github.com/d-SEAMS/seams-core).
+This repository builds the PyPI distribution `pydseamslib`. One wheel
+holds three import names over the same engine:
+
+| Import | What it is |
+| --- | --- |
+| `pydseams` | The `Frame` package: `read`, `from_ase`, `features`, `band`, solvis, and the compiled `pydseams.yoda` surface over `libyodaLib` |
+| `pydseamslib` | Re-exports `pydseams` (`pydseamslib.Frame is pydseams.Frame`) |
+| `dseams` | The 2.14 API over the stable C API (`seams.h`): `chill_plus`, `q4q6`, `neighbours`, `rings`, `cages`, `symmetry`, `dseams.Frame`, and `dseams.userframe` |
+
+The C++ engine and `seams` CLI live in
+[`seams-core`](https://github.com/d-SEAMS/seams-core), built here as a
+Meson subproject; `libseams` and `libseams_lang` ship inside the wheel.
+`src/seams` is the ctypes package over `libseams` (not in the wheel).
 Lua/Fennel is `dseams` in [`yodaStruct`](https://github.com/d-SEAMS/yodaStruct).
 Neighbour search is [`linkcell`](https://github.com/d-SEAMS/linkcell).
-Do not grow a second engine here. `import pydseamslib` still works.
+Do not grow a second engine here.
 
 Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
 Unreleased notes are files under `changelog.d/`. The cut is
@@ -79,6 +90,30 @@ hydrogen-bond topology requires a heavy-atom selection such as ``select="O"``.
 Cutoff, frame, and *k* follow the same twelve-factor table as
 `seams`: `SEAMS_CONFIG` or `./seams.env`, then the environment, then
 the function argument. `pydseams.config` is the reader.
+
+```python
+import dseams
+
+labels, counts = dseams.chill_plus(positions, (lx, ly, lz))  # (n, 3) float64, Angstrom
+q4, q6 = dseams.q4q6(positions, (lx, ly, lz))
+```
+
+`dseams` reads C-contiguous NumPy arrays in place. `box` is three edge
+lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
+`cages`, `signature_cages`, and `symmetry` go through `libseams_lang`.
+
+## Upgrading from 2.11
+
+- `import pydseams` and `import pydseamslib` keep the 2.11 API, including
+  `pydseams.yoda`, `cyoda`, and `_core`.
+- CHILL+ on a cutoff list follows the seams-core 2.14 shell-count fix. On
+  `tests/data/exampleTraj.lammpstrj` (oxygen, type 2) `Frame.chill_plus()`
+  reports 9 interClathrate and 241 water, where 2.11 reported 12 and 238.
+- `FrameFingerprint` and `KeyLibrary` also expose `colored`; `coloured`
+  still works.
+- `dseams` is new. `dseams.userframe.Frame` is a second `Frame` over
+  `libseams_lang` with a `graph` argument on `chill_plus`; it is not
+  `pydseams.Frame`.
 
 Primary author: Ruhila S. The project started as PSF GSoC 2023 (`pyseams`).
 

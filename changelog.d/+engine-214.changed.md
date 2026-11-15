@@ -1,0 +1,1 @@
+The engine is seams-core 2.14.0. On a cutoff list CHILL+ follows its shell-count fix: on `tests/data/exampleTraj.lammpstrj` (oxygen, type 2) `Frame.chill_plus()` reports 9 interClathrate and 241 water instead of 12 and 238. `FrameFingerprint.colored` and `KeyLibrary.colored` join the `coloured` names.

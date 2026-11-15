@@ -1,0 +1,1 @@
+This repository builds and publishes `pydseamslib` 2.14.0; seams-core no longer does. The sdist carries every subproject, the wheels are built from it on Linux (x86_64, aarch64) and macOS (arm64, x86_64), and PyPI trusted publishing runs from `build_wheels.yml` on a `v*` tag of d-SEAMS/PydSEAMSlib.
