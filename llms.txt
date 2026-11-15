@@ -1,0 +1,64 @@
+# PydSEAMSlib
+
+> PydSEAMSlib builds `pydseamslib`, the Python bindings of d-SEAMS: CHILL and CHILL+ ice labels, topological cages, primitive rings, Steinhardt order parameters, radial distributions and site analyses of molecular simulation frames. One wheel provides `pydseams` (the `Frame` package), `pydseamslib` (which re-exports it), and `dseams` (the 2.14 API over the libseams C API).
+
+Install with `pip install pydseamslib`; extras are `[ase]`, `[mdanalysis]` and `[solvis]`. The wheel carries `libseams` and `libseams_lang` from seams-core; the package version is the seams-core release it builds. Each page link below is on https://d-seams.github.io/PydSEAMSlib/. Contributor instructions are in the contributing guide at the repository root.
+
+## Getting started
+
+- [pydseams](https://d-seams.github.io/PydSEAMSlib/index.html): Overview, install and the three import names.
+- [Quickstart](https://d-seams.github.io/PydSEAMSlib/quickstart.html): Read a dump and print CHILL+ and cage scores.
+- [Install](https://d-seams.github.io/PydSEAMSlib/howto/install.html): Wheels, source builds and the optional extras.
+
+## Tutorials
+
+- [Classify ice](https://d-seams.github.io/PydSEAMSlib/tutorials/classify-ice.html): Load a mixed ice-water dump, print CHILL+, score cages.
+- [dseams](https://d-seams.github.io/PydSEAMSlib/tutorials/dseams.html): CHILL+, q4/q6 and rings on NumPy arrays through `import dseams`.
+- [Bulk ice](https://d-seams.github.io/PydSEAMSlib/tutorials/bulk-ice.html): CHILL+ and cages on the mixed TIP4P frame from the CLI and Python, and why they differ.
+- [Ice and clathrate](https://d-seams.github.io/PydSEAMSlib/tutorials/ice-and-clathrate.html): CHILL+ stars and signature cages on sI.
+- [Primitive rings](https://d-seams.github.io/PydSEAMSlib/tutorials/rings.html): Hydrogen-bond and cutoff ring census.
+- [Order parameters](https://d-seams.github.io/PydSEAMSlib/tutorials/order-parameters.html): Steinhardt q_l and the Lechner-Dellago average.
+- [Confined water](https://d-seams.github.io/PydSEAMSlib/tutorials/confined-water.html): In-plane RDF, monolayer rings and prisms.
+- [Paper figures](https://d-seams.github.io/PydSEAMSlib/tutorials/paper-figures.html): The 2020 JCIM figure calls on the in-tree dumps.
+
+## How-to guides
+
+- [ASE](https://d-seams.github.io/PydSEAMSlib/howto/ase.html): Build a Frame from ASE Atoms and write labels back.
+- [ASE integration](https://d-seams.github.io/PydSEAMSlib/howto/ase-integration.html): Label the TIP4P dump read through ASE.
+- [solvis](https://d-seams.github.io/PydSEAMSlib/howto/solvis.html): View a classified frame with solvis.
+- [View a classified frame](https://d-seams.github.io/PydSEAMSlib/howto/solvis-dseams.html): CHILL+ and cage labels into a solvis System.
+- [Features](https://d-seams.github.io/PydSEAMSlib/howto/features.html): Per-frame feature vectors from `pydseams.features`.
+- [Troubleshooting](https://d-seams.github.io/PydSEAMSlib/howto/troubleshooting.html): Import, reader and type-selection errors.
+
+## Reference
+
+- [Python surface](https://d-seams.github.io/PydSEAMSlib/reference/python.html): `Frame`, `IceCounts`, `CageScore`, `read`, ASE and `pydseams.features`.
+- [API](https://d-seams.github.io/PydSEAMSlib/api.html): Autodoc of the `pydseams` helpers and the `yoda` name table.
+- [dseams and the C API](https://d-seams.github.io/PydSEAMSlib/reference/dseams.html): `import dseams`, the `seams` ctypes package and the symbol table.
+- [dseams module](https://d-seams.github.io/PydSEAMSlib/lang/python.html): Autodoc of `dseams` and the ice Ih census.
+- [Language task](https://d-seams.github.io/PydSEAMSlib/lang/task-python.html): The ice Ih census every d-SEAMS language front prints, in Python against `libseams_lang`.
+
+## Explanation
+
+- [The yoda surface](https://d-seams.github.io/PydSEAMSlib/explanation/yoda-surface.html): Why the compiled module and the Python helpers are split.
+- [Frame](https://d-seams.github.io/PydSEAMSlib/explanation/frame.html): What a Frame holds and which graph each analysis reads.
+- [Citation](https://d-seams.github.io/PydSEAMSlib/explanation/citation.html): How to cite d-SEAMS and this package.
+
+## Repository
+
+- [README](https://github.com/d-SEAMS/PydSEAMSlib/blob/main/README.md): Install, the import names, upgrading from 2.11, development against seams-core and the release order.
+- [CHANGELOG](https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md): Released changes; unreleased fragments are in `changelog.d/`.
+
+## Engine
+
+- [d-SEAMS/seams-core](https://github.com/d-SEAMS/seams-core): The C++ engine, the libseams C API, the language-front ABI and the CLI.
+- [seams.h](https://github.com/d-SEAMS/seams-core/blob/main/include/seams.h): The C API header `dseams` and the `seams` ctypes package wrap.
+- [docs.dseams.info](https://docs.dseams.info): d-SEAMS documentation: analyses, C API reference and every language front.
+
+## Other language bindings
+
+- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia.
+- [dseams-r](https://github.com/d-SEAMS/dseams-r): R.
+- [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Rust.
+- [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Fortran.
+- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua and Fennel.

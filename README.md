@@ -115,6 +115,50 @@ lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
   `libseams_lang` with a `graph` argument on `chill_plus`; it is not
   `pydseams.Frame`.
 
+## Development
+
+The engine is [seams-core](https://github.com/d-SEAMS/seams-core), a
+Meson subproject here. `subprojects/seams-core.wrap` pins the revision
+the wheel builds, and the other wraps carry the revisions seams-core
+pins. Engine changes go to d-SEAMS/seams-core, not to this repository.
+The contributing guide at the repository root has the layout, the test
+commands and the commit conventions.
+
+The build needs a C++20 compiler and `cargo` (linkcell, minimage and
+readcon are Rust crates):
+
+```bash
+meson setup bbdir --force-fallback-for=eigen3
+meson compile -C bbdir
+meson test -C bbdir --suite pydseamslib
+```
+
+To build against a local seams-core checkout, put it where the wrap
+would: Meson uses an existing `subprojects/seams-core` directory and
+does not fetch the pinned revision.
+
+```bash
+ln -s /path/to/seams-core subprojects/seams-core
+meson setup --wipe bbdir --force-fallback-for=eigen3
+```
+
+The tests that read seams-core inputs (`input/traj/...`) take them from
+`SEAMS_CORE_SRC`, else `subprojects/seams-core`.
+
+Release order:
+
+1. d-SEAMS/seams-core tags `vX.Y.Z`.
+2. `subprojects/seams-core.wrap` moves to that tag, and the version in
+   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py` and
+   `CITATION.cff` becomes `X.Y.Z`.
+3. `towncrier build --version X.Y.Z`, then tag `vX.Y.Z` on
+   d-SEAMS/PydSEAMSlib.
+4. `build_wheels.yml` builds the sdist and the wheels and publishes them
+   to PyPI through trusted publishing from d-SEAMS/PydSEAMSlib.
+
+`llms.txt` at the repository root, also served at the docs site root,
+lists the documentation pages.
+
 Primary author: Ruhila S. The project started as PSF GSoC 2023 (`pyseams`).
 
 Requires Python 3.11+. CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
