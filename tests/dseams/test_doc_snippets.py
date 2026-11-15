@@ -82,6 +82,9 @@ def _needs(body):
             and importlib.util.find_spec(name) is None
         ):
             pytest.skip(f"{name} is not installed")
+    # Frame.to_solvis imports solvis itself (the [solvis] extra).
+    if ".to_solvis(" in body and importlib.util.find_spec("solvis") is None:
+        pytest.skip("solvis is not installed")
 
 
 @pytest.mark.parametrize("page", ORG_PAGES)
