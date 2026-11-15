@@ -118,6 +118,9 @@ py.install_sources(
 # The 2.14 API: import dseams.
 subdir('src/dseams')
 
+# The sdist keeps the patched linkcell and the vesin and gpulite overlays.
+meson.add_dist_script(py, files('scripts/dist_subprojects.py'))
+
 # Development-tree tests: `meson test -C <builddir>`. The wheel and CI
 # run the same files with pytest against the installed package.
 _engine_src = meson.project_source_root() / 'subprojects' / 'seams-core'
