@@ -32,4 +32,4 @@ jobs:
           python -c 'import dseams; print(dseams.__version__)'
           python -m pytest -vvv tests/python
           python -m pytest -vvv --import-mode=importlib tests/dseams/test_dseams.py \
-            tests/dseams/installed_package.py tests/dseams/docs
+            tests/dseams/installed_package.py tests/dseams/docs tests/dseams/test_doc_snippets.py
