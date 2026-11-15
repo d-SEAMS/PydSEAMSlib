@@ -146,7 +146,12 @@ test(
     'python_seams_ctypes',
     py,
     args: [
-        '-m', 'pytest', '-q', '-p', 'no:cacheprovider', '--noconftest',
+        '-m',
+        'pytest',
+        '-q',
+        '-p',
+        'no:cacheprovider',
+        '--noconftest',
         meson.project_source_root() / 'tests' / 'dseams' / 'test_seams_package.py',
         '--doctest-modules',
         meson.project_source_root() / 'src' / 'seams',
@@ -167,7 +172,10 @@ test(
 )
 _examples_env = environment()
 _examples_env.set('SEAMS_CORE_SRC', _engine_src)
-_examples_env.set('SEAMS_LIBDIR', meson.project_build_root() / 'subprojects' / 'seams-core' / 'src')
+_examples_env.set(
+    'SEAMS_LIBDIR',
+    meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
+)
 test(
     'docs_api_python',
     py,

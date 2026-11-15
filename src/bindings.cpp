@@ -1016,7 +1016,8 @@ NB_MODULE(yoda, m) {
           nb::arg("orderL"));
     using ClassifyTemplatesRows = std::vector<chill::TemplateHit> (*)(
         const molSys::PointCloud<molSys::Point<double>, double> &,
-        const std::vector<std::vector<int>> &, int);
+        const std::vector<std::vector<int>> &,
+        int);
     m.def("classifyTemplates",
           static_cast<ClassifyTemplatesRows>(&chill::classifyTemplates),
           "IRA/Horn overlay onto FCC, HCP, BCC and SC neighbour shells.",
@@ -1279,9 +1280,12 @@ NB_MODULE(yoda, m) {
         .def_ro("nIce", &site::IonEnvironment::nIce)
         .def_ro("nFront", &site::IonEnvironment::nFront)
         .def_ro("nLiquid", &site::IonEnvironment::nLiquid);
-    using IonEnvironmentOneType = site::IonEnvironment (*)(
-        const molSys::PointCloud<molSys::Point<double>, double> &,
-        const std::vector<bool> &, const std::vector<int> &, int, double);
+    using IonEnvironmentOneType
+        = site::IonEnvironment (*)(const molSys::PointCloud<molSys::Point<double>, double> &,
+                                   const std::vector<bool> &,
+                                   const std::vector<int> &,
+                                   int,
+                                   double);
     m.def("ionEnvironment",
           static_cast<IonEnvironmentOneType>(&site::ionEnvironment),
           "Class each ion by its first water shell against iceFlag: every "
