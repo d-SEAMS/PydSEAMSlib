@@ -12,7 +12,8 @@ project(
 
 # C++ engine. Bindings live here; seams-core is the library, not a monolith.
 # libseams (the C API) and libseams_lang are shared and ship in the wheel;
-# libyodaLib and the Rust neighbour crates are static inside them.
+# libyodaLib and the Rust crates (linkcell, minimage, readcon) are static
+# inside them. readcon keeps the .con reader the 2.11 wheels had.
 seams = subproject(
     'seams-core',
     default_options: [
@@ -24,7 +25,7 @@ seams = subproject(
         'with_minimage=enabled',
         'with_blas=disabled',
         'with_chemfiles=disabled',
-        'with_readcon=disabled',
+        'with_readcon=enabled',
         'with_gpulite=disabled',
         'with_openmp_offload=disabled',
         'with_mpi=disabled',
@@ -142,7 +143,7 @@ test(
     'python_seams_ctypes',
     py,
     args: [
-        '-m', 'pytest', '-q', '-p', 'no:cacheprovider',
+        '-m', 'pytest', '-q', '-p', 'no:cacheprovider', '--noconftest',
         meson.project_source_root() / 'tests' / 'dseams' / 'test_seams_package.py',
         '--doctest-modules',
         meson.project_source_root() / 'src' / 'seams',
