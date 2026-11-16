@@ -141,7 +141,7 @@ def test_cubic_ice_shell_and_cages():
     assert labels.shape == (len(pos),)
     # Every site of a perfect diamond lattice is ice Ic.
     assert np.all(labels == 1), np.unique(labels, return_counts=True)
-    per, (n_hex, n_cubic, n_water, n_both) = dseams.cages(pos, box)
+    per, (n_hex, n_cubic, _n_water, _n_both) = dseams.cages(pos, box)
     assert per.shape == (len(pos),)
     assert n_cubic == len(pos)
     assert n_hex == 0

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Self
 
 import numpy as np
 import numpy.typing as npt
@@ -129,7 +129,7 @@ class _Owned:
         self._ptr = None
         self._destroy(ptr)
 
-    def __enter__(self) -> _Owned:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *_exc: object) -> None:
@@ -138,7 +138,7 @@ class _Owned:
     def __del__(self) -> None:
         try:
             self.close()
-        except Exception:
+        except Exception:  # noqa: BLE001 - a finalizer must not raise
             return
 
     def _live(self) -> int:
@@ -165,7 +165,7 @@ class Neighbours(_Owned):
     Use it as a context manager so the handle is freed on the way out.
     """
 
-    def __enter__(self) -> Neighbours:
+    def __enter__(self) -> Self:
         return self
 
     def count(self) -> int:
@@ -195,7 +195,7 @@ class Rings(_Owned):
     The caller owns the handle. Copied arrays do not borrow it.
     """
 
-    def __enter__(self) -> Rings:
+    def __enter__(self) -> Self:
         return self
 
     def count(self) -> int:
@@ -274,7 +274,7 @@ class CageSet(_Owned):
     The four population counts are disjoint.
     """
 
-    def __enter__(self) -> CageSet:
+    def __enter__(self) -> Self:
         return self
 
     def counts(self) -> CageCounts:
@@ -307,7 +307,7 @@ class CageSet(_Owned):
 class Fingerprint(_Owned):
     """Topological fingerprint of one bonded frame."""
 
-    def __enter__(self) -> Fingerprint:
+    def __enter__(self) -> Self:
         return self
 
     def key(self) -> str:
@@ -355,7 +355,7 @@ class Brine(_Owned):
     per kilogram of water.
     """
 
-    def __enter__(self) -> Brine:
+    def __enter__(self) -> Self:
         return self
 
     def fronts(self) -> BrineFronts:
@@ -446,7 +446,7 @@ class System(_Owned):
                 self.close()
                 raise
 
-    def __enter__(self) -> System:
+    def __enter__(self) -> Self:
         return self
 
     def __repr__(self) -> str:

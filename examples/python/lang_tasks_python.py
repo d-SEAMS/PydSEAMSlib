@@ -128,6 +128,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as err:
+    except Exception as err:  # noqa: BLE001 - any failure is one stderr line and exit 1
         print(err, file=sys.stderr)
         sys.exit(1)

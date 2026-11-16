@@ -28,9 +28,8 @@ def main():
     if hit["permutation"].shape != (6,):
         raise SystemExit("permutation length")
     group = symmetry.point_group(symmetry.template("ring-6"))
-    if symmetry.backend() == "ira":
-        if group is None or group[0] != "D6h":
-            raise SystemExit(f"point group {group}")
+    if symmetry.backend() == "ira" and (group is None or group[0] != "D6h"):
+        raise SystemExit(f"point group {group}")
     lattice, xyz = symmetry.crystal("ic")
     labels = symmetry.classify(xyz, lattice)
     if not (labels == 1).all():

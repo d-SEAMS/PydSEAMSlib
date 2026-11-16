@@ -447,7 +447,7 @@ def _ensure_display():
     if xvfb is None or ctypes.util.find_library("xcb-cursor") is None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         return None
-    display = ":%d" % (20 + os.getpid() % 50)
+    display = f":{20 + os.getpid() % 50}"
     proc = subprocess.Popen(
         [xvfb, display, "-screen", "0", "1280x1024x24"],
         stdout=subprocess.DEVNULL,
@@ -651,8 +651,8 @@ def run_julia(root: Path, libdir: Path, frames):
         cwd=root,
         env=_language_env(libdir),
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
+        check=False,
     )
     text = proc.stdout
     # Julia 1.13 can fault in ijl_process_events after the script has

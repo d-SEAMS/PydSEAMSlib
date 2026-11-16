@@ -89,7 +89,9 @@ print(json.dumps(out))
     env["PYTHONPATH"] = root
     env["TRAJ"] = str(TRAJ)
     env.pop("DSEAMS_DOC_BUILD", None)
-    done = subprocess.run([exe, "-c", script], env=env, text=True, capture_output=True)
+    done = subprocess.run(
+        [exe, "-c", script], env=env, text=True, capture_output=True, check=False
+    )
     if done.returncode != 0:
         raise AssertionError(done.stderr[-2000:] or done.stdout[-2000:])
     return json.loads(done.stdout.strip().splitlines()[-1])

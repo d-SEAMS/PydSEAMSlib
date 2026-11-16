@@ -31,7 +31,7 @@ def via_dseams(xyz, edge):
     if dseams.num_threads() != 1:
         raise SystemExit("dseams thread width")
     labels, counts = dseams.chill_plus(pos, box)
-    q4, q6 = dseams.q4q6(pos, box)
+    _q4, q6 = dseams.q4q6(pos, box)
     if int(counts[0]) != 8 or len(labels) != 8 or len(q6) != 8:
         raise SystemExit("dseams counts")
     if float(np.mean(q6)) <= 0.3:
