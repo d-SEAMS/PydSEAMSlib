@@ -26,5 +26,9 @@ dependencies:
   - pip
   - pytest
   - pre-commit
+  # The meson-format hook selects files by identify's meson tag.
+  - identify >=2.6
   - clang-format
+  - cppcheck
+  - cpplint
   - ruff
