@@ -35,6 +35,7 @@ from seams.errors import (
     SeamsError,
 )
 from seams.results import (
+    Q4Q6,
     BrineFronts,
     BrinePockets,
     BrineProfile,
@@ -47,7 +48,6 @@ from seams.results import (
     NeighbourCSR,
     OrderResult,
     Prisms,
-    Q4Q6,
     Q6Bar,
     Radial,
     RingLabels,
@@ -117,6 +117,7 @@ __all__ = [
     "OK",
     "OVITO",
     "PUBLISHED",
+    "Q4Q6",
     "SEEDED",
     "Brine",
     "BrineFronts",
@@ -134,7 +135,6 @@ __all__ = [
     "Neighbours",
     "OrderResult",
     "Prisms",
-    "Q4Q6",
     "Q6Bar",
     "Radial",
     "RingLabels",

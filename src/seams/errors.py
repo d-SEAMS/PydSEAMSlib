@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-
 OK = 0
 ERR_NULL = 1
 ERR_RANGE = 2

@@ -21,9 +21,9 @@ import ctypes
 import hashlib
 import math
 import os
-import sys
 import shutil
 import subprocess
+import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -35,9 +35,8 @@ ENGINE = Path(
     )
 )
 sys.path.insert(0, str(ENGINE / "docs"))
-from toolchain import c_compiler, link_command  # noqa: E402
-
 import numpy as np
+from toolchain import c_compiler, link_command
 
 NAMES = (
     "cubic",

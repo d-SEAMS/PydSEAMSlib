@@ -290,9 +290,9 @@ def via_ctypes(libdir, xyz, edge):
     for rel, (count, filt) in expect.items():
         got = read_count(lib, str(root / rel), filt)
         if count is not None and got != count:
-            raise SystemExit("ctypes read {} {}".format(rel, got))
+            raise SystemExit(f"ctypes read {rel} {got}")
         if got <= 0:
-            raise SystemExit("ctypes read empty {}".format(rel))
+            raise SystemExit(f"ctypes read empty {rel}")
     guest = lib.seams_system_create()
     guest_path = str(root / "input/traj/genice_sI.lammpstrj").encode()
     if lib.seams_system_read(guest, guest_path, 1, 1) != 0:
@@ -302,8 +302,8 @@ def via_ctypes(libdir, xyz, edge):
     if lib.seams_signature_cages(guest, 3.5, 0, 0, b"512", n_cages, n_atoms) != 0:
         fail(lib, guest, "signature")
     if n_cages.value != 2 or n_atoms.value != 40:
-        raise SystemExit("ctypes signature {} {}".format(n_cages.value, n_atoms.value))
-    print("python call sig {} {}".format(n_cages.value, n_atoms.value))
+        raise SystemExit(f"ctypes signature {n_cages.value} {n_atoms.value}")
+    print(f"python call sig {n_cages.value} {n_atoms.value}")
     lib.seams_system_destroy(guest)
     print("python api ok ctypes", lib.seams_version_string().decode())
 
@@ -311,7 +311,7 @@ def via_ctypes(libdir, xyz, edge):
 def fail(lib, handle, label):
     text = lib.seams_handle_error(handle)
     detail = text.decode() if text else ""
-    raise SystemExit("ctypes {} {}".format(label, detail))
+    raise SystemExit(f"ctypes {label} {detail}")
 
 
 def exercise(lib, sys_handle):
@@ -325,8 +325,8 @@ def exercise(lib, sys_handle):
         fail(lib, sys_handle, "steinhardt")
     if sum(bar) / 8.0 <= 0.0:
         raise SystemExit("ctypes lechner-dellago")
-    print("python call q6bar {:.12g}".format(sum(bar) / 8.0))
-    print("python call cubic {}".format(counts[0]))
+    print(f"python call q6bar {sum(bar) / 8.0:.12g}")
+    print(f"python call cubic {counts[0]}")
     cages = ctypes.c_void_p()
     if lib.seams_cages(sys_handle, 3.5, 0, 2, 4, 0, ctypes.byref(cages)) != 0:
         fail(lib, sys_handle, "cages")
@@ -337,9 +337,7 @@ def exercise(lib, sys_handle):
     if lib.seams_cages_counts(cages, n_hex, n_cubic, n_water, n_both) != 0:
         fail(lib, cages, "cage counts")
     print(
-        "python call cages {} {} {} {}".format(
-            n_hex.value, n_cubic.value, n_water.value, n_both.value
-        )
+        f"python call cages {n_hex.value} {n_cubic.value} {n_water.value} {n_both.value}"
     )
     lib.seams_cages_destroy(cages)
     knn = ctypes.c_void_p()
@@ -349,11 +347,11 @@ def exercise(lib, sys_handle):
     cn = ctypes.c_double()
     if lib.seams_coordination(sys_handle, 3.5, 8, 0, 0, cn) != 0:
         fail(lib, sys_handle, "coordination")
-    print("python call cn {:.12g}".format(cn.value))
+    print(f"python call cn {cn.value:.12g}")
     n_bonds = ctypes.c_int()
     if lib.seams_hbonds(sys_handle, 3.5, 1, 2, 2.42, 30.0, n_bonds) != 0:
         fail(lib, sys_handle, "hbonds")
-    print("python call hbond {}".format(n_bonds.value))
+    print(f"python call hbond {n_bonds.value}")
     n_out = ctypes.c_size_t()
     r = (ctypes.c_double * 16)()
     g = (ctypes.c_double * 16)()
@@ -431,14 +429,14 @@ def exercise(lib, sys_handle):
     sheet = (ctypes.c_int * 7)()
     if lib.seams_monolayer(sys_handle, 3.5, 0, 6, 100.0, sheet, 7) != 0:
         fail(lib, sys_handle, "monolayer")
-    print("python call sheet {}".format(sheet[6]))
+    print(f"python call sheet {sheet[6]}")
     rings = ctypes.c_void_p()
     if lib.seams_rings_find(sys_handle, 3.5, 0, 0, 6, ctypes.byref(rings)) != 0:
         fail(lib, sys_handle, "rings")
     atoms = (ctypes.c_int * 12)()
     if lib.seams_rings_vertices(rings, 0, atoms, 12, n_out) != 0 or n_out.value <= 0:
         fail(lib, rings, "vertices")
-    print("python call vert {} {}".format(n_out.value, atoms[0]))
+    print(f"python call vert {n_out.value} {atoms[0]}")
     lib.seams_rings_destroy(rings)
     kinds = (ctypes.c_int * 8)()
     if lib.seams_site_table(sys_handle, b"1=waterO", kinds, 8) != 0:

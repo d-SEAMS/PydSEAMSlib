@@ -5,7 +5,7 @@ import math
 
 import numpy as np
 
-from dseams import PUBLISHED, OVITO, chill_plus, version
+from dseams import OVITO, PUBLISHED, chill_plus, version
 
 
 def diamond(nrep=2):

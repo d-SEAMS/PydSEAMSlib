@@ -100,9 +100,8 @@ def test_threads_version_and_cubic_ice() -> None:
 
 
 def test_missing_frame_uses_handle_error() -> None:
-    with System() as sys:
-        with pytest.raises(SeamsError) as caught:
-            sys.chill_plus()
+    with System() as sys, pytest.raises(SeamsError) as caught:
+        sys.chill_plus()
     assert caught.value.status != 0
     assert caught.value.message
     assert "no frame" in caught.value.message or caught.value.status == seams.ERR_STATE

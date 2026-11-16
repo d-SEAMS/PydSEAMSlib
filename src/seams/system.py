@@ -13,6 +13,7 @@ import numpy.typing as npt
 from seams import _lib
 from seams.errors import ERR_ARG, ERR_STATE, SeamsError
 from seams.results import (
+    Q4Q6,
     BrineFronts,
     BrinePockets,
     BrineProfile,
@@ -25,7 +26,6 @@ from seams.results import (
     NeighbourCSR,
     OrderResult,
     Prisms,
-    Q4Q6,
     Q6Bar,
     Radial,
     RingLabels,

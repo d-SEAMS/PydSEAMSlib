@@ -51,7 +51,7 @@ def main():
     xyz, edges = read_dump(path)
     n = len(xyz) // 3
     if n != 46:
-        raise SystemExit("atom count {}".format(n))
+        raise SystemExit(f"atom count {n}")
     lib = ctypes.CDLL(os.path.join(libdir, "libseams.so"))
     lib.seams_version_string.restype = ctypes.c_char_p
     lib.seams_last_error.restype = ctypes.c_char_p

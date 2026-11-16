@@ -52,17 +52,17 @@ def _classify(lib, path):
     box9 = (ctypes.c_double * 9)(*box)
     kinds = (ctypes.c_int * n)(*types)
     if lib.seams_system_set_frame(sys, points, n, box9, kinds, None) != 0:
-        raise SystemExit("set_frame {}".format(path))
+        raise SystemExit(f"set_frame {path}")
     labels = (ctypes.c_int * n)()
     counts = (ctypes.c_int * 9)()
     if lib.seams_chill_plus(sys, 3.5, 0, 0, 0, labels, counts) != 0:
-        raise SystemExit("chill+ {}".format(path))
+        raise SystemExit(f"chill+ {path}")
     rings = ctypes.c_void_p()
     if lib.seams_rings_find(sys, 3.5, 0, 0, 6, ctypes.byref(rings)) != 0:
-        raise SystemExit("rings {}".format(path))
+        raise SystemExit(f"rings {path}")
     hist = (ctypes.c_int * 13)()
     if lib.seams_rings_histogram(rings, hist, 13) != 0:
-        raise SystemExit("histogram {}".format(path))
+        raise SystemExit(f"histogram {path}")
     lib.seams_rings_destroy(rings)
     lib.seams_system_destroy(sys)
     return n, [counts[i] for i in range(9)], [hist[i] for i in range(13)]
@@ -127,10 +127,10 @@ def check(libdir=None):
         raise SystemExit("threads")
     n, counts, rings = _classify(lib, str(ROOT / "input/traj/ice1h.lammpstrj"))
     if n != 128 or counts[1] != 128 or rings[6] != 256:
-        raise SystemExit("ice Ih {} {} {}".format(n, counts, rings))
+        raise SystemExit(f"ice Ih {n} {counts} {rings}")
     n, counts, rings = _classify(lib, str(ROOT / "input/traj/genice_sII.lammpstrj"))
     if n != 136 or counts[4] != 136 or rings[5] != 144 or rings[6] != 16:
-        raise SystemExit("sII {} {} {}".format(n, counts, rings))
+        raise SystemExit(f"sII {n} {counts} {rings}")
     print("hexagonal 128")
     print("rings6 256")
     print("clathrate 136")

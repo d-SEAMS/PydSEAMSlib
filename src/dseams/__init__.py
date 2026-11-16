@@ -101,7 +101,7 @@ def num_threads():
     return _core.num_threads()
 
 
-from dseams import frames as _frames  # noqa: E402
+from dseams import frames as _frames
 
 cages = _frames.cages
 signature_cages = _frames.signature_cages
