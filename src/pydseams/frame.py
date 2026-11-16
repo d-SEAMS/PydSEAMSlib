@@ -1235,7 +1235,7 @@ class Frame:
         found = yoda.findBySignature(rings, self.bonds_by_index, str(signature))
         cages = [list(map(int, c["vertices"])) for c in found]
         faces = [list(map(int, c["faces"])) for c in found]
-        wanted = set(int(t) for t in guest_types)
+        wanted = {int(t) for t in guest_types}
         guests = [i for i, p in enumerate(self.cloud.pts) if p.c_type in wanted]
         return DualOccupancy(
             radius=yoda.guestOccupancy(self.cloud, cages, guests, float(radius)),
