@@ -21,6 +21,10 @@ BibTeX for that article lives in the docs bibliography
 (=docs/source/bibtex/pyseamsDocs.bib=). ~CITATION.cff~ at the
 repository root lists the same preferred citation.
 
+#+begin_export rst
+.. bibliography::
+#+end_export
+
 * The software
 
 ~pydseams~ is the Python package in

@@ -151,7 +151,7 @@ myst_enable_extensions = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable", None),
-    "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
+    "ase": ("https://docs.ase-lib.org/", None),
     "dseams": ("https://docs.dseams.info", None),
     "luadseams": ("https://d-seams.github.io/yodaStruct/", None),
 }
