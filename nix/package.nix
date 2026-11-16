@@ -49,10 +49,40 @@ let
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
-    version = "0.3.11";
+    version = "0.4.0";
     owner = "d-SEAMS";
-    rev = "2e26b83c0c9bbc07d09eb056011dd8e2cec6f4a5";
-    hash = "sha256-36Zvbw/KgZw0VLUQstRIX27WXoan80JMKJNjkz9RgM0=";
+    rev = "2441fd8e3027befa22defb33eda6913fc3cdc72a";
+    hash = "sha256-NGE4ImMzrDomFzkys4GtCMDReKCTaT5NsABRLkAq1zs=";
+  };
+  # seams-core reads .con frames through readcon-core (with_readcon is
+  # enabled in meson.build); the sandbox cannot run its cargo wrap.
+  readcon-core = rustPlatform.buildRustPackage rec {
+    pname = "readcon-core";
+    version = "0.16.2";
+    src = fetchFromGitHub {
+      owner = "lode-org";
+      repo = pname;
+      rev = "9e12ea9727d5f3c85d8eeb4d927beb634e1bdb59";
+      hash = "sha256-N3dH/eGnulSuq2aV0ghRul0v/OZZE5UBUUc/sUgnUB4=";
+    };
+    cargoLock.lockFile = "${src}/Cargo.lock";
+    cargoBuildFlags = [ "--lib" ];
+    cargoTestFlags = [ "--lib" ];
+    postInstall = ''
+      mkdir -p "$out/include" "$out/lib/pkgconfig"
+      cp include/*.h include/*.hpp "$out/include/"
+      cat > "$out/lib/pkgconfig/${pname}.pc" <<EOF
+      prefix=$out
+      libdir=$out/lib
+      includedir=$out/include
+      Name: ${pname}
+      Description: CON and convel reader
+      Version: ${version}
+      Libs: -L$out/lib -lreadcon_core
+      Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
+      Cflags: -I$out/include
+      EOF
+    '';
   };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
@@ -78,6 +108,9 @@ python3.pkgs.buildPythonPackage {
       ../meson.build
       ../pyproject.toml
       ../README.md
+      ../LICENSE
+      ../examples
+      ../scripts/dist_subprojects.py
       ../src
       ../tests
       ../subprojects/nanobind.wrap
@@ -93,7 +126,10 @@ python3.pkgs.buildPythonPackage {
     python3.pkgs.meson-python
   ];
 
-  build-system = [ python3.pkgs.meson-python ];
+  build-system = [
+    python3.pkgs.meson-python
+    python3.pkgs.ninja
+  ];
 
   buildInputs = [
     eigen
@@ -102,6 +138,7 @@ python3.pkgs.buildPythonPackage {
     libhwy
     minimage
     linkcell
+    readcon-core
     python3.pkgs.nanobind
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
