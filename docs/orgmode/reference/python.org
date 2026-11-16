@@ -74,6 +74,9 @@ largest connected site domain.
 | ~seeded_affiliation~ | seeded flags; ~ring_adjacent~ completes six-rings |
 | ~cage_affiliation~ | cutoff-graph per-ring flags |
 | ~ion_environment~ | first-shell ice class of every ion |
+| ~hydration_shell_rings~ | rings of the water network through each ion's shell, by size |
+| ~guest_occupancy~ | guests placed in enumerated cages by periodic centroids |
+| ~classify_topology~ | atoms named by one key library, or by several at different hops |
 
 ~cages~ with the seeded flag on is the hysteresis construction
 (~seeded_affiliation~). Cutoff-graph affiliation on this frame's
@@ -251,7 +254,8 @@ Implementation autodoc is the ASE helpers section of
 | ~pydseams.Trajectory~ | alias of ~Frame~ |
 | ~pydseams.features~ | kinetic vectors and ion environment |
 
-Requires Python 3.12+. Wheels are the CPython 3.12 limited ABI.
+Requires Python 3.11+. CPython 3.11 has a version-specific wheel; Python 3.12 and newer
+use the CPython 3.12 limited ABI.
 
 ~yoda~ names (mocked in the Sphinx build) are tabulated on
 [[file:../../source/api.md][api.md]].

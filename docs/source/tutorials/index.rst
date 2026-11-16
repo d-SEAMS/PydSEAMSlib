@@ -24,7 +24,7 @@ Available tutorials
     +----------------------------------------------+-------------------------------------------------------------------+
     | `Primitive rings <rings.rst>`_               | Hydrogen-bond and cutoff ring census                              |
     +----------------------------------------------+-------------------------------------------------------------------+
-    | `Order parameters <order-parameters.rst>`_   | Steinhardt q_l and the Lechner-Dellago average                    |
+    | `Order parameters <order-parameters.rst>`_   | Steinhardt q\ :sub:`l`\ and the Lechner-Dellago average           |
     +----------------------------------------------+-------------------------------------------------------------------+
     | `Confined water <confined-water.rst>`_       | In-plane RDF, monolayer rings, prisms                             |
     +----------------------------------------------+-------------------------------------------------------------------+
