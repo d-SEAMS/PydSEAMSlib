@@ -46,8 +46,9 @@ def test_chill_plus_no_tempdir(tmp_path, monkeypatch):
     frame = read(TRAJ.resolve())
     counts = frame.chill_plus()
     assert isinstance(counts, IceCounts)
-    assert counts.interClathrate == 12
-    assert counts.water == 238
+    # seams-core 2.14.0 fixed the CHILL+ shell count on cutoff lists: 9 and 241, not 12 and 238.
+    assert counts.interClathrate == 9
+    assert counts.water == 241
     assert counts.cubic == 0
     assert counts.hexagonal == 0
     assert sum(counts.values()) == 250
@@ -59,8 +60,9 @@ def test_chill_plus_replaces_chill_classification():
     frame = read(TRAJ)
     frame.chill()
     counts = frame.chill_plus()
-    assert counts.interClathrate == 12
-    assert counts.water == 238
+    # seams-core 2.14.0 fixed the CHILL+ shell count on cutoff lists: 9 and 241, not 12 and 238.
+    assert counts.interClathrate == 9
+    assert counts.water == 241
     assert sum(counts.values()) == frame.n_atoms
 
 
@@ -105,8 +107,9 @@ def test_trajectory_alias():
     traj = Trajectory(str(TRAJ.resolve()))
     counts = traj.classify_chill_plus()
     assert counts["hexagonal"] == 0
-    assert counts["water"] == 238
-    assert counts["interClathrate"] == 12
+    # seams-core 2.14.0 fixed the CHILL+ shell count on cutoff lists: 9 and 241, not 12 and 238.
+    assert counts["water"] == 241
+    assert counts["interClathrate"] == 9
 
 
 def test_from_arrays_roundtrip_positions():

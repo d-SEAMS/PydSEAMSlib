@@ -1,0 +1,1 @@
+`pydseams` CHILL+ counts on cutoff neighbour lists change with the engine: seams-core 2.14.0 fixed the shell count, so `Frame.chill_plus()` on `tests/data/exampleTraj.lammpstrj` (oxygen, type 2) reports 9 interClathrate and 241 water where 2.11 reported 12 and 238.

@@ -43,7 +43,8 @@ def test_features_are_consistent_counts():
     assert chill == traj.n_atoms
     # the mixed TIP4P example: CHILL+ finds interfacial clathrate, the cages find nothing
     assert names["n_ice"] == 0
-    assert names["chill_interclathrate"] == 12
+    # seams-core 2.14.0 fixed the CHILL+ shell count on cutoff lists: 9 and 241, not 12 and 238.
+    assert names["chill_interclathrate"] == 9
 
 
 def test_transform_stacks_frames():
