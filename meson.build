@@ -18,7 +18,6 @@ seams = subproject(
     'seams-core',
     default_options: [
         'default_library=static',
-        'with_python=false',
         'with_tests=false',
         'with_cli=false',
         'with_linkcell=enabled',
@@ -29,8 +28,6 @@ seams = subproject(
         'with_gpulite=disabled',
         'with_openmp_offload=disabled',
         'with_mpi=disabled',
-        'with_lua=disabled',
-        'with_fortran=disabled',
         'with_lammps=disabled',
         'with_gromacs=disabled',
         'with_openmm=disabled',

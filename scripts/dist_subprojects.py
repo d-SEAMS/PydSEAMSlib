@@ -3,8 +3,7 @@
 
 `meson dist --include-subprojects` archives the committed tree of a
 wrap-git subproject, which drops the wrap's diff_files patches and any
-packagefile overlay. linkcell needs its patches (lc_mesh_cut,
-lc_partition_weights) for seams-core to compile. This copies each
+packagefile overlay (the vesin and gpulite meson.build files). This copies each
 subproject's modified and untracked files from the configured source
 tree, removes the files a patch deletes, and drops VCS metadata.
 """
