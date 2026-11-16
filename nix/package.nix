@@ -146,7 +146,7 @@ python3.pkgs.buildPythonPackage {
   dependencies = [ python3.pkgs.numpy ];
 
   nativeCheckInputs = [
-    python3.pkgs.pytest
+    python3.pkgs.pytestCheckHook
     python3.pkgs.hypothesis
     python3.pkgs.ase
   ];
