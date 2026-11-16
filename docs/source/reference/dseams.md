@@ -30,7 +30,9 @@ from seams import PUBLISHED, System, set_num_threads
 edge = 2.75 * 4.0 / math.sqrt(3.0)
 fcc = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5))
 basis = ((0, 0, 0), (0.25, 0.25, 0.25))
-positions = np.array([[(s + b) * edge for s, b in zip(shift, site)] for shift in fcc for site in basis])
+positions = np.array(
+    [[(s + b) * edge for s, b in zip(shift, site)] for shift in fcc for site in basis]
+)
 
 set_num_threads(1)
 with System() as sys:
@@ -74,8 +76,16 @@ import dseams
 import numpy as np
 
 edge = 2.75 * 4.0 / math.sqrt(3.0)
-sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5),
-         (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
 positions = np.array([[x * edge, y * edge, z * edge] for x, y, z in sites])
 box = (3 * edge, 3 * edge, 3 * edge)
 labels, counts = dseams.chill_plus(positions, box)

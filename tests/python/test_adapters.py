@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
+from test_features import _cubic_diamond
 
 from pydseams.adapters import IceStates, ice_states
 from pydseams.features import STATE_IC, STATE_WATER
-
-from test_features import _cubic_diamond
 
 
 class _Particles:

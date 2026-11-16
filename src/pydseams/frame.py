@@ -12,8 +12,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import config
-from . import yoda
+from . import config, yoda
 
 
 class IceCounts(dict):
@@ -488,7 +487,7 @@ class Frame:
         """
         n = len(positions)
         nums = list(numbers) if numbers is not None else [1] * n
-        types = sorted(set(int(x) for x in nums))
+        types = sorted({int(x) for x in nums})
         atom_type = types[0] if len(types) == 1 else 1
         cloud = _cloud_from_positions(positions, cell, nums, box_low)
         return cls(
@@ -1082,7 +1081,7 @@ class Frame:
         """
         score = self.seeded_affiliation(k=k, ring_adjacent=ring_adjacent)
         ice = [bool(h or d) for h, d in zip(score.hc, score.ddc)]
-        wanted = set(int(t) for t in ion_types)
+        wanted = {int(t) for t in ion_types}
         ions = [i for i, p in enumerate(self.cloud.pts) if p.c_type in wanted]
         return yoda.ionEnvironment(
             self.cloud,
@@ -1195,7 +1194,7 @@ class Frame:
             ``centreDistance`` and the counts ``occupied``, ``multiply``
             and ``free``.
         """
-        wanted = set(int(t) for t in guest_types)
+        wanted = {int(t) for t in guest_types}
         guests = [i for i, p in enumerate(self.cloud.pts) if p.c_type in wanted]
         return yoda.guestOccupancy(
             self.cloud, [list(map(int, c)) for c in cages], guests, float(radius)

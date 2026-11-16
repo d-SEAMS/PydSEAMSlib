@@ -19,8 +19,7 @@ ASE Atoms work the same way::
     atoms = frame.to_ase()
 """
 
-from . import config
-from . import yoda
+from . import config, yoda
 from . import yoda as _core
 from . import yoda as cyoda
 from .frame import (
@@ -219,23 +218,23 @@ def to_solvis(frame, expand_box=True):
 
 
 __all__ = [
-    "Frame",
-    "Trajectory",
-    "IceCounts",
     "CageScore",
-    "DensityProfile",
     "ContactPairs",
+    "DensityProfile",
     "DomainStats",
-    "read",
-    "from_ase",
+    "Frame",
+    "IceCounts",
+    "Trajectory",
+    "__version__",
+    "_core",
+    "available_readers",
+    "cyoda",
     "from_arrays",
+    "from_ase",
     "from_chemfiles",
     "from_con",
     "from_xyz",
+    "read",
     "to_solvis",
-    "available_readers",
     "yoda",
-    "_core",
-    "cyoda",
-    "__version__",
 ]

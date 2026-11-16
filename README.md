@@ -51,7 +51,7 @@ Site: <https://d-seams.github.io/PydSEAMSlib/>.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")   # also .xyz, .pdb, .gro, .dcd, .con
+frame = ds.read("water.lammpstrj")  # also .xyz, .pdb, .gro, .dcd, .con
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -65,7 +65,7 @@ print(mixed.pairs(ions))
 
 frame = ds.from_ase(atoms)
 atoms = frame.to_ase()
-system = frame.to_solvis()           # optional extra
+system = frame.to_solvis()  # optional extra
 ```
 
 `ds.read` picks the engine reader from the suffix. `yoda` is the compiled
