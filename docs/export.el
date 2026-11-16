@@ -7,19 +7,21 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
-(unless (package-installed-p 'ox-rst)
+;; ox-rst 2025-04 calls the Org 9.7 element API (org-element-parent,
+;; org-element-type-p, ...). Emacs 29 bundles Org 9.6, so take Org from
+;; GNU ELPA before anything loads the bundled copy.
+(unless (package-installed-p 'org '(9 7))
   (package-refresh-contents)
+  (package-install (cadr (assq 'org package-archive-contents))))
+(unless (package-installed-p 'ox-rst)
+  (unless package-archive-contents
+    (package-refresh-contents))
   (package-install 'ox-rst))
 
 (require 'ox-rst)
 (require 'ox-publish)
-
-;; ox-rst 2025-04 needs org-element-type-p (Org 9.7+). Ubuntu emacs-nox is 29/9.6.
-(require 'org-element)
-(unless (fboundp 'org-element-type-p)
-  (defun org-element-type-p (node types)
-    (memq (org-element-type node)
-          (if (listp types) types (list types)))))
+(unless (version<= "9.7" org-version)
+  (error "ox-rst needs Org 9.7 or newer; loaded Org %s" org-version))
 
 (setq org-export-with-section-numbers nil)
 (setq org-export-with-toc nil)
