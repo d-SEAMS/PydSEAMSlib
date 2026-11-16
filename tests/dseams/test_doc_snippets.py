@@ -115,9 +115,8 @@ def test_lang_tasks_python(monkeypatch):
     """The task-python page program on ice Ih: 256 six-rings, 128 hexagonal."""
     env = _env()
     if "SEAMS_LANG_LIB" not in os.environ and "SEAMS_LIBDIR" in env:
-        monkeypatch.setenv(
-            "SEAMS_LANG_LIB", str(Path(env["SEAMS_LIBDIR"]) / "libseams_lang.so")
-        )
+        name = "libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so"
+        monkeypatch.setenv("SEAMS_LANG_LIB", str(Path(env["SEAMS_LIBDIR"]) / name))
     if "SEAMS_LANG_LIB" not in os.environ:
         pytest.skip("libseams_lang was not found; set SEAMS_LANG_LIB")
     out = _run(

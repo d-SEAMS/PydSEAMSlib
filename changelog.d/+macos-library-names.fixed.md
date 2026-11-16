@@ -1,0 +1,1 @@
+On macOS the `core_counts`, `lang_tasks_python`, `minimal_py`, `python_api` and `science_tutorials` examples, and the tests that run them, load `libseams.dylib` and `libseams_lang.dylib` instead of the Linux `.so` names, so the documentation checks pass against the macOS wheels.

@@ -40,7 +40,8 @@ def via_dseams(xyz, edge):
 
 
 def via_ctypes(libdir, xyz, edge):
-    lib = ctypes.CDLL(os.path.join(libdir, "libseams.so"))
+    name = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
+    lib = ctypes.CDLL(os.path.join(libdir, name))
     lib.seams_version_string.restype = ctypes.c_char_p
     lib.seams_set_num_threads.argtypes = [ctypes.c_int]
     lib.seams_set_num_threads.restype = ctypes.c_int
@@ -464,7 +465,7 @@ def main():
     if len(sys.argv) >= 2:
         via_ctypes(sys.argv[1], xyz, edge)
     elif not loaded:
-        raise SystemExit("pass the directory that holds libseams.so")
+        raise SystemExit("pass the directory that holds libseams")
 
 
 if __name__ == "__main__":

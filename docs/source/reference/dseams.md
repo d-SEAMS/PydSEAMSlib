@@ -15,7 +15,7 @@ trajectory package on PyPI. `seams.from_pydseams(frame)` copies
 `frame.positions` and `frame.box` into a `System` when an analysis lives
 only on the C API.
 
-Set `SEAMS_LIB` to `libseams.so`. Importing `seams` does not load the library.
+Set `SEAMS_LIB` to `libseams.so` (`libseams.dylib` on macOS). Importing `seams` does not load the library.
 
 ## Quickstart
 
@@ -171,7 +171,7 @@ The nanobind module and the language-binding examples stay below.
 
 `examples/python/core_counts.py` is the Ice Ih and sII census.
 `meson test docs_core_counts` runs it. `SEAMS_LIBDIR`
-is the directory that holds `libseams.so`.
+is the directory that holds `libseams.so` (`libseams.dylib` on macOS).
 
 ```pycon
 >>> import core_counts

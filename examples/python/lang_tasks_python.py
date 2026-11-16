@@ -15,7 +15,10 @@ import numpy as np
 
 class Frame:
     def __init__(self, path):
-        lib = os.environ.get("SEAMS_LANG_LIB", "libseams_lang.so")
+        default = (
+            "libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so"
+        )
+        lib = os.environ.get("SEAMS_LANG_LIB", default)
         self._lib = ctypes.CDLL(lib)
         self._lib.seams_frame_read.restype = ctypes.c_void_p
         self._lib.seams_frame_read.argtypes = [
