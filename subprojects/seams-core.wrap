@@ -4,5 +4,5 @@ directory = seams-core
 # Becomes url = https://github.com/d-SEAMS/seams-core.git and
 # revision = v2.14.0 once d-SEAMS/seams-core publishes that tag.
 url = https://github.com/HaoZeke/seams-core.git
-revision = f9846e2f8797cd42937ed0d891a61ac941c963df
+revision = 628b0af94b4d3bf52426708a0d08436027c8e4fa
 depth = 1
