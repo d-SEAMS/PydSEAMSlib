@@ -19,13 +19,14 @@ ROOT = Path(
         Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
     )
 )
-sys.path.insert(0, str(ROOT / "scripts"))
-from lammps_box import cell_from_bounds
-
 LIBSEAMS = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
 
 
 def _load_dump(path):
+    if str(ROOT / "scripts") not in sys.path:
+        sys.path.insert(0, str(ROOT / "scripts"))
+    from lammps_box import cell_from_bounds
+
     xyz = []
     types = []
     box = None

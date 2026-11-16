@@ -28,16 +28,16 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import numpy as np
+
 ENGINE = Path(
     os.environ.get(
         "SEAMS_CORE_SRC",
         Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
     )
 )
+# toolchain.py, imported where a C program is built.
 sys.path.insert(0, str(ENGINE / "docs"))
-import numpy as np
-from toolchain import c_compiler, link_command
-
 LIBSEAMS = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
 
 NAMES = (
@@ -570,6 +570,8 @@ def expect(condition, message):
 
 
 def run_c(root: Path, build: Path, mode: str, extra: list[str]):
+    from toolchain import c_compiler, link_command
+
     cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)
@@ -672,6 +674,8 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
     if rscript is None:
         print("r tutorial skipped: Rscript was not found")
         return
+    from toolchain import c_compiler, link_command
+
     cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)

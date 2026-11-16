@@ -15,6 +15,8 @@ import os
 
 import numpy as np
 
+from dseams import frames as _frames
+
 if os.environ.get("DSEAMS_DOC_BUILD") == "1":
 
     class _DocCore:
@@ -100,8 +102,6 @@ def num_threads():
     """
     return _core.num_threads()
 
-
-from dseams import frames as _frames
 
 cages = _frames.cages
 signature_cages = _frames.signature_cages

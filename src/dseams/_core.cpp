@@ -1,8 +1,7 @@
 // Copyright (c) d-SEAMS developers
 // Nanobind front. Arrays are the caller's buffers; the C API reads them in place.
 
-#include "seams.h"
-
+#include <seams.h>
 #include <stdexcept>
 #include <string>
 
