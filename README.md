@@ -124,8 +124,10 @@ pins. Engine changes go to d-SEAMS/seams-core, not to this repository.
 The contributing guide at the repository root has the layout, the test
 commands and the commit conventions.
 
-The build needs a C++20 compiler and `cargo` (linkcell, minimage and
-readcon are Rust crates):
+The build needs a C++20 compiler and `cargo` with Rust 1.88 or newer
+(linkcell, minimage and readcon are Rust crates; readcon-core and
+readcon-db declare `rust-version = "1.88"`). Installing the sdist
+builds the same tree, so it needs them too:
 
 ```bash
 meson setup bbdir --force-fallback-for=eigen3
@@ -149,8 +151,8 @@ Release order:
 
 1. d-SEAMS/seams-core tags `vX.Y.Z`.
 2. `subprojects/seams-core.wrap` moves to that tag, and the version in
-   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py` and
-   `CITATION.cff` becomes `X.Y.Z`.
+   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py`,
+   `tests/python/test_bindings.py` and `CITATION.cff` becomes `X.Y.Z`.
 3. `towncrier build --version X.Y.Z`, then tag `vX.Y.Z` on
    d-SEAMS/PydSEAMSlib.
 4. `build_wheels.yml` builds the sdist and the wheels and publishes them
