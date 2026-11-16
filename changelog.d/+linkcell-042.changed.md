@@ -1,0 +1,1 @@
+linkcell is v0.4.2, the release seams-core 2.14.0 pins. Meson takes a dependency both projects wrap from this project's wrap, so the v0.4.0 pin stopped the engine at its `linkcell >= 0.4.1` requirement once the engine moved past 0.4.0.
