@@ -78,8 +78,8 @@ html_meta = {
     ),
 }
 html_static_path = ["_static"]
-# llms.txt at the site root, from the repository root.
-html_extra_path = ["../../llms.txt"]
+# Machine-readable discovery files at the site root.
+html_extra_path = ["../../llms.txt", "../robots.txt"]
 html_favicon = "_static/logo/pydseams-icon.ico"
 html_css_files = ["custom.css"]
 
