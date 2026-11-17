@@ -2,6 +2,7 @@
 """Import the built nanobind module and run unittest discovery."""
 
 import argparse
+import ast
 import fnmatch
 import os
 import re
@@ -109,6 +110,88 @@ def discovery_modules(start):
     return found
 
 
+def _testcase_aliases(tree):
+    names = set()
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module == "unittest":
+            for alias in node.names:
+                if alias.name == "TestCase":
+                    names.add(alias.asname or alias.name)
+    return names
+
+
+def _is_unittest_testcase(class_node, aliases):
+    for base in class_node.bases:
+        if (
+            isinstance(base, ast.Attribute)
+            and base.attr == "TestCase"
+            and isinstance(base.value, ast.Name)
+            and base.value.id == "unittest"
+        ):
+            return True
+        if isinstance(base, ast.Name) and base.id in aliases:
+            return True
+    return False
+
+
+def _has_main_guard(tree):
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.If):
+            continue
+        test = node.test
+        if (
+            isinstance(test, ast.Compare)
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+            and len(test.comparators) == 1
+            and isinstance(test.comparators[0], ast.Constant)
+            and test.comparators[0].value == "__main__"
+        ):
+            left = test.left
+            if isinstance(left, ast.Name) and left.id == "__name__":
+                return True
+    return False
+
+
+def module_ast_features(source):
+    tree = ast.parse(source)
+    aliases = _testcase_aliases(tree)
+    pytest_like = False
+    for node in tree.body:
+        if isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef)
+        ) and node.name.startswith("test_"):
+            pytest_like = True
+            break
+        if (
+            isinstance(node, ast.ClassDef)
+            and node.name.startswith("Test")
+            and not _is_unittest_testcase(node, aliases)
+        ):
+            pytest_like = True
+            break
+    script_only = _has_main_guard(tree) and not pytest_like
+    return pytest_like, script_only
+
+
+def resolve_module_path(name):
+    path = root / module_filename(name)
+    if path.is_file():
+        return path
+    return None
+
+
+def should_route_pytest(path):
+    source = path.read_text(encoding="utf-8")
+    if "import pytest" in source:
+        return True
+    try:
+        pytest_like, _ = module_ast_features(source)
+    except SyntaxError:
+        return False
+    return pytest_like
+
+
 root = src / "tests" / "dseams"
 modules = discovery_modules(root)
 suite = unittest.defaultTestLoader.discover(str(root), pattern="test_*.py")
@@ -158,15 +241,19 @@ chosen = set(modules)
 if include:
     chosen &= include
 chosen -= exclude
+failed = False
 pytest_paths = []
 for name in sorted(chosen - unittest_modules - failed_modules):
-    path = root / name
-    if path.is_file() and "import pytest" in path.read_text(encoding="utf-8"):
+    path = resolve_module_path(name)
+    if not path or not path.is_file():
+        print(f"selected module file not found: {name}", file=sys.stderr)
+        failed = True
+        continue
+    if should_route_pytest(path):
         pytest_paths.append(path)
 
 missing_include = sorted(include - modules)
 missing_exclude = sorted(exclude - modules)
-failed = False
 if missing_include:
     print(
         "include matched no test module: " + ", ".join(missing_include),
@@ -179,6 +266,7 @@ if missing_exclude:
         file=sys.stderr,
     )
     failed = True
+
 if (include or exclude) and selected.countTestCases() == 0 and not pytest_paths:
     print("filters selected no tests", file=sys.stderr)
     failed = True

@@ -1,0 +1,1 @@
+In exclude mode, ``run_unittest.py`` now parses each selected module to find pytest-style tests, so a ``test_*`` function runs even when its module never imports pytest. A meson self-test covers the routing cases.
