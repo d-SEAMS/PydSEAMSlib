@@ -33,10 +33,14 @@ Unreleased notes are files under `changelog.d/`. The cut is
 `towncrier build --version X.Y.Z`.
 
 ```bash
-pip install pydseamslib
-pip install 'pydseamslib[ase]'      # ASE Atoms
-pip install 'pydseamslib[solvis]'   # solvis / PyVista
+python -m pip install 'pydseamslib==2.14.0'
+python -m pip install 'pydseamslib[ase]==2.14.0'      # ASE Atoms
+python -m pip install 'pydseamslib[solvis]==2.14.0'   # solvis / PyVista
 ```
+
+Each command installs a wheel containing the bundled engine and all three
+import names: `dseams`, `pydseams`, and `pydseamslib`. No separate
+seams-core installation is needed.
 
 Nix flake:
 
@@ -51,7 +55,7 @@ Site: <https://d-seams.github.io/PydSEAMSlib/>.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")  # also .xyz, .pdb, .gro, .dcd, .con
+frame = ds.read("water.lammpstrj")  # release wheels also read .xyz and .con
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -71,6 +75,9 @@ system = frame.to_solvis()  # optional extra
 `ds.read` picks the engine reader from the suffix. `yoda` is the compiled
 surface. Helpers (`Frame`, `io`, ASE, solvis) stay in Python.
 `_core` and `cyoda` still name the same module.
+`ds.available_readers()` reports the readers compiled into a wheel. The
+2.14.0 PyPI wheels do not link chemfiles, so `.pdb`, `.gro`, and `.dcd`
+inputs raise `RuntimeError`.
 
 `Frame.density`, `Frame.pairs`, and `Frame.domain` expose the same
 site-resolved density, ion-pair, and connected-domain analyses as the CLI.
@@ -94,8 +101,19 @@ the function argument. `pydseams.config` is the reader.
 ```python
 import dseams
 
-labels, counts = dseams.chill_plus(positions, (lx, ly, lz))  # (n, 3) float64, Angstrom
-q4, q6 = dseams.q4q6(positions, (lx, ly, lz))
+a = 2.75 * 4 / 3**0.5
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
+xyz = [[x * a, y * a, z * a] for x, y, z in sites]
+assert dseams.chill_plus(xyz, [a, a, a])[1][0] == 8
 ```
 
 `dseams` reads C-contiguous NumPy arrays in place. `box` is three edge
