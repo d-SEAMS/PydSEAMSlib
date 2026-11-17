@@ -63,7 +63,9 @@ jobs:
 
   # The site as readers get it: every published page is a lychee input,
   # so relative links resolve against the page they are on. The page list
-  # comes from the artifact the deploy job published.
+  # comes from the artifact the deploy job published. github.com answers
+  # the per-page source links with 503 to automated clients; the files
+  # they name are the sources this build read.
   live-links:
     needs: deploy
     runs-on: ubuntu-latest
@@ -86,5 +88,6 @@ jobs:
           args: >-
             --no-progress --max-retries 3 --accept 200,206,429
             --exclude '^https://doi\.org/10\.1021/'
+            --exclude '^https://github\.com/d-SEAMS/PydSEAMSlib/(blob|edit)/main/docs/'
             --files-from pages.txt
           fail: true
