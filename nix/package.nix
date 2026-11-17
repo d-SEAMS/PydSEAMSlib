@@ -16,6 +16,76 @@
 }:
 
 let
+  # rustc passes -install_name only with -C rpath. Otherwise ld64 uses the
+  # cargo -o path, target/<triple>/release/deps/lib….dylib, as LC_ID_DYLIB.
+  # The next link copies that into LC_LOAD_DYLIB, and dyld opens it after
+  # the build directory is gone. The Nix ld wrapper adds an rpath for
+  # lib*.so only, so an @rpath id would not resolve these .dylib files.
+  # Upstream Meson passes -Wl,-install_name for the cdylib; do the same,
+  # aimed at the installed store path. Build scripts and the staticlib are
+  # separate rustc invocations and do not get the flag.
+  darwinCdylibHook = dylibFile:
+    lib.optionalString stdenv.hostPlatform.isDarwin ''
+      wrapdir=$(mktemp -d)
+      cat > "$wrapdir/rustc-wrapper" <<'EOF'
+      #!/bin/sh
+      response_has_cdylib() {
+        prev=
+        while IFS= read -r line || [ -n "$line" ]; do
+          if [ "$prev" = "--crate-type" ] && [ "$line" = "cdylib" ]; then
+            return 0
+          fi
+          case "$line" in
+            --crate-type=cdylib) return 0 ;;
+          esac
+          prev=$line
+        done < "$1"
+        return 1
+      }
+      compiler=$1
+      shift
+      cdylib=0
+      prev=
+      for arg in "$@"; do
+        if [ "$prev" = "--crate-type" ] && [ "$arg" = "cdylib" ]; then
+          cdylib=1
+        fi
+        case "$arg" in
+          --crate-type=cdylib) cdylib=1 ;;
+          @*)
+            if response_has_cdylib "''${arg#@}"; then
+              cdylib=1
+            fi
+            ;;
+        esac
+        prev=$arg
+      done
+      if [ "$cdylib" = 1 ]; then
+        exec "$compiler" -C "link-arg=-Wl,-install_name,$DYLIB_INSTALL_NAME" "$@"
+      fi
+      exec "$compiler" "$@"
+      EOF
+      chmod +x "$wrapdir/rustc-wrapper"
+      export DYLIB_INSTALL_NAME="$out/lib/${dylibFile}"
+      export RUSTC_WRAPPER="$wrapdir/rustc-wrapper"
+    '';
+  assertDarwinInstallName = dylibFile:
+    lib.optionalString stdenv.hostPlatform.isDarwin ''
+      if command -v otool >/dev/null 2>&1; then
+        dump_id() { otool -D "$1"; }
+      elif command -v llvm-otool >/dev/null 2>&1; then
+        dump_id() { llvm-otool -D "$1"; }
+      else
+        echo "otool is required to check ${dylibFile}" >&2
+        exit 1
+      fi
+      got=$(dump_id "$out/lib/${dylibFile}" | awk 'NR==2 { print $1 }')
+      want="$out/lib/${dylibFile}"
+      if [ "$got" != "$want" ]; then
+        printf '%s: LC_ID_DYLIB is "%s", want "%s"\n' "${dylibFile}" "$got" "$want" >&2
+        exit 1
+      fi
+    '';
   geometryLibrary = { pname, version, owner, rev, hash }:
     rustPlatform.buildRustPackage rec {
       inherit pname version;
@@ -24,6 +94,7 @@ let
       cargoBuildFlags = [ "--package" pname "--lib" ];
       cargoTestFlags = [ "--package" pname ];
       RAYON_NUM_THREADS = "8";
+      preBuild = darwinCdylibHook "lib${pname}.dylib";
       postInstall = ''
         mkdir -p "$out/include" "$out/lib/pkgconfig"
         cp include/*.h include/*.hpp "$out/include/"
@@ -38,7 +109,7 @@ let
         Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
         Cflags: -I$out/include
         EOF
-      '';
+      '' + assertDarwinInstallName "lib${pname}.dylib";
     };
   minimage = geometryLibrary {
     pname = "minimage";
@@ -68,6 +139,7 @@ let
     cargoLock.lockFile = "${src}/Cargo.lock";
     cargoBuildFlags = [ "--lib" ];
     cargoTestFlags = [ "--lib" ];
+    preBuild = darwinCdylibHook "libreadcon_core.dylib";
     postInstall = ''
       mkdir -p "$out/include" "$out/lib/pkgconfig"
       cp include/*.h include/*.hpp "$out/include/"
@@ -82,7 +154,7 @@ let
       Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
       Cflags: -I$out/include
       EOF
-    '';
+    '' + assertDarwinInstallName "libreadcon_core.dylib";
   };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
