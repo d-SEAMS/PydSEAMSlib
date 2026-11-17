@@ -53,6 +53,7 @@ docs = [
   "myst-parser",
   "sphinx-copybutton",
   "sphinx-design",
+  "sphinx-sitemap",
   "sphinxcontrib-bibtex",
   "sphinx-contributors",
   "sphinxcontrib-mermaid>=1.0",

@@ -49,6 +49,7 @@ extensions = [
     "sphinx_contributors",
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinx_sitemap",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.mermaid",
 ]
@@ -69,7 +70,13 @@ master_doc = "index"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "shibuya"
-html_title = "pydseams"
+html_title = "pydseams Python API documentation"
+html_meta = {
+    "description": (
+        "Python APIs for d-SEAMS molecular simulation trajectory analysis, "
+        "including ice, clathrate, ring, cage, and order-parameter methods."
+    ),
+}
 html_static_path = ["_static"]
 # llms.txt at the site root, from the repository root.
 html_extra_path = ["../../llms.txt"]
@@ -140,6 +147,7 @@ html_sidebars = {
 }
 
 html_baseurl = "https://python.dseams.info/"
+sitemap_url_scheme = "{link}"
 
 # --- Plugin options
 

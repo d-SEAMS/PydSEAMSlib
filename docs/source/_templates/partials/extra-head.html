@@ -1,3 +1,44 @@
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="description" content="Python APIs for d-SEAMS molecular simulation trajectory analysis, including ice, clathrate, ring, cage, and order-parameter methods.">
+{% if not sourcename %}
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://python.dseams.info/{{ pagename|e }}.html">
+<meta property="og:title" content="{{ title|striptags|e }} - pydseams Python API">
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta property="og:description" content="Python APIs for d-SEAMS molecular simulation trajectory analysis, including ice, clathrate, ring, cage, and order-parameter methods.">
+<meta property="og:site_name" content="pydseams Python API documentation">
+<meta name="twitter:title" content="{{ title|striptags|e }} - pydseams Python API">
+<meta name="twitter:description" content="Python APIs for d-SEAMS molecular simulation trajectory analysis, including ice, clathrate, ring, cage, and order-parameter methods.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://python.dseams.info/#application",
+      "name": "pydseamslib",
+      "description": "Python APIs for the d-SEAMS molecular simulation analysis engine.",
+      "applicationCategory": "ScientificApplication",
+      "operatingSystem": "Linux, macOS",
+      "url": "https://python.dseams.info/",
+      "downloadUrl": "https://pypi.org/project/pydseamslib/",
+      "softwareVersion": "{{ release|e }}",
+      "license": "https://spdx.org/licenses/MIT.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://github.com/d-SEAMS/PydSEAMSlib#source",
+      "name": "PydSEAMSlib",
+      "codeRepository": "https://github.com/d-SEAMS/PydSEAMSlib",
+      "programmingLanguage": ["Python", "C++"],
+      "runtimePlatform": "Python 3.11 or later",
+      "license": "https://spdx.org/licenses/MIT.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    }
+  ]
+}
+</script>

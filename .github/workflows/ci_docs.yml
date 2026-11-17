@@ -24,8 +24,12 @@ jobs:
         run: |
           pip install numpy sphinx shibuya myst-parser sphinx-copybutton \
             sphinx-design sphinxcontrib-bibtex sphinx-contributors \
-            sphinxcontrib-mermaid
+            sphinxcontrib-mermaid sphinx-sitemap
           sphinx-build -b html docs/source html
+      - name: SEO metadata
+        run: |
+          python docs/check_seo.py --self-test
+          python docs/check_seo.py html
       - name: Link check
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
