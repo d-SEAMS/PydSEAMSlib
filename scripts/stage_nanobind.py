@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
 """Copy installed nanobind sources into the build directory."""
 

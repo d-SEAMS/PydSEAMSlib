@@ -212,6 +212,7 @@ python3.pkgs.buildPythonPackage {
       ../README.md
       ../LICENSE
       ../examples
+      ../scripts/stage_nanobind.py
       ../scripts/dist_subprojects.py
       ../src
       ../tests
