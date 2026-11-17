@@ -1,0 +1,6 @@
+# The published site and the source links on main trail the branch
+# under test; the built pages are checked as local files instead.
+^https://d-seams\.github\.io/PydSEAMSlib/
+^https://github\.com/d-SEAMS/PydSEAMSlib/(blob|edit)/main/docs/
+# ACS answers automated clients with 403.
+^https://doi\.org/10\.1021/
