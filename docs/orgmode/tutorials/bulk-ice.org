@@ -12,8 +12,8 @@ The result is a labeled oxygen set and a reason the two scores disagree.
 - The in-tree dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
 Python and Lua are not required.
-The Frame tutorial lives in [[https://d-seams.github.io/PydSEAMSlib/][pydseams]].
-Lua is [[https://d-seams.github.io/yodaStruct/][dseams]].
+The Frame tutorial lives in [[https://python.dseams.info/][pydseams]].
+Lua is [[https://lua.dseams.info/][dseams]].
 
 * Learning Objectives
 
@@ -159,8 +159,8 @@ CageScore(n_ih=0, n_ic=0, n_water=250)
 Those counts are the cutoff list, the same list as Step 2.
 ~import pydseamslib~ is the released Frame package.
 The in-tree module is ~import dseams~, built from ~libseams~.
-The Frame walkthrough is [[https://d-seams.github.io/PydSEAMSlib/][pydseams]].
-Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
+The Frame walkthrough is [[https://python.dseams.info/][pydseams]].
+Lua is [[https://lua.dseams.info/][require("dseams")]].
 
 * Troubleshooting
 
@@ -177,8 +177,8 @@ Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
 
 - [[https://docs.dseams.info][Classify a dump you already have]] (frame ranges, ~--graph~, ~--jobs~)
 - [[https://docs.dseams.info][CHILL+ versus cages]]
-- [[https://d-seams.github.io/PydSEAMSlib/][pydseams Frame tutorial]]
-- [[https://d-seams.github.io/yodaStruct/][Lua read-and-classify]]
+- [[https://python.dseams.info/][pydseams Frame tutorial]]
+- [[https://lua.dseams.info/][Lua read-and-classify]]
 
 * Summary
 

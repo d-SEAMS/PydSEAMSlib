@@ -5,7 +5,7 @@ ASE integration
 
 Turn an ASE ``Atoms`` into labels. The engine repository does not
 install Python. The full howto is
-`pydseams ASE <https://d-seams.github.io/PydSEAMSlib/>`_.
+`pydseams ASE <https://python.dseams.info/>`_.
 
 .. code:: bash
 
