@@ -80,8 +80,12 @@ html_meta = {
 html_static_path = ["_static"]
 # Machine-readable discovery files at the site root.
 html_extra_path = ["../../llms.txt", "../robots.txt"]
-html_favicon = "_static/logo/pydseams-icon.ico"
-html_css_files = ["custom.css"]
+html_favicon = "_static/dseams/favicon.ico"
+html_css_files = [
+    "dseams/dseams-tokens.css",
+    "dseams/dseams-family.css",
+    "dseams/dseams-shibuya.css",
+]
 
 html_context = {
     "source_type": "github",
@@ -91,57 +95,28 @@ html_context = {
     "source_docs_path": "/docs/source/",
 }
 
-# Mermaid: use default CDN; diagrams authorable via ``.. mermaid::`` (from Org RST export).
+# Mermaid: vendored library; diagrams authorable via ``.. mermaid::`` (from Org RST export).
 mermaid_version = "11.4.0"
-mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
+mermaid_use_local = "dseams/mermaid.mjs"
+mermaid_init_config = {
+    "startOnLoad": False,
+    "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif"},
+}
 
 html_theme_options = {
     "github_url": "https://github.com/d-SEAMS/PydSEAMSlib",
-    "accent_color": "teal",
+    "accent_color": "blue",
+    "show_ai_links": False,
     "dark_code": True,
     "globaltoc_expand_depth": 1,
     "toctree_collapse": True,
     "toctree_maxdepth": 3,
     "toctree_titles_only": True,
-    "light_logo": "_static/logo/pydseams-logo-light.png",
-    "dark_logo": "_static/logo/pydseams-logo-dark.png",
-    "nav_links": [
-        {
-            "title": "Ecosystem",
-            "children": [
-                {
-                    "title": "d-SEAMS engine",
-                    "url": "https://docs.dseams.info",
-                    "summary": "libyodaLib and the seams CLI",
-                    "external": True,
-                },
-                {
-                    "title": "pydseams",
-                    "url": "https://python.dseams.info/",
-                    "summary": "Python Frame API on yoda",
-                    "external": True,
-                },
-                {
-                    "title": "dseams (Lua)",
-                    "url": "https://lua.dseams.info/",
-                    "summary": 'require("dseams") and Fennel',
-                    "external": True,
-                },
-                {
-                    "title": "linkcell",
-                    "url": "https://github.com/d-SEAMS/linkcell",
-                    "summary": "Periodic linked-cell k-nearest neighbours",
-                    "external": True,
-                },
-            ],
-        },
-    ],
 }
 
 html_sidebars = {
     "**": [
         "sidebars/localtoc.html",
-        "sidebars/repo-stats.html",
         "sidebars/edit-this-page.html",
     ],
 }

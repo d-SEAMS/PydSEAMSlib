@@ -6,18 +6,7 @@ pydseams
 .. raw:: html
 
    <p class="dseams-hero">
-     <img class="dseams-hero-logo dseams-hero-logo--light"
-          src="_static/logo/pydseams-logo-light.png"
-          alt="pydseams"
-          width="320"
-          height="320"
-          loading="eager" />
-     <img class="dseams-hero-logo dseams-hero-logo--dark"
-          src="_static/logo/pydseams-logo-dark.png"
-          alt="pydseams"
-          width="320"
-          height="320"
-          loading="eager" />
+     <img src="_static/dseams/dseams-logo.png" alt="" width="128" height="128" />
    </p>
 
 .. grid:: 1 2 3 3
