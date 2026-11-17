@@ -78,6 +78,24 @@ print(frame.chill_plus())
 print(frame.cages())
 #+end_src
 
+* Book and video
+
+The d-SEAMS book covers the Python front end in
+[[https://docs.dseams.info/stable/python.html][Python]] and the
+[[https://docs.dseams.info/reference/python-frame.html][Python Frame]]
+reference. The walkthrough video is on
+[[https://odysee.com/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa][Odysee]].
+
+#+begin_export rst
+.. raw:: html
+
+   <iframe class="dseams-video"
+           src="https://odysee.com/$/embed/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa"
+           title="pydseams walkthrough"
+           width="100%" style="aspect-ratio: 16 / 9; border: 0;"
+           loading="lazy" allowfullscreen></iframe>
+#+end_export
+
 * Suite stack
 
 Python helpers sit on the compiled ~yoda~ module. The same

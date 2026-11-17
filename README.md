@@ -48,6 +48,12 @@ nix develop
 Docs: `docs/orgmode/` (ox-rst) and `docs/source/` (Shibuya).
 Site: <https://d-seams.github.io/PydSEAMSlib/>.
 
+Book: [Python](https://docs.dseams.info/stable/python.html) and the
+[Python Frame](https://docs.dseams.info/reference/python-frame.html)
+reference in the d-SEAMS book.
+Video: [pydseams walkthrough](https://odysee.com/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa)
+on Odysee.
+
 ```python
 import pydseams as ds
 

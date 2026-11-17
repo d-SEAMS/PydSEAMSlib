@@ -74,6 +74,23 @@ neighbour backends (vesin cutoff lists, linkcell k-NN).
     print(frame.chill_plus())
     print(frame.cages())
 
+Book and video
+--------------
+
+The d-SEAMS book covers the Python front end in
+`Python <https://docs.dseams.info/stable/python.html>`_ and the
+`Python Frame <https://docs.dseams.info/reference/python-frame.html>`_
+reference. The walkthrough video is on
+`Odysee <https://odysee.com/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa>`_.
+
+.. raw:: html
+
+   <iframe class="dseams-video"
+           src="https://odysee.com/$/embed/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa"
+           title="pydseams walkthrough"
+           width="100%" style="aspect-ratio: 16 / 9; border: 0;"
+           loading="lazy" allowfullscreen></iframe>
+
 Suite stack
 -----------
 
