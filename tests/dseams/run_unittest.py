@@ -36,26 +36,42 @@ if not cores:
     sys.exit(77)
 
 stage = build / "python-stage"
+
+
+def publish(source, dest):
+    """Put source at dest without ever leaving a partial file there.
+
+    meson test runs python_dseams and python_dseams_no_checkout at the same
+    time, and both publish into this directory. Copying over dest rewrites
+    the inode another process may have mapped or be loading, and that process
+    dies with signal 11 or 7. A rename leaves the old inode intact for the
+    processes that have it open.
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    partial = dest.with_name(f".{dest.name}.{os.getpid()}.partial")
+    try:
+        shutil.copy(source, partial)
+        os.replace(partial, dest)
+    finally:
+        partial.unlink(missing_ok=True)
+
+
 pkg = stage / "dseams"
-pkg.mkdir(parents=True, exist_ok=True)
 package = src / "src" / "dseams"
 for name in ("__init__.py", "__main__.py", "frames.py", "userframe.py"):
-    shutil.copy(package / name, pkg / name)
+    publish(package / name, pkg / name)
 for so in cores:
-    shutil.copy(so, pkg / so.name)
+    publish(so, pkg / so.name)
 
 # Doc snippets import pydseams.yoda. The extension is built at the top of
 # the build tree; put it next to a copy of the package so that import works.
 front = stage / "pydseams"
-front.mkdir(parents=True, exist_ok=True)
 source_front = src / "src" / "pydseams"
 for path in source_front.rglob("*.py"):
-    dest = front / path.relative_to(source_front)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(path, dest)
+    publish(path, front / path.relative_to(source_front))
 for pattern in ("yoda*.so", "yoda*.pyd", "yoda*.dylib"):
     for shared in build.glob(pattern):
-        shutil.copy(shared, front / shared.name)
+        publish(shared, front / shared.name)
 
 if os.environ.get("SEAMS_LIB") and not os.environ.get("SEAMS_LIBDIR"):
     os.environ["SEAMS_LIBDIR"] = str(Path(os.environ["SEAMS_LIB"]).resolve().parent)
