@@ -158,9 +158,9 @@ def module_ast_features(source):
     aliases = _testcase_aliases(tree)
     pytest_like = False
     for node in tree.body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
-            "test_"
-        ):
+        if isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef)
+        ) and node.name.startswith("test_"):
             pytest_like = True
             break
         if (

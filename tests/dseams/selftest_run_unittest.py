@@ -74,8 +74,7 @@ def main():
         {
             "test_plain_fail.py": "def test_plain():\n    assert False\n",
             "test_script_only.py": (
-                "def main():\n    return\n\n"
-                'if __name__ == "__main__":\n    main()\n'
+                'def main():\n    return\n\nif __name__ == "__main__":\n    main()\n'
             ),
         }
     ) as src:
@@ -123,8 +122,7 @@ def main():
     with stub_tree(
         {
             "test_script_only.py": (
-                "def main():\n    return\n\n"
-                'if __name__ == "__main__":\n    main()\n'
+                'def main():\n    return\n\nif __name__ == "__main__":\n    main()\n'
             ),
         }
     ) as src:
