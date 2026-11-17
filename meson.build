@@ -295,14 +295,33 @@ test(
     timeout: 120,
 )
 
+# Every module except the two that read the seams-core checkout.
+_dseams_common_env = environment()
+_dseams_common_env.set('DSEAMS_BUILD', meson.project_build_root())
+_dseams_common_env.set('DSEAMS_SRC', meson.project_source_root())
+_dseams_common_env.set('SEAMS_LIB', _seams_lib_path)
+_dseams_common_env.set('SEAMS_LANG_LIB', _seams_lang_path)
+test(
+    'python_dseams_no_checkout',
+    py,
+    args: [
+        files('tests/dseams/run_unittest.py'),
+        '--exclude',
+        'test_seams_package.py',
+        'test_doc_snippets.py',
+    ],
+    env: _dseams_common_env,
+    depends: [dseams_core] + _built_libs,
+    timeout: 180,
+)
+
 # Each of these needs the seams-core subproject checkout (input/, scripts/)
 # or the libraries meson just built under that checkout.
 if not use_installed_engine
     _engine_src = meson.project_source_root() / 'subprojects' / 'seams-core'
     _sub_libdir = meson.project_build_root() / 'subprojects' / 'seams-core' / 'src'
 
-    # python_dseams: run_unittest puts the subproject build tree on
-    # LD_LIBRARY_PATH and discovers tests that read its trajectories.
+    # python_dseams: the modules that read the seams-core checkout.
     _dseams_env = environment()
     _dseams_env.set('DSEAMS_BUILD', meson.project_build_root())
     _dseams_env.set('DSEAMS_SRC', meson.project_source_root())
@@ -312,7 +331,12 @@ if not use_installed_engine
     test(
         'python_dseams',
         py,
-        args: [files('tests/dseams/run_unittest.py')],
+        args: [
+            files('tests/dseams/run_unittest.py'),
+            '--include',
+            'test_seams_package.py',
+            'test_doc_snippets.py',
+        ],
         env: _dseams_env,
         depends: [dseams_core, seams_lang_lib],
         timeout: 180,

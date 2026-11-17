@@ -1,0 +1,1 @@
+`meson test python_dseams_no_checkout` now runs in both engine modes and covers every `tests/dseams/test_*.py` module except `test_seams_package.py` and `test_doc_snippets.py`. The checkout-dependent pair stays on the subproject-only `python_dseams` test.
