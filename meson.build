@@ -322,6 +322,18 @@ test(
     depends: [dseams_core] + _built_libs,
     timeout: 120,
 )
+# Twelve run_unittest.py processes at once for ten rounds, with
+# MALLOC_PERTURB_ cycling through 0, 20, 139 and 255. They share
+# <build>/python-stage, as the two tests above do when meson runs them side
+# by side.
+test(
+    'python_dseams_stage_concurrency',
+    py,
+    args: [files('tests/dseams/stage_concurrency.py')],
+    env: _dseams_common_env,
+    depends: [dseams_core] + _built_libs,
+    timeout: 600,
+)
 
 # Each of these needs the seams-core subproject checkout (input/, scripts/)
 # or the libraries meson just built under that checkout.
