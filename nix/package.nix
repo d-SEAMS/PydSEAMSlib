@@ -22,29 +22,52 @@ let
   # the build directory is gone. The Nix ld wrapper adds an rpath for
   # lib*.so only, so an @rpath id would not resolve these .dylib files.
   # Upstream Meson passes -Wl,-install_name for the cdylib; do the same,
-  # aimed at the installed store path. Build scripts and the staticlib are
-  # separate rustc invocations and do not get the flag.
+  # aimed at the installed store path.
+  #
+  # Cargo invokes $RUSTC_WRAPPER $RUSTC_WORKSPACE_WRAPPER $RUSTC args.
+  # `cargo auditable` is the workspace wrapper and treats its argv[1] as
+  # the rustc path (the word rustc, or an absolute rustc). A -C flag in
+  # that slot is executed as the compiler. The target-info probe also
+  # lists --crate-type cdylib, so the flag is added only for a real
+  # cdylib link and only after the rustc path.
   darwinCdylibHook = dylibFile:
     lib.optionalString stdenv.hostPlatform.isDarwin ''
       wrapdir=$(mktemp -d)
       cat > "$wrapdir/rustc-wrapper" <<'EOF'
       #!/bin/sh
-      response_has_cdylib() {
+      response_has() {
+        kind=$1
+        file=$2
         prev=
         while IFS= read -r line || [ -n "$line" ]; do
-          if [ "$prev" = "--crate-type" ] && [ "$line" = "cdylib" ]; then
-            return 0
+          if [ "$kind" = cdylib ]; then
+            if [ "$prev" = "--crate-type" ] && [ "$line" = "cdylib" ]; then
+              return 0
+            fi
+            case "$line" in
+              --crate-type=cdylib) return 0 ;;
+            esac
+          else
+            case "$line" in
+              --print|--print=*) return 0 ;;
+            esac
           fi
-          case "$line" in
-            --crate-type=cdylib) return 0 ;;
-          esac
           prev=$line
-        done < "$1"
+        done < "$file"
         return 1
       }
-      compiler=$1
+      is_rustc() {
+        [ "$1" = "rustc" ] || [ "$(basename "$1")" = "rustc" ]
+      }
+      next=$1
       shift
+      rustc_tok=
+      if ! is_rustc "$next"; then
+        rustc_tok=$1
+        shift
+      fi
       cdylib=0
+      probe=0
       prev=
       for arg in "$@"; do
         if [ "$prev" = "--crate-type" ] && [ "$arg" = "cdylib" ]; then
@@ -52,18 +75,25 @@ let
         fi
         case "$arg" in
           --crate-type=cdylib) cdylib=1 ;;
+          --print|--print=*) probe=1 ;;
           @*)
-            if response_has_cdylib "''${arg#@}"; then
+            if response_has cdylib "''${arg#@}"; then
               cdylib=1
+            fi
+            if response_has print "''${arg#@}"; then
+              probe=1
             fi
             ;;
         esac
         prev=$arg
       done
-      if [ "$cdylib" = 1 ]; then
-        exec "$compiler" -C "link-arg=-Wl,-install_name,$DYLIB_INSTALL_NAME" "$@"
+      if [ "$cdylib" = 1 ] && [ "$probe" = 0 ]; then
+        set -- -C "link-arg=-Wl,-install_name,$DYLIB_INSTALL_NAME" "$@"
       fi
-      exec "$compiler" "$@"
+      if [ -n "$rustc_tok" ]; then
+        exec "$next" "$rustc_tok" "$@"
+      fi
+      exec "$next" "$@"
       EOF
       chmod +x "$wrapdir/rustc-wrapper"
       export DYLIB_INSTALL_NAME="$out/lib/${dylibFile}"
