@@ -68,14 +68,114 @@ else
     )
 endif
 
-nanobind_dep = dependency(
-    'nanobind',
-    default_options: [
-        'python.allow_limited_api=' + get_option('python.allow_limited_api').to_string(),
-    ],
-)
-
 py = import('python').find_installation(pure: false)
+# An installed nanobind module ships headers and src/nb_combined.cpp, not a
+# library meson can find. Copy those sources into the build directory and
+# compile them. A wheel build with no module still uses the wrap.
+nb_root_r = run_command(
+    py,
+    '-c',
+    'import nanobind, pathlib; print(pathlib.Path(nanobind.__file__).resolve().parent)',
+    check: false,
+)
+nb_names = []
+if nb_root_r.returncode() == 0 and nb_root_r.stdout().strip() != ''
+    nb_list_r = run_command(
+        py,
+        '-c',
+        'import pathlib, sys; root = pathlib.Path(sys.argv[1]); print(" ".join(sorted(p.name for p in root.iterdir() if p.is_file())))',
+        nb_root_r.stdout().strip() / 'src',
+        check: false,
+    )
+    if nb_list_r.returncode() == 0 and nb_list_r.stdout().strip() != ''
+        nb_names = nb_list_r.stdout().split()
+    endif
+endif
+if nb_names.length() > 0 and nb_names.contains('nb_combined.cpp')
+    nb_root = nb_root_r.stdout().strip()
+    nb_inc = nb_root / 'include'
+    nb_robin = nb_root / 'ext' / 'robin_map' / 'include'
+    nb_rest = []
+    foreach nb_name : nb_names
+        if nb_name != 'nb_combined.cpp'
+            nb_rest += nb_name
+        endif
+    endforeach
+    # First output is the translation unit. The other files sit beside it
+    # so its quoted includes resolve, and they are not compiled on their own.
+    nb_outputs = ['nb_combined.cpp'] + nb_rest
+    nb_staged = custom_target(
+        'stage-nanobind',
+        output: nb_outputs,
+        command: [
+            py,
+            files('scripts/stage_nanobind.py'),
+            nb_root / 'src',
+            '@OUTDIR@',
+            nb_outputs,
+        ],
+    )
+    nb_compile = ['-I' + nb_inc, '-I' + nb_robin]
+    nb_link = []
+    if meson.get_compiler('cpp').get_argument_syntax() != 'msvc'
+        if host_machine.system() == 'darwin'
+            nb_compile += ['-fno-strict-aliasing']
+        else
+            nb_compile += [
+                '-fno-strict-aliasing',
+                '-ffunction-sections',
+                '-fdata-sections',
+            ]
+            nb_link += ['-Wl,--gc-sections']
+        endif
+    endif
+    if py.get_variable('Py_GIL_DISABLED', 0) != 0
+        nb_compile += ['-DNB_FREE_THREADED']
+    endif
+    if not get_option('debug')
+        nb_compile += ['-DNB_COMPACT_ASSERTIONS']
+        if host_machine.system() == 'darwin'
+            nb_link += ['-Wl,-dead_strip', '-Wl,-x', '-Wl,-S']
+        elif host_machine.system() != 'windows'
+            nb_link += ['-Wl,-s']
+        endif
+    endif
+    if host_machine.system() == 'darwin'
+        py_soabi = py.get_variable('SOABI')
+        if py_soabi.startswith('cp')
+            resp_file = nb_root / 'cmake' / 'darwin-ld-cpython.sym'
+        else
+            resp_file = nb_root / 'cmake' / 'darwin-ld-pypy.sym'
+        endif
+        nb_link += ['-Wl,@' + resp_file]
+    endif
+    limited_api_args = []
+    if get_option('python.allow_limited_api') and py.language_version().version_compare(
+        '>=3.12',
+    )
+        limited_api_args = ['-DPy_LIMITED_API=0x030C0000']
+    endif
+    nanobind_lib = static_library(
+        'nanobind',
+        nb_staged[0],
+        dependencies: py.dependency(),
+        cpp_args: nb_compile + limited_api_args,
+        pic: true,
+    )
+    nanobind_dep = declare_dependency(
+        link_with: nanobind_lib,
+        dependencies: py.dependency(),
+        compile_args: nb_compile,
+        link_args: nb_link,
+    )
+else
+    nanobind_dep = dependency(
+        'nanobind',
+        default_options: [
+            'python.allow_limited_api=' + get_option('python.allow_limited_api').to_string(),
+        ],
+    )
+endif
 # Stable-ABI wheel builds opt in; source builds use the interpreter ABI.
 limited_api = py.language_version().version_compare('>=3.12') ? '3.12' : ''
 
