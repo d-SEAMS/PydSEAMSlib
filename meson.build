@@ -314,6 +314,14 @@ test(
     depends: [dseams_core] + _built_libs,
     timeout: 180,
 )
+test(
+    'python_dseams_run_unittest_selftest',
+    py,
+    args: [files('tests/dseams/selftest_run_unittest.py')],
+    env: _dseams_common_env,
+    depends: [dseams_core] + _built_libs,
+    timeout: 120,
+)
 
 # Each of these needs the seams-core subproject checkout (input/, scripts/)
 # or the libraries meson just built under that checkout.
@@ -341,7 +349,6 @@ if not use_installed_engine
         depends: [dseams_core, seams_lang_lib],
         timeout: 180,
     )
-
     # python_seams_ctypes: reads input/traj and include/seams.h from the checkout.
     _ctypes_env = environment()
     _ctypes_env.set('PYTHONPATH', meson.project_source_root() / 'src')
