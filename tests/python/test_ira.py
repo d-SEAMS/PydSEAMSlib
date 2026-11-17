@@ -1,7 +1,8 @@
 """IRA/SOFI bindings. Skip the overlay when this build did not link libira."""
 
-import pydseams as ds
 import pytest
+
+import pydseams as ds
 
 
 def test_ira_available_is_bool():

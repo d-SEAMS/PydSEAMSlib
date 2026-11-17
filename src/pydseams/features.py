@@ -369,7 +369,7 @@ def to_pyemma_featurizer(featurizer, topology):
     engine instead, so the feature order is the one of
     :attr:`FEATURE_NAMES`.
     """
-    import pyemma  # noqa: F401  (optional, unmaintained since 2022)
+    import pyemma
 
     feat = pyemma.coordinates.featurizer(topology)
 

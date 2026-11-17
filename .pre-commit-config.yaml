@@ -7,7 +7,7 @@ exclude: |
   )
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.0.1
+  rev: v6.0.0
   hooks:
   -   id: trailing-whitespace
       exclude: |
@@ -71,10 +71,12 @@ repos:
       entry: ruff
       language: system
       types_or: [ python, pyi, jupyter ]
+      pass_filenames: false
       args: ["check", "--fix", "--unsafe-fixes", "."]
     - id: ruff-format
       name: ruff format
       entry: ruff
       language: system
       types_or: [ python, pyi, jupyter ]
+      pass_filenames: false
       args: ["format", "."]

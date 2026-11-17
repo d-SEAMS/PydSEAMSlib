@@ -13,6 +13,7 @@ problem.
 | [[file:ase.org][Classify ASE Atoms]] | ~from_ase~, ~to_ase~, select, bonding |
 | [[file:solvis.org][View a frame in solvis]] | ~to_solvis~ extra |
 | [[file:features.org][Features and ions]] | ~IceFeaturizer~, deeptime, PyEMMA, ions |
+| [[file:tools.org][Tools: MDAnalysis, OVITO]] | ~IceStates~, ~ice_states~, Colab |
 | [[file:faq.org][FAQ]] | Names, extras, formats |
 | [[file:troubleshooting.org][Troubleshooting]] | Import errors, cells, hydrogens |
 
@@ -24,6 +25,7 @@ problem.
    ase
    solvis
    features
+   tools
    faq
    troubleshooting
 #+end_export

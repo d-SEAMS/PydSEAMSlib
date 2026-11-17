@@ -34,8 +34,9 @@ def _library() -> None:
     if os.environ.get("SEAMS_LIB"):
         return
     root = repo_root()
+    name = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
     for rel in ("bbdir", "build"):
-        path = root / rel / "subprojects" / "seams-core" / "src" / "libseams.so"
+        path = root / rel / "subprojects" / "seams-core" / "src" / name
         if path.is_file():
             os.environ["SEAMS_LIB"] = str(path)
             return

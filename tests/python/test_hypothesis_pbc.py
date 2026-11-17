@@ -7,8 +7,8 @@ of the minimum image convention distance formula.
 import pytest
 
 hypothesis = pytest.importorskip("hypothesis")
-from hypothesis import given, settings  # noqa: E402
-from hypothesis import strategies as st  # noqa: E402
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 
 def periodic_dist_1d(dr, L):

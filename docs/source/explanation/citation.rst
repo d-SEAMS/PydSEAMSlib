@@ -22,6 +22,8 @@ BibTeX for that article lives in the docs bibliography
 (``docs/source/bibtex/pyseamsDocs.bib``). ``CITATION.cff`` at the
 repository root lists the same preferred citation.
 
+.. bibliography::
+
 The software
 ------------
 

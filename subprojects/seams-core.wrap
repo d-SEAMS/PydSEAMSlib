@@ -1,8 +1,5 @@
 [wrap-git]
 directory = seams-core
-# release/2.14.0 of the engine, after the language bindings moved out.
-# Becomes url = https://github.com/d-SEAMS/seams-core.git and
-# revision = v2.14.0 once d-SEAMS/seams-core publishes that tag.
-url = https://github.com/HaoZeke/seams-core.git
-revision = f9846e2f8797cd42937ed0d891a61ac941c963df
+url = https://github.com/d-SEAMS/seams-core.git
+revision = v2.14.0
 depth = 1

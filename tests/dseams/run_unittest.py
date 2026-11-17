@@ -4,6 +4,7 @@
 import os
 import shutil
 import sys
+import unittest
 from pathlib import Path
 
 try:
@@ -49,8 +50,6 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
     )
     env["DSEAMS_PY_READY"] = "1"
     os.execve(sys.executable, [sys.executable, __file__], env)
-
-import unittest
 
 suite = unittest.defaultTestLoader.discover(
     str(src / "tests" / "dseams"), pattern="test_*.py"

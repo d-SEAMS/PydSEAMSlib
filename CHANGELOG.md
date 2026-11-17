@@ -10,6 +10,33 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.0] - 2026-11-17
+
+### Added
+
+- A contributing guide at the repository root, `llms.txt` (also served at the docs site root), and a README section on developing against seams-core and the release order.
+- The Python tutorial and how-to pages, examples and ctypes checks move here from seams-core: bulk ice, ice and clathrate, rings, order parameters, confined water, paper figures, ASE integration, solvis, the `dseams` autodoc and language-task pages, `lang_tasks_python.py` and `science_tutorials.py`. `tests/dseams/test_doc_snippets.py` runs their Python blocks against the installed wheel.
+- `Frame.guest_occupancy_both(signature, guest_types, radius)` returns the radius and ray-parity occupancy of the same guests in the same signature cages, and `yoda.guestOccupancyInside` binds the engine's inside assignment.
+- `import dseams` ships in the `pydseamslib` wheel: the nanobind module over the seams-core 2.14 C API (`chill_plus`, `q4q6`, `neighbours`, `rings`, `dseams.Frame`), `cages`, `signature_cages` and `symmetry` through `libseams_lang`, and `dseams.userframe`. The sources and tests move here from seams-core with their history; `libseams` and `libseams_lang` are inside the wheel.
+- `src/seams` is the ctypes package over `libseams`, with the Python examples under `examples/python` and `examples/ctypes`. It is not in the wheel; `meson test` runs it against the subproject build.
+
+### Changed
+
+- The engine is seams-core 2.14.0. `FrameFingerprint.colored` and `KeyLibrary.colored` join the `coloured` names.
+- The engine wrap follows seams-core tag `v2.14.0`. That release builds the C API examples and fuzzers only with `with_tests`, adds `seams_rings_chordless`, and requires linkcell `v0.4.2`.
+- The package metadata states the licence as the SPDX expression `MIT` with `LICENSE` as its licence file (core metadata 2.4, PEP 639), replacing the free-text licence and the licence classifier.
+- This repository builds and publishes `pydseamslib` 2.14.0; seams-core no longer does. The sdist carries every subproject, the wheels are built from it on Linux (x86_64, aarch64) and macOS (arm64, x86_64), and PyPI trusted publishing runs from `build_wheels.yml` on a `v*` tag of d-SEAMS/PydSEAMSlib.
+- `pydseams` CHILL+ counts on cutoff neighbour lists change with the engine: seams-core 2.14.0 fixed the shell count, so `Frame.chill_plus()` on `tests/data/exampleTraj.lammpstrj` (oxygen, type 2) reports 9 interClathrate and 241 water where 2.11 reported 12 and 238.
+
+### Fixed
+
+- On macOS the `core_counts`, `lang_tasks_python`, `minimal_py`, `python_api` and `science_tutorials` examples, and the tests that run them, load `libseams.dylib` and `libseams_lang.dylib` instead of the Linux `.so` names, so the documentation checks pass against the macOS wheels.
+- The Nix flake builds seams-core tag `v2.14.0`, the revision `subprojects/seams-core.wrap` pins, with linkcell 0.4.2 and readcon-core 0.16.2 as the engine requires.
+- The citation page lists the d-SEAMS paper in a bibliography so its `:cite:` resolves, and the ASE cross-references load from `https://docs.ase-lib.org/`, where the ASE inventory moved.
+- The documentation is regenerated from its Org sources: the stray `#skip_lint_start` and `#skip_lint_end` lines are gone from the quickstart, ASE and features pages, the Python surface tables render instead of failing on an over-wide cell, and the hand edits (the CPython 3.11 wheel, `hydration_shell_rings`, `guest_occupancy`, `classify_topology` and the tools page) now live in the Org sources.
+- The published API reference documents `dseams` and `pydseams.features` again; the documentation build installs NumPy, which autodoc needs to import them.
+
+
 ## [2.11.1] - 2026-10-15
 
 ### Fixed

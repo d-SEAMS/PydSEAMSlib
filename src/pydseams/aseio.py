@@ -139,7 +139,7 @@ def frame_from_ase(cls, atoms, select="O", cutoff=3.5, bonded="auto"):
     ownership. Without it, each hydrogen belongs to the nearest selected atom
     under the minimum-image convention.
     """
-    _, Atoms, _ = _require_ase()
+    _, _Atoms, _ = _require_ase()
     if not hasattr(atoms, "get_positions"):
         raise TypeError("from_ase expects an ASE Atoms object")
     keep = _mask(atoms, select)

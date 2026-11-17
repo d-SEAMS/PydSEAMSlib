@@ -121,15 +121,27 @@ jobs:
     # The trusted publisher on
     # https://pypi.org/manage/project/pydseamslib/settings/publishing/
     # names d-SEAMS/PydSEAMSlib, workflow build_wheels.yml, environment pypi.
+    # Job permissions replace the workflow set, so the artifact download
+    # needs actions: read next to the OIDC token.
     environment:
       name: pypi
       url: https://pypi.org/p/pydseamslib
     permissions:
       id-token: write
+      actions: read
+      contents: read
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: dist
           merge-multiple: true
-      - run: ls -la dist
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Check the distributions
+        run: |
+          python -m pip install twine
+          compgen -G 'dist/*.tar.gz' >/dev/null
+          compgen -G 'dist/*.whl' >/dev/null
+          twine check dist/*
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

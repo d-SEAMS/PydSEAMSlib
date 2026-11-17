@@ -16,6 +16,106 @@
 }:
 
 let
+  # rustc passes -install_name only with -C rpath. Otherwise ld64 uses the
+  # cargo -o path, target/<triple>/release/deps/lib….dylib, as LC_ID_DYLIB.
+  # The next link copies that into LC_LOAD_DYLIB, and dyld opens it after
+  # the build directory is gone. The Nix ld wrapper adds an rpath for
+  # lib*.so only, so an @rpath id would not resolve these .dylib files.
+  # Upstream Meson passes -Wl,-install_name for the cdylib; do the same,
+  # aimed at the installed store path.
+  #
+  # Cargo invokes $RUSTC_WRAPPER $RUSTC_WORKSPACE_WRAPPER $RUSTC args.
+  # `cargo auditable` is the workspace wrapper and treats its argv[1] as
+  # the rustc path (the word rustc, or an absolute rustc). A -C flag in
+  # that slot is executed as the compiler. The target-info probe also
+  # lists --crate-type cdylib, so the flag is added only for a real
+  # cdylib link and only after the rustc path.
+  darwinCdylibHook = dylibFile:
+    lib.optionalString stdenv.hostPlatform.isDarwin ''
+      wrapdir=$(mktemp -d)
+      cat > "$wrapdir/rustc-wrapper" <<'EOF'
+      #!/bin/sh
+      response_has() {
+        kind=$1
+        file=$2
+        prev=
+        while IFS= read -r line || [ -n "$line" ]; do
+          if [ "$kind" = cdylib ]; then
+            if [ "$prev" = "--crate-type" ] && [ "$line" = "cdylib" ]; then
+              return 0
+            fi
+            case "$line" in
+              --crate-type=cdylib) return 0 ;;
+            esac
+          else
+            case "$line" in
+              --print|--print=*) return 0 ;;
+            esac
+          fi
+          prev=$line
+        done < "$file"
+        return 1
+      }
+      is_rustc() {
+        [ "$1" = "rustc" ] || [ "$(basename "$1")" = "rustc" ]
+      }
+      next=$1
+      shift
+      rustc_tok=
+      if ! is_rustc "$next"; then
+        rustc_tok=$1
+        shift
+      fi
+      cdylib=0
+      probe=0
+      prev=
+      for arg in "$@"; do
+        if [ "$prev" = "--crate-type" ] && [ "$arg" = "cdylib" ]; then
+          cdylib=1
+        fi
+        case "$arg" in
+          --crate-type=cdylib) cdylib=1 ;;
+          --print|--print=*) probe=1 ;;
+          @*)
+            if response_has cdylib "''${arg#@}"; then
+              cdylib=1
+            fi
+            if response_has print "''${arg#@}"; then
+              probe=1
+            fi
+            ;;
+        esac
+        prev=$arg
+      done
+      if [ "$cdylib" = 1 ] && [ "$probe" = 0 ]; then
+        set -- -C "link-arg=-Wl,-install_name,$DYLIB_INSTALL_NAME" "$@"
+      fi
+      if [ -n "$rustc_tok" ]; then
+        exec "$next" "$rustc_tok" "$@"
+      fi
+      exec "$next" "$@"
+      EOF
+      chmod +x "$wrapdir/rustc-wrapper"
+      export DYLIB_INSTALL_NAME="$out/lib/${dylibFile}"
+      export RUSTC_WRAPPER="$wrapdir/rustc-wrapper"
+    '';
+  assertDarwinInstallName = dylibFile:
+    lib.optionalString stdenv.hostPlatform.isDarwin ''
+      if command -v otool >/dev/null 2>&1; then
+        dump_id() { otool -D "$1"; }
+      elif command -v llvm-otool >/dev/null 2>&1; then
+        dump_id() { llvm-otool -D "$1"; }
+      else
+        echo "otool is required to check ${dylibFile}" >&2
+        exit 1
+      fi
+      got=$(dump_id "$out/lib/${dylibFile}" | awk 'NR==2 { print $1 }')
+      want="$out/lib/${dylibFile}"
+      if [ "$got" != "$want" ]; then
+        printf '%s: LC_ID_DYLIB is "%s", want "%s"\n' "${dylibFile}" "$got" "$want" >&2
+        exit 1
+      fi
+    '';
   geometryLibrary = { pname, version, owner, rev, hash }:
     rustPlatform.buildRustPackage rec {
       inherit pname version;
@@ -24,6 +124,7 @@ let
       cargoBuildFlags = [ "--package" pname "--lib" ];
       cargoTestFlags = [ "--package" pname ];
       RAYON_NUM_THREADS = "8";
+      preBuild = darwinCdylibHook "lib${pname}.dylib";
       postInstall = ''
         mkdir -p "$out/include" "$out/lib/pkgconfig"
         cp include/*.h include/*.hpp "$out/include/"
@@ -38,7 +139,7 @@ let
         Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
         Cflags: -I$out/include
         EOF
-      '';
+      '' + assertDarwinInstallName "lib${pname}.dylib";
     };
   minimage = geometryLibrary {
     pname = "minimage";
@@ -49,10 +150,41 @@ let
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
-    version = "0.3.11";
+    version = "0.4.2";
     owner = "d-SEAMS";
-    rev = "2e26b83c0c9bbc07d09eb056011dd8e2cec6f4a5";
-    hash = "sha256-36Zvbw/KgZw0VLUQstRIX27WXoan80JMKJNjkz9RgM0=";
+    rev = "v0.4.2";
+    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+  };
+  # seams-core reads .con frames through readcon-core (with_readcon is
+  # enabled in meson.build); the sandbox cannot run its cargo wrap.
+  readcon-core = rustPlatform.buildRustPackage rec {
+    pname = "readcon-core";
+    version = "0.16.2";
+    src = fetchFromGitHub {
+      owner = "lode-org";
+      repo = pname;
+      rev = "9e12ea9727d5f3c85d8eeb4d927beb634e1bdb59";
+      hash = "sha256-N3dH/eGnulSuq2aV0ghRul0v/OZZE5UBUUc/sUgnUB4=";
+    };
+    cargoLock.lockFile = "${src}/Cargo.lock";
+    cargoBuildFlags = [ "--lib" ];
+    cargoTestFlags = [ "--lib" ];
+    preBuild = darwinCdylibHook "libreadcon_core.dylib";
+    postInstall = ''
+      mkdir -p "$out/include" "$out/lib/pkgconfig"
+      cp include/*.h include/*.hpp "$out/include/"
+      cat > "$out/lib/pkgconfig/${pname}.pc" <<EOF
+      prefix=$out
+      libdir=$out/lib
+      includedir=$out/include
+      Name: ${pname}
+      Description: CON and convel reader
+      Version: ${version}
+      Libs: -L$out/lib -lreadcon_core
+      Libs.private: -lpthread -lm ${lib.optionalString (!stdenv.hostPlatform.isDarwin) "-ldl"}
+      Cflags: -I$out/include
+      EOF
+    '' + assertDarwinInstallName "libreadcon_core.dylib";
   };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
@@ -78,6 +210,9 @@ python3.pkgs.buildPythonPackage {
       ../meson.build
       ../pyproject.toml
       ../README.md
+      ../LICENSE
+      ../examples
+      ../scripts/dist_subprojects.py
       ../src
       ../tests
       ../subprojects/nanobind.wrap
@@ -93,7 +228,10 @@ python3.pkgs.buildPythonPackage {
     python3.pkgs.meson-python
   ];
 
-  build-system = [ python3.pkgs.meson-python ];
+  build-system = [
+    python3.pkgs.meson-python
+    python3.pkgs.ninja
+  ];
 
   buildInputs = [
     eigen
@@ -102,6 +240,7 @@ python3.pkgs.buildPythonPackage {
     libhwy
     minimage
     linkcell
+    readcon-core
     python3.pkgs.nanobind
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
@@ -109,7 +248,7 @@ python3.pkgs.buildPythonPackage {
   dependencies = [ python3.pkgs.numpy ];
 
   nativeCheckInputs = [
-    python3.pkgs.pytest
+    python3.pkgs.pytestCheckHook
     python3.pkgs.hypothesis
     python3.pkgs.ase
   ];

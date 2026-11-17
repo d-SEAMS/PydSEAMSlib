@@ -52,7 +52,8 @@ def main():
     n = len(xyz) // 3
     if n != 46:
         raise SystemExit(f"atom count {n}")
-    lib = ctypes.CDLL(os.path.join(libdir, "libseams.so"))
+    name = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
+    lib = ctypes.CDLL(os.path.join(libdir, name))
     lib.seams_version_string.restype = ctypes.c_char_p
     lib.seams_last_error.restype = ctypes.c_char_p
     lib.seams_set_num_threads.argtypes = [ctypes.c_int]

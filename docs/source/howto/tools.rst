@@ -1,5 +1,7 @@
+===============================
 MDAnalysis, OVITO and notebooks
 ===============================
+
 
 ``pydseams.adapters`` connects the engine to the tools a trajectory
 already lives in.
@@ -11,7 +13,7 @@ MDAnalysis
 ``AtomGroup``; ions are a second group read against the assignment.
 Boxes must be orthorhombic.
 
-.. code-block:: python
+.. code:: python
 
     import MDAnalysis as mda
     from pydseams.adapters import IceStates
@@ -29,7 +31,7 @@ OVITO
 and colour by the ``Ice state`` particle property (0 water, 1 cubic,
 2 hexagonal, 3 mixed; ``-1`` outside the oxygen type).
 
-.. code-block:: python
+.. code:: python
 
     from functools import partial
     from ovito.io import import_file

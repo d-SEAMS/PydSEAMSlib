@@ -7,15 +7,11 @@ Quickstart
 Install
 -------
 
-#skip_lint_start
-
 .. code:: bash
 
     pip install pydseamslib
     pip install 'pydseamslib[ase]'
     pip install 'pydseamslib[solvis]'
-
-#skip_lint_end
 
 ``pydseams`` is the package. The ``[ase]`` extra pulls ASE for ``from_ase``
 / ``to_ase``. The ``[solvis]`` extra pulls ASE plus solvis-tools for
@@ -76,27 +72,19 @@ Seeded cages and mixed ASE selections
 ``cages`` with the seeded flag on calls. Ring-adjacent completion fills
 the last vertex of a six-ring whose other vertices carry a label:
 
-#skip_lint_start
-
 .. code:: python
 
     print(frame.seeded_affiliation(ring_adjacent=True))
     print(frame.cages(seeded=True, ring_adjacent=True))
-
-#skip_lint_end
 
 ``IceFeaturizer`` turns the same flag on by default.
 
 Pass a sequence to ``from_ase`` when the ASE ``Atoms`` mix water and
 salt. The listed species stay in the cloud:
 
-#skip_lint_start
-
 .. code:: python
 
     frame = ds.from_ase(atoms, select=("O", "Na", "Cl"))
-
-#skip_lint_end
 
 The first entry is the analysed water. The other species keep their
 atomic numbers as ``c_type`` for ``ion_environment``. See the

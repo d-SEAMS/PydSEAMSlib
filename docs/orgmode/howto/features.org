@@ -105,7 +105,23 @@ feature vector.
 
 ~Frame.ion_environment~ is the compiled path for the same first-shell
 class. That method turns ~ring_adjacent~ on by default and passes the
-flag through to ~seeded_affiliation~.
+flag through to ~seeded_affiliation~. Its result lists each ion's
+shell in ~members~.
+
+~Frame.hydration_shell_rings~ counts the primitive rings of the water
+network that pass through each shell, by ring size. An ion is not a
+vertex of the network, so the rings it would have closed are gone; the
+shell census says how far the network survives around it:
+
+#+begin_src python
+env, census = frame.hydration_shell_rings((3, 4))
+for ion, row in zip(env.ion, census):
+    print(ion, row[6], "six-rings through the shell")
+#+end_src
+
+~Frame.guest_occupancy~ places guests (methane, THF, ions) in cages
+given as vertex index lists, by the nearest periodic cage centroid
+within a radius, and reports occupied, multiply occupied and free.
 
 * See also
 

@@ -1,9 +1,10 @@
 # Copyright (c) d-SEAMS developers
 """CHILL+ and ring counts for Ice Ih and sII, through libseams.
 
-``SEAMS_LIBDIR`` is the directory that holds ``libseams.so``. The numbers
-are ``seams_chill_plus`` and ``seams_rings_histogram`` at 3.5 angstroms
-on ``input/traj/ice1h.lammpstrj`` and ``input/traj/genice_sII.lammpstrj``.
+``SEAMS_LIBDIR`` is the directory that holds ``libseams.so``
+(``libseams.dylib`` on macOS). The numbers are ``seams_chill_plus`` and
+``seams_rings_histogram`` at 3.5 angstroms on ``input/traj/ice1h.lammpstrj``
+and ``input/traj/genice_sII.lammpstrj``.
 """
 
 import ctypes
@@ -18,11 +19,14 @@ ROOT = Path(
         Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
     )
 )
-sys.path.insert(0, str(ROOT / "scripts"))
-from lammps_box import cell_from_bounds
+LIBSEAMS = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
 
 
 def _load_dump(path):
+    if str(ROOT / "scripts") not in sys.path:
+        sys.path.insert(0, str(ROOT / "scripts"))
+    from lammps_box import cell_from_bounds
+
     xyz = []
     types = []
     box = None
@@ -82,8 +86,8 @@ def check(libdir=None):
     """
     libdir = libdir or os.environ.get("SEAMS_LIBDIR", "")
     if not libdir:
-        raise SystemExit("set SEAMS_LIBDIR to the directory that holds libseams.so")
-    lib = ctypes.CDLL(os.path.join(libdir, "libseams.so"))
+        raise SystemExit(f"set SEAMS_LIBDIR to the directory that holds {LIBSEAMS}")
+    lib = ctypes.CDLL(os.path.join(libdir, LIBSEAMS))
     lib.seams_system_create.restype = ctypes.c_void_p
     lib.seams_system_set_frame.argtypes = [
         ctypes.c_void_p,

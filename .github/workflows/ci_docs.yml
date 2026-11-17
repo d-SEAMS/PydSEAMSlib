@@ -1,10 +1,5 @@
 # Kanged from eOn : https://github.com/TheochemUI/eOn
 name: Build documentation
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 on:
   push:
     branches: [main]
@@ -27,7 +22,7 @@ jobs:
           python-version: "3.12"
       - name: Generate Docs
         run: |
-          pip install sphinx shibuya myst-parser sphinx-copybutton \
+          pip install numpy sphinx shibuya myst-parser sphinx-copybutton \
             sphinx-design sphinxcontrib-bibtex sphinx-contributors \
             sphinxcontrib-mermaid
           sphinx-build -b html docs/source html
@@ -41,6 +36,11 @@ jobs:
     needs: build_docs
     runs-on: ubuntu-latest
     if: (github.event.pull_request.merged == true || github.event_name == 'push') && github.repository == 'd-SEAMS/PydSEAMSlib' && github.ref == 'refs/heads/main'
+    # One deployment at a time; a queued deployment waits for the running
+    # one instead of cancelling it. Pull request builds are not in the group.
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source

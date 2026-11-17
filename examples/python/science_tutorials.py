@@ -11,8 +11,8 @@ Usage: science_tutorials.py [ROOT [BUILD]]
 ROOT is a seams-core checkout (default SEAMS_CORE_SRC, else
 subprojects/seams-core); the inputs, the C and R programs, toolchain.py
 and the render helpers are read from it. BUILD holds src/libseams.so
-(default SEAMS_BUILD, else ROOT/bbdir). Figures go to SEAMS_FIGURES,
-else ROOT/docs/source/science/figures.
+(src/libseams.dylib on macOS; default SEAMS_BUILD, else ROOT/bbdir).
+Figures go to SEAMS_FIGURES, else ROOT/docs/source/science/figures.
 """
 
 from __future__ import annotations
@@ -28,15 +28,17 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import numpy as np
+
 ENGINE = Path(
     os.environ.get(
         "SEAMS_CORE_SRC",
         Path(__file__).resolve().parents[2] / "subprojects" / "seams-core",
     )
 )
+# toolchain.py, imported where a C program is built.
 sys.path.insert(0, str(ENGINE / "docs"))
-import numpy as np
-from toolchain import c_compiler, link_command
+LIBSEAMS = "libseams.dylib" if sys.platform == "darwin" else "libseams.so"
 
 NAMES = (
     "cubic",
@@ -64,7 +66,7 @@ SKIP = (
 
 
 def _lib(libdir: Path):
-    lib = ctypes.CDLL(str(libdir / "libseams.so"))
+    lib = ctypes.CDLL(str(libdir / LIBSEAMS))
     lib.seams_system_create.restype = ctypes.c_void_p
     lib.seams_system_destroy.argtypes = [ctypes.c_void_p]
     lib.seams_system_read.argtypes = [
@@ -568,6 +570,8 @@ def expect(condition, message):
 
 
 def run_c(root: Path, build: Path, mode: str, extra: list[str]):
+    from toolchain import c_compiler, link_command
+
     cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)
@@ -614,7 +618,7 @@ def _language_env(libdir: Path):
         "LD_PRELOAD",
     ):
         env.pop(key, None)
-    env["SEAMS_LIB"] = str(libdir / "libseams.so")
+    env["SEAMS_LIB"] = str(libdir / LIBSEAMS)
     env["LD_LIBRARY_PATH"] = str(libdir) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
     return env
 
@@ -670,6 +674,8 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
     if rscript is None:
         print("r tutorial skipped: Rscript was not found")
         return
+    from toolchain import c_compiler, link_command
+
     cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)
@@ -847,7 +853,7 @@ def tutorials(root: Path, build: Path):
         print(f"brine tend thickness {late['thickness']:.4f} k {late['k']:.1f}")
         render_brine_scene(root, frames[1], figures)
 
-    if build.is_dir() and (build / "src" / "libseams.so").is_file():
+    if build.is_dir() and (build / "src" / LIBSEAMS).is_file():
         c_interface = run_c(root, build, "interface", [])
         expect("interface hexagonal 352" in c_interface, c_interface)
         expect("interface layers HHHHHHHHC" in c_interface, c_interface)

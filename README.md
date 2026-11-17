@@ -51,7 +51,7 @@ Site: <https://d-seams.github.io/PydSEAMSlib/>.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")   # also .xyz, .pdb, .gro, .dcd, .con
+frame = ds.read("water.lammpstrj")  # also .xyz, .pdb, .gro, .dcd, .con
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -65,7 +65,7 @@ print(mixed.pairs(ions))
 
 frame = ds.from_ase(atoms)
 atoms = frame.to_ase()
-system = frame.to_solvis()           # optional extra
+system = frame.to_solvis()  # optional extra
 ```
 
 `ds.read` picks the engine reader from the suffix. `yoda` is the compiled
@@ -118,14 +118,16 @@ lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
 ## Development
 
 The engine is [seams-core](https://github.com/d-SEAMS/seams-core), a
-Meson subproject here. `subprojects/seams-core.wrap` pins the revision
-the wheel builds, and the other wraps carry the revisions seams-core
-pins. Engine changes go to d-SEAMS/seams-core, not to this repository.
+Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.0`,
+and the other wraps carry the revisions that tag pins. Engine changes
+go to d-SEAMS/seams-core, not to this repository.
 The contributing guide at the repository root has the layout, the test
 commands and the commit conventions.
 
-The build needs a C++20 compiler and `cargo` (linkcell, minimage and
-readcon are Rust crates):
+The build needs a C++20 compiler and `cargo` with Rust 1.88 or newer
+(linkcell, minimage and readcon are Rust crates; readcon-core and
+readcon-db declare `rust-version = "1.88"`). Installing the sdist
+builds the same tree, so it needs them too:
 
 ```bash
 meson setup bbdir --force-fallback-for=eigen3
@@ -149,8 +151,8 @@ Release order:
 
 1. d-SEAMS/seams-core tags `vX.Y.Z`.
 2. `subprojects/seams-core.wrap` moves to that tag, and the version in
-   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py` and
-   `CITATION.cff` becomes `X.Y.Z`.
+   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py`,
+   `tests/python/test_bindings.py` and `CITATION.cff` becomes `X.Y.Z`.
 3. `towncrier build --version X.Y.Z`, then tag `vX.Y.Z` on
    d-SEAMS/PydSEAMSlib.
 4. `build_wheels.yml` builds the sdist and the wheels and publishes them

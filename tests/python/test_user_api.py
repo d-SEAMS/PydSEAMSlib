@@ -344,11 +344,7 @@ def test_from_xyz_keeps_a_nitrogen_pair(tmp_path):
 
     xyz = tmp_path / "sin.xyz"
     xyz.write_text(
-        "4\n\n"
-        "Si 0.0 0.0 0.0\n"
-        "Si 3.0 0.0 0.0\n"
-        "N 0.0 3.0 0.0\n"
-        "N 1.1 3.0 0.0\n"
+        "4\n\nSi 0.0 0.0 0.0\nSi 3.0 0.0 0.0\nN 0.0 3.0 0.0\nN 1.1 3.0 0.0\n"
     )
     frame = Frame.from_xyz(xyz, cutoff=2.0, periodic=False)
     types = {int(pt.c_type) for pt in frame.cloud.pts}
@@ -384,6 +380,7 @@ def test_from_ase_optional():
     np = pytest.importorskip("numpy")
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     src = read(TRAJ)
@@ -405,6 +402,7 @@ def test_from_ase_optional():
 def test_from_ase_auto_assigns_hydrogens_to_nearest_oxygen():
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -431,6 +429,7 @@ def test_from_ase_preserves_mol_id_for_hydrogen_donors():
     np = pytest.importorskip("numpy")
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -457,6 +456,7 @@ def test_from_ase_preserves_mol_id_for_hydrogen_donors():
 def test_from_ase_all_atom_auto_uses_cutoff_bonding():
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -474,6 +474,7 @@ def test_from_ase_all_atom_auto_uses_cutoff_bonding():
 def test_from_ase_hbond_rejects_selected_hydrogens():
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -490,6 +491,7 @@ def test_from_ase_hbond_rejects_selected_hydrogens():
 def test_to_ase_exports_chill_plus_labels():
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -516,6 +518,7 @@ def test_to_ase_exports_chill_plus_labels():
 def test_to_ase_exports_cage_flags():
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms(
@@ -542,6 +545,7 @@ def test_from_ase_roundtrips_general_periodic_cell():
     np = pytest.importorskip("numpy")
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     angle = np.deg2rad(31.0)
@@ -588,6 +592,7 @@ def test_from_ase_roundtrips_general_periodic_cell():
 def test_from_ase_rejects_unsupported_periodicity(cell, pbc, match):
     pytest.importorskip("ase")
     from ase import Atoms
+
     from pydseams import from_ase
 
     atoms = Atoms("O", positions=[[0.0, 0.0, 0.0]], cell=cell, pbc=pbc)

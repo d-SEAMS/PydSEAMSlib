@@ -225,8 +225,14 @@ foreach _script : [
 endforeach
 _science_env = environment()
 _science_env.set('SEAMS_CORE_SRC', _engine_src)
-_science_env.set('SEAMS_LIBDIR', meson.project_build_root() / 'subprojects' / 'seams-core' / 'src')
-_science_env.set('SEAMS_FIGURES', meson.project_build_root() / 'docs-science' / 'figures')
+_science_env.set(
+    'SEAMS_LIBDIR',
+    meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
+)
+_science_env.set(
+    'SEAMS_FIGURES',
+    meson.project_build_root() / 'docs-science' / 'figures',
+)
 test(
     'docs_science_tutorials',
     py,

@@ -122,7 +122,9 @@ def test_ion_without_water_shell_is_liquid():
     numbers = [1] * (len(pos) - 1) + [4]
     frame = Frame.from_arrays(pos, cell, numbers=numbers, cutoff=3.5)
     states = np.zeros(len(pos), dtype=np.int8)
-    ions, shell, fraction, ion_states = ion_environment(frame, states, (4,), cutoff=0.5)
+    _ions, shell, _fraction, ion_states = ion_environment(
+        frame, states, (4,), cutoff=0.5
+    )
     assert shell.tolist() == [0]
     assert ion_states.tolist() == [ION_LIQUID]
     assert ION_FRONT not in ion_states
@@ -148,12 +150,12 @@ def test_from_ase_sequence_select_keeps_ions_for_ion_environment():
     frame = Frame.from_ase(atoms, select=("O", "Na", "Cl"), bonded="cutoff")
     assert frame.atom_type == 8
     assert frame.n_atoms == len(pos)
-    types = sorted(set(p.c_type for p in frame.cloud.pts))
+    types = sorted({p.c_type for p in frame.cloud.pts})
     assert types == [8, 11, 17]
     feat = IceFeaturizer(frame, chill=False, ion_types=(11, 17))
     x, states = feat.frame_features()
     names = dict(zip(feat.feature_names, x))
-    ions, shell, fraction, ion_states = ion_environment(frame, states, (11, 17))
+    ions, shell, _fraction, ion_states = ion_environment(frame, states, (11, 17))
     assert sorted(ions.tolist()) == [5, 40]
     assert shell.tolist() == [4, 4]
     assert ion_states.tolist() == [ION_ICE, ION_ICE]

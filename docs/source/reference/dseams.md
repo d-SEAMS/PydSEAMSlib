@@ -15,7 +15,7 @@ trajectory package on PyPI. `seams.from_pydseams(frame)` copies
 `frame.positions` and `frame.box` into a `System` when an analysis lives
 only on the C API.
 
-Set `SEAMS_LIB` to `libseams.so`. Importing `seams` does not load the library.
+Set `SEAMS_LIB` to `libseams.so` (`libseams.dylib` on macOS). Importing `seams` does not load the library.
 
 ## Quickstart
 
@@ -30,7 +30,9 @@ from seams import PUBLISHED, System, set_num_threads
 edge = 2.75 * 4.0 / math.sqrt(3.0)
 fcc = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5))
 basis = ((0, 0, 0), (0.25, 0.25, 0.25))
-positions = np.array([[(s + b) * edge for s, b in zip(shift, site)] for shift in fcc for site in basis])
+positions = np.array(
+    [[(s + b) * edge for s, b in zip(shift, site)] for shift in fcc for site in basis]
+)
 
 set_num_threads(1)
 with System() as sys:
@@ -74,8 +76,16 @@ import dseams
 import numpy as np
 
 edge = 2.75 * 4.0 / math.sqrt(3.0)
-sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5),
-         (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
 positions = np.array([[x * edge, y * edge, z * edge] for x, y, z in sites])
 box = (3 * edge, 3 * edge, 3 * edge)
 labels, counts = dseams.chill_plus(positions, box)
@@ -171,7 +181,7 @@ The nanobind module and the language-binding examples stay below.
 
 `examples/python/core_counts.py` is the Ice Ih and sII census.
 `meson test docs_core_counts` runs it. `SEAMS_LIBDIR`
-is the directory that holds `libseams.so`.
+is the directory that holds `libseams.so` (`libseams.dylib` on macOS).
 
 ```pycon
 >>> import core_counts

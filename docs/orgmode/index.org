@@ -153,6 +153,8 @@ framework.
    howto/solvis
    howto/ase-integration
    howto/solvis-dseams
+   howto/features
+   howto/tools
    howto/faq
    howto/troubleshooting
 
