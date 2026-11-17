@@ -157,3 +157,28 @@ intersphinx_mapping = {
 }
 
 bibtex_bibfiles = ["bibtex/pyseamsDocs.bib"]
+
+
+def _org_file_links_to_html(app, doctree, docname):
+    """Resolve the ``page.rst`` and ``page.md`` links that ox-rst writes for
+    Org file links to the built pages; Sphinx treats them as external URIs."""
+    from docutils import nodes
+
+    srcdir = Path(app.srcdir).resolve()
+    for ref in doctree.findall(nodes.reference):
+        uri = ref.get("refuri", "")
+        path, _, anchor = uri.partition("#")
+        if "://" in path or not path.endswith((".rst", ".md")):
+            continue
+        target = (srcdir / os.path.dirname(docname) / path).resolve()
+        if not target.is_file() or srcdir not in target.parents:
+            continue
+        target_doc = target.relative_to(srcdir).with_suffix("").as_posix()
+        if target_doc not in app.env.all_docs:
+            continue
+        new = app.builder.get_relative_uri(docname, target_doc)
+        ref["refuri"] = f"{new}#{anchor}" if anchor else new
+
+
+def setup(app):
+    app.connect("doctree-resolved", _org_file_links_to_html)
