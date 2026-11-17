@@ -118,9 +118,9 @@ lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
 ## Development
 
 The engine is [seams-core](https://github.com/d-SEAMS/seams-core), a
-Meson subproject here. `subprojects/seams-core.wrap` pins the revision
-the wheel builds, and the other wraps carry the revisions seams-core
-pins. Engine changes go to d-SEAMS/seams-core, not to this repository.
+Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.0`,
+and the other wraps carry the revisions that tag pins. Engine changes
+go to d-SEAMS/seams-core, not to this repository.
 The contributing guide at the repository root has the layout, the test
 commands and the commit conventions.
 

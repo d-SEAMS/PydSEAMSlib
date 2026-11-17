@@ -1,1 +1,1 @@
-The Nix flake builds the seams-core commit that `subprojects/seams-core.wrap` pins (628b0af9 on HaoZeke/seams-core) instead of the pre-split d-SEAMS/seams-core main, with linkcell 0.4.0 and readcon-core 0.16.2 as the engine requires.
+The Nix flake builds seams-core tag `v2.14.0`, the revision `subprojects/seams-core.wrap` pins, with linkcell 0.4.2 and readcon-core 0.16.2 as the engine requires.

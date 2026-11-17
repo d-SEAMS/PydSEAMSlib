@@ -3,11 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # Source only: meson builds seams-core as a subproject. Same commit as
-    # subprojects/seams-core.wrap; becomes github:d-SEAMS/seams-core/v2.14.0
-    # once the tag exists.
+    # Source only: meson builds seams-core as a subproject. Same tag as
+    # subprojects/seams-core.wrap.
     seams-core = {
-      url = "github:HaoZeke/seams-core/628b0af94b4d3bf52426708a0d08436027c8e4fa";
+      url = "github:d-SEAMS/seams-core/v2.14.0";
       flake = false;
     };
   };

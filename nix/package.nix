@@ -49,10 +49,10 @@ let
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
-    version = "0.4.0";
+    version = "0.4.2";
     owner = "d-SEAMS";
-    rev = "2441fd8e3027befa22defb33eda6913fc3cdc72a";
-    hash = "sha256-NGE4ImMzrDomFzkys4GtCMDReKCTaT5NsABRLkAq1zs=";
+    rev = "v0.4.2";
+    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
   };
   # seams-core reads .con frames through readcon-core (with_readcon is
   # enabled in meson.build); the sandbox cannot run its cargo wrap.
