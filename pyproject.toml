@@ -67,6 +67,8 @@ limited-api = true
 # Eigen always comes from its wrap so the sdist carries it. The runtime
 # tags install libseams and libseams_lang from the seams-core subproject
 # next to the extensions, and leave its headers and static archives out.
+# A conda build appends --force-fallback-for= so the later flag wins and
+# pkg-config eigen3 is used instead.
 setup = ["--force-fallback-for=eigen3"]
 install = ["--tags=runtime,python-runtime"]
 dist = ["--include-subprojects"]

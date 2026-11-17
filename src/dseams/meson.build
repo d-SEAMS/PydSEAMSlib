@@ -1,6 +1,6 @@
 # Nanobind module over libseams, plus the pure-Python package.
 # The top-level meson.build sets py, nanobind_dep, limited_api and
-# dseams_api_dep (libseams from the seams-core subproject).
+# dseams_api_dep (installed libseams, or the seams-core subproject).
 
 dseams_core = py.extension_module(
     '_core',
