@@ -3,7 +3,7 @@
 
 View ice labels on a dump. The engine writes LAMMPS text. The
 viewer for this release is solvis (PyVista) through
-[[https://d-seams.github.io/PydSEAMSlib/][pydseams]], not OVITO.
+[[https://python.dseams.info/][pydseams]], not OVITO.
 
 #+begin_src bash
 pip install 'pydseamslib[solvis]'
@@ -23,5 +23,5 @@ assert type(system).__name__ == "System"
 returns, including ~ice_type~ / ~hc~ / ~ddc~ arrays after those
 calls. Interactive plots follow the
 [[https://github.com/amritagos/solvis][solvis examples]]. The full
-howto is [[https://d-seams.github.io/PydSEAMSlib/][pydseams solvis]].
+howto is [[https://python.dseams.info/][pydseams solvis]].
 

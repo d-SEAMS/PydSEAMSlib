@@ -5,7 +5,7 @@ View a classified frame
 
 View ice labels on a dump. The engine writes LAMMPS text. The
 viewer for this release is solvis (PyVista) through
-`pydseams <https://d-seams.github.io/PydSEAMSlib/>`_, not OVITO.
+`pydseams <https://python.dseams.info/>`_, not OVITO.
 
 .. code:: bash
 
@@ -25,4 +25,4 @@ viewer for this release is solvis (PyVista) through
 returns, including ``ice_type`` / ``hc`` / ``ddc`` arrays after those
 calls. Interactive plots follow the
 `solvis examples <https://github.com/amritagos/solvis>`_. The full
-howto is `pydseams solvis <https://d-seams.github.io/PydSEAMSlib/>`_.
+howto is `pydseams solvis <https://python.dseams.info/>`_.

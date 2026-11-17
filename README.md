@@ -50,7 +50,7 @@ nix develop
 ```
 
 Docs: `docs/orgmode/` (ox-rst) and `docs/source/` (Shibuya).
-Site: <https://d-seams.github.io/PydSEAMSlib/>.
+Site: <https://python.dseams.info/>.
 
 Book: [Python](https://docs.dseams.info/stable/python.html) and the
 [Python Frame](https://docs.dseams.info/reference/python-frame.html)

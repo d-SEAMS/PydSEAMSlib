@@ -110,13 +110,13 @@ html_theme_options = {
                 },
                 {
                     "title": "pydseams",
-                    "url": "https://d-seams.github.io/PydSEAMSlib/",
+                    "url": "https://python.dseams.info/",
                     "summary": "Python Frame API on yoda",
                     "external": True,
                 },
                 {
                     "title": "dseams (Lua)",
-                    "url": "https://d-seams.github.io/yodaStruct/",
+                    "url": "https://lua.dseams.info/",
                     "summary": 'require("dseams") and Fennel',
                     "external": True,
                 },
@@ -139,7 +139,7 @@ html_sidebars = {
     ],
 }
 
-html_baseurl = "https://d-seams.github.io/PydSEAMSlib/"
+html_baseurl = "https://python.dseams.info/"
 
 # --- Plugin options
 
@@ -153,7 +153,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "ase": ("https://docs.ase-lib.org/", None),
     "dseams": ("https://docs.dseams.info", None),
-    "luadseams": ("https://d-seams.github.io/yodaStruct/", None),
+    "luadseams": ("https://lua.dseams.info/", None),
 }
 
 bibtex_bibfiles = ["bibtex/pyseamsDocs.bib"]

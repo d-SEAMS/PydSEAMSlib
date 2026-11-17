@@ -38,7 +38,7 @@ authors = [
 [project.urls]
 Homepage = "https://dseams.info"
 Repository = "https://github.com/d-SEAMS/PydSEAMSlib"
-Documentation = "https://d-seams.github.io/PydSEAMSlib/"
+Documentation = "https://python.dseams.info/"
 Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
 
