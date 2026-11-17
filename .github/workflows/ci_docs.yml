@@ -60,3 +60,31 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+  # The site as readers get it: every published page is a lychee input,
+  # so relative links resolve against the page they are on. The page list
+  # comes from the artifact the deploy job published.
+  live-links:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: github-pages
+          path: pages
+      - name: Page list
+        run: |
+          tar -tf pages/artifact.tar | grep '\.html$' | grep -v '_static/' \
+            | sed 's#^\./##; s#^#https://python.dseams.info/#' > pages.txt
+          wc -l pages.txt
+          test -s pages.txt
+      - name: Check links on the published site
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress --max-retries 3 --accept 200,206,429
+            --exclude '^https://doi\.org/10\.1021/'
+            --files-from pages.txt
+          fail: true
