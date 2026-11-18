@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Validate SEO metadata on every generated HTML page."""
 
 from __future__ import annotations
@@ -76,13 +75,17 @@ def page_problems(path: Path, root: Path) -> list[str]:
     if not any(parser.descriptions):
         problems.append(f"{label}: missing non-empty meta description")
     if len(parser.canonicals) != 1:
-        problems.append(f"{label}: expected one canonical URL, found {len(parser.canonicals)}")
+        problems.append(
+            f"{label}: expected one canonical URL, found {len(parser.canonicals)}"
+        )
     elif _canonical_file(parser.canonicals[0], root) != path:
         problems.append(f"{label}: canonical URL does not resolve to this page")
     for prop in sorted(REQUIRED_OG):
         values = parser.open_graph.get(prop, [])
         if len(values) != 1 or not values[0]:
-            problems.append(f"{label}: expected one non-empty {prop}, found {len(values)}")
+            problems.append(
+                f"{label}: expected one non-empty {prop}, found {len(values)}"
+            )
     if (
         len(parser.open_graph.get("og:url", [])) == 1
         and _canonical_file(parser.open_graph["og:url"][0], root) != path
