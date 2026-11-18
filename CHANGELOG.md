@@ -10,7 +10,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
-## [2.14.1]
+## [2.14.1] - 2026-11-19
 
 ### Added
 
