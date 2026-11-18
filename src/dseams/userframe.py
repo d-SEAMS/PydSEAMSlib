@@ -299,8 +299,13 @@ class Frame:
 
     @property
     def positions(self):
+        """Coordinates, shape ``(n, 3)``. A frame with no atoms is shape ``(0, 3)``."""
         n = self.n_atoms
+        if n == 0:
+            return np.zeros((0, 3), dtype=np.float64)
         raw = _library().seams_frame_positions(self._ptr)
+        if not raw:
+            return np.zeros((0, 3), dtype=np.float64)
         return np.ctypeslib.as_array(raw, shape=(n, 3)).copy()
 
     @property
@@ -513,12 +518,21 @@ class Frame:
         }
 
     def rdf_2d(self, output_dir, cutoff=12.0, binwidth=0.05):
-        """In-plane g(r) from seams_frame_rdf2d."""
+        """In-plane g(r) from seams_frame_rdf2d.
+
+        A frame with no atoms returns the bin centres and a zero ``g(r)``
+        of that length. The engine reads the first point of an empty
+        cloud, so this method does not call it.
+        """
         nbin = int(
             _library().seams_frame_rdf2d_nbin(
                 ctypes.c_double(cutoff), ctypes.c_double(binwidth)
             )
         )
+        if self.n_atoms == 0:
+            width = float(binwidth)
+            centres = [width * (i + 0.5) for i in range(nbin)]
+            return centres, [0.0] * nbin
         radius = np.zeros(nbin, dtype=np.float64)
         values = np.zeros(nbin, dtype=np.float64)
         code = _library().seams_frame_rdf2d(
@@ -564,9 +578,19 @@ class Frame:
         return found
 
     def find_prisms(self, output_dir="output/", max_depth=6, shape_matching=False):
-        """Prism census from seams_frame_prisms. The return is the C rows."""
+        """Prism census from seams_frame_prisms. The return is the C rows.
+
+        A frame with no atoms returns one zero row for each ring size from
+        3 through ``max_depth``. The engine reads the first point while
+        removing axial drift, so this method does not call it.
+        """
         del shape_matching
         depth = int(max_depth)
+        if self.n_atoms == 0:
+            return [
+                {"size": size, "perfect": 0, "imperfect": 0}
+                for size in range(3, depth + 1)
+            ]
         n_rows = ctypes.c_int(depth - 2)
         rows = (_PrismRow * (depth - 2))()
         code = _library().seams_frame_prisms(
