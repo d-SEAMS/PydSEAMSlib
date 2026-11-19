@@ -14,6 +14,11 @@ When the library is found, seams-core adds =SEAMS_HAS_CHEMFILES= or
 succeeds and the loaded module reports the reader as absent.
 =has_chemfiles()= and =has_readcon()= read that report.
 The bindings do not reimplement either parser.
+Release wheels and the sdist install in
+=.github/workflows/build_wheels.yml= pass
+=-Dwith_chemfiles=enabled= and =-Dwith_readcon=enabled=.
+The cibuildwheel test command requires both queries to be true.
+A source tree left on =auto= can still build without either library.
 
 ** Why does =cog= not write =CHANGELOG.md=?
 

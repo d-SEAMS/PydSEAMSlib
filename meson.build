@@ -90,21 +90,25 @@ else
 endif
 
 # seams-core copies the vendored chemfiles library into libdir with no
-# install tag. A wheel built with --tags=runtime,python-runtime then
-# omits it, and libseams.so plus the yoda extension fail to load.
-# Install the same soname with the runtime tag so it sits with the
-# other bundled libraries. A system chemfiles is found by the loader.
-fs = import('fs')
-_chem_vendored = (
-    meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib' / 'libseams-chemfiles.so.0.10.4'
+# install tag, and that copy uses the Linux soname. A wheel built with
+# --tags=runtime,python-runtime then omits it. Install the file the
+# loader opens (ELF SONAME or Mach-O install id) with the runtime tag,
+# next to the other bundled libraries. auditwheel and delocate, which
+# the wheel workflow already runs, repair that copy. A system chemfiles
+# is found by the loader and is not staged here.
+_chem_probe = run_command(
+    find_program('python3'),
+    files('scripts/chemfiles_soname.py'),
+    meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib',
+    check: false,
 )
-if fs.exists(_chem_vendored)
-    # A custom target output is a build product, so the install plan
-    # carries the runtime tag. install_data() on the cmake file does not.
+_chem_text = _chem_probe.stdout().strip()
+if _chem_probe.returncode() == 0 and _chem_text != ''
+    _chem_lines = _chem_text.split('\n')
     custom_target(
         'bundle-seams-chemfiles',
-        output: 'libseams-chemfiles.so.0.10',
-        command: ['cp', _chem_vendored, '@OUTPUT@'],
+        output: _chem_lines[1],
+        command: ['cp', _chem_lines[0], '@OUTPUT@'],
         install: true,
         install_dir: get_option('libdir'),
         install_tag: 'runtime',

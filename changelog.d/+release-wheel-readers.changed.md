@@ -1,0 +1,1 @@
+Release wheels and the sdist install enable chemfiles and readcon-core. The wheel tests require `has_chemfiles()` and `has_readcon()` to be true. The vendored chemfiles library is installed under the name the loader opens, on Linux and macOS.

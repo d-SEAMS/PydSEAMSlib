@@ -43,7 +43,9 @@ build that linked the library runs the read.
 The =readers= job in =.github/workflows/build_test.yml= configures
 =-Dwith_chemfiles=enabled -Dwith_readcon=enabled= and asserts both
 queries are true before it runs that file, so a missing library fails
-the job instead of skipping the reads.
+the job instead of skipping the reads. =build_wheels.yml= passes the
+same two options for the sdist install and for cibuildwheel, and the
+wheel test command asserts both queries.
 
 #+begin_src bash
 python - <<'PY'

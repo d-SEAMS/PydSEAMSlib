@@ -144,8 +144,12 @@ cog bump --version X.Y.Z
 git push origin HEAD --follow-tags
 #+end_src
 
-The tag push runs =build_wheels.yml=. Confirm the sdist and the wheels
-on PyPI after that workflow finishes. Do not upload a wheel by hand
+The tag push runs =build_wheels.yml=. That workflow installs the sdist
+and builds the wheels with =-Dwith_chemfiles=enabled= and
+=-Dwith_readcon=enabled=, and the wheel tests require both
+=has_chemfiles()= and =has_readcon()= to be true. Confirm the sdist
+and the wheels on PyPI after that workflow finishes. Do not upload a
+wheel by hand
 while the workflow is the publish path.
 
 ** Version policy
