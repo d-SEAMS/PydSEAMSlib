@@ -562,6 +562,7 @@ if not use_installed_engine
 
     # docs_science_tutorials: the engine checkout and its build tree.
     _science_env = environment()
+    _science_env.set('CC', meson.get_compiler('c').cmd_array()[0])
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)
     _science_env.set(

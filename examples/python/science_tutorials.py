@@ -468,61 +468,57 @@ def _ensure_display():
     return proc
 
 
+def _svg_fallback(png: Path, reason) -> tuple[bool, None]:
+    print(f"SVG fallback: v12 raster renderer unavailable: {reason}", file=sys.stderr)
+    png.with_suffix(".svg").write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
+        '<rect width="100%" height="100%" fill="white"/>'
+        '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
+    )
+    return False, None
+
+
 def _raster_or_fail(png: Path, draw):
+    import importlib
+
+    try:
+        for module in ("ovito.data", "ovito.pipeline", "ovito.vis"):
+            importlib.import_module(module)
+    except (ImportError, OSError) as exc:
+        return _svg_fallback(png, exc)
     server = _ensure_display()
     try:
-        draw()
+        try:
+            result = draw()
+        except SystemExit as exc:
+            if exc.code != 77:
+                raise
+            return _svg_fallback(png, "the OVITO Vulkan renderer is unavailable")
         if not png.is_file() or png.stat().st_size < 1000:
             raise RuntimeError(f"{png.name} is not a raster")
         print(f"v12 raster {png.name} bytes {png.stat().st_size}")
-    except Exception as exc:
-        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
-        png.with_suffix(".svg").write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
-            '<rect width="100%" height="100%" fill="white"/>'
-            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
-        )
-        if os.environ.get("DOCS_CI") == "1":
-            raise SystemExit(1) from exc
+        return True, result
     finally:
         if server is not None:
             server.terminate()
 
 
-def render_interface_v12(root: Path, pos, chill, box, figures: Path):
-    """Raster from scripts/science_render.py: Tachyon, liquid at 0.40, numbered guides.
-
-    The SVG stand-in is logged and, when DOCS_CI=1, fails the job.
-    """
-    server = _ensure_display()
+def render_interface_v12(root: Path, pos, chill, box, figures: Path) -> bool:
+    """Render the Tachyon interface or a missing-renderer SVG."""
     png = figures / "interface.png"
-    try:
+
+    def draw():
         from render_scenes import render_interface
 
         render = _load_science_render(root)
         origin = np.zeros(3)
         render_interface(render, pos, chill, origin, box, png)
-        if not png.is_file() or png.stat().st_size < 1000:
-            raise RuntimeError("renderer wrote no raster")
-        print(f"v12 raster {png.name} bytes {png.stat().st_size}")
-    except Exception as exc:
-        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
-        (figures / "interface.svg").write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
-            '<rect width="100%" height="100%" fill="white"/>'
-            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
-        )
-        if os.environ.get("DOCS_CI") == "1":
-            raise SystemExit(1) from exc
-    finally:
-        if server is not None:
-            server.terminate()
+
+    rendered, _ = _raster_or_fail(png, draw)
+    return rendered
 
 
-def render_hosts(root: Path, lib, figures: Path):
-    from render_scenes import render_host
-
-    render = _load_science_render(root)
+def render_hosts(root: Path, lib, figures: Path) -> dict[str, bool]:
     hosts = {
         "sii": (
             root / "input" / "traj" / "genice_sII.lammpstrj",
@@ -542,52 +538,68 @@ def render_hosts(root: Path, lib, figures: Path):
             (12, 8, 4),
         ),
     }
+    rendered = {}
+    for stem, (dump, kinds, want) in hosts.items():
+        png = figures / f"{stem}.png"
 
-    def draw():
-        counted = []
-        for stem, (dump, kinds, want) in hosts.items():
-            got = render_host(render, lib, dump, figures / f"{stem}.png", kinds)
-            counted.append((stem, tuple(got), want))
-        return counted
+        def draw(dump=dump, kinds=kinds, png=png):
+            from render_scenes import render_host
 
-    # A cage-count mismatch is a failed tutorial. It is not a missing
-    # renderer, so it is not turned into an SVG stand-in.
-    server = _ensure_display()
-    try:
-        try:
-            counted = draw()
-        except Exception as exc:
-            print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
-            (figures / "sii.svg").write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
-                '<rect width="100%" height="100%" fill="white"/>'
-                '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
-            )
-            if os.environ.get("DOCS_CI") == "1":
-                raise SystemExit(1) from exc
-        else:
-            for stem, got, want in counted:
-                if got != want:
-                    raise RuntimeError(f"{stem} cages {got} wanted {want}")
-            png = figures / "sii.png"
-            if not png.is_file() or png.stat().st_size < 1000:
-                raise RuntimeError(f"{png.name} is not a raster")
-            print(f"v12 raster {png.name} bytes {png.stat().st_size}")
-    finally:
-        if server is not None:
-            server.terminate()
+            render = _load_science_render(root)
+            return tuple(render_host(render, lib, dump, png, kinds))
+
+        available, got = _raster_or_fail(png, draw)
+        rendered[png.name] = available
+        if available and got != want:
+            raise RuntimeError(f"{stem} cages {got} wanted {want}")
+    return rendered
 
 
-def render_brine_scene(root: Path, frame: Path, figures: Path):
-    from render_scenes import render_brine
-
-    render = _load_science_render(root)
+def render_brine_scene(root: Path, frame: Path, figures: Path) -> bool:
     box, rows = read_xyz(frame)
+    png = figures / "brine.png"
 
     def draw():
-        render_brine(render, rows, figures / "brine.png", box, width=1400)
+        from render_scenes import render_brine
 
-    _raster_or_fail(figures / "brine.png", draw)
+        render = _load_science_render(root)
+        render_brine(render, rows, png, box, width=1400)
+
+    rendered, _ = _raster_or_fail(png, draw)
+    return rendered
+
+
+def check_contact_rasters(figures: Path, rendered: dict[str, bool]):
+    from PIL import Image
+
+    names = ("interface.png", "brine.png", "sii.png", "sh.png")
+    missing = []
+    for name in names:
+        path = figures / name
+        if rendered.get(name, False):
+            if not path.is_file():
+                raise RuntimeError(f"missing render {path}")
+            with Image.open(path) as image:
+                short_side = min(image.size)
+                if short_side < 1200:
+                    raise RuntimeError(
+                        f"{name} is {image.size[0]}x{image.size[1]}, "
+                        "short side under 1200"
+                    )
+                print(f"contact {name} {image.size[0]}x{image.size[1]}")
+            continue
+        svg = path.with_suffix(".svg")
+        if not svg.is_file():
+            raise RuntimeError(f"missing raster and SVG fallback for {name}")
+        missing.append(name)
+
+    if not missing:
+        return
+    reason = "OVITO raster unavailable: " + ", ".join(missing)
+    print(reason, file=sys.stderr)
+    if os.environ.get("DOCS_CI") == "1" or len(missing) != len(names):
+        raise SystemExit(reason)
+    raise SystemExit(77)
 
 
 def expect(condition, message):
@@ -818,7 +830,11 @@ def tutorials(root: Path, build: Path):
                     lo, hi = (float(item) for item in handle.readline().split()[:2])
                     edge.append(hi - lo)
                 break
-    render_interface_v12(root, pos, _labels, np.asarray(edge), figures)
+    raster_results = {
+        "interface.png": render_interface_v12(
+            root, pos, _labels, np.asarray(edge), figures
+        )
+    }
 
     sii = signature(lib, traj / "genice_sII.lammpstrj", "512")
     sii_large = signature(lib, traj / "genice_sII.lammpstrj", "51264")
@@ -833,7 +849,7 @@ def tutorials(root: Path, build: Path):
     print("cages sH 512 12")
     print("cages sH sh 8")
     print("cages sH 51268 4")
-    render_hosts(root, lib, figures)
+    raster_results.update(render_hosts(root, lib, figures))
 
     cache = root / "docs" / ".cache" / "brine-front-230K" / BRINE_REV
     frames = fetch_brine(cache)
@@ -843,6 +859,7 @@ def tutorials(root: Path, build: Path):
             [("cached", 0), ("fetched", 0)],
             figures / "brine.svg",
         )
+        raster_results["brine.png"] = False
         print(SKIP)
     else:
         early = brine_frame(lib, frames[0])
@@ -877,7 +894,7 @@ def tutorials(root: Path, build: Path):
         print(f"brine t0 thickness {early['thickness']:.4f} k {early['k']:.1f}")
         print("brine tend hexagonal 741 water 621 interfacial 89 cubic 0 agree 1496")
         print(f"brine tend thickness {late['thickness']:.4f} k {late['k']:.1f}")
-        render_brine_scene(root, frames[1], figures)
+        raster_results["brine.png"] = render_brine_scene(root, frames[1], figures)
 
     if build.is_dir() and (build / "src" / LIBSEAMS).is_file():
         c_interface = run_c(root, build, "interface", [])
@@ -904,10 +921,8 @@ def tutorials(root: Path, build: Path):
         print("c tutorials ok")
     run_julia(root, libdir, frames)
     run_r(root, build, libdir, frames)
-    sys.path.insert(0, str(root / "docs"))
-    from check_contact_sheet import check
-
-    check(figures)
+    print("science tutorials non-raster checks ok")
+    check_contact_rasters(figures, raster_results)
     print("science tutorials ok")
     return 0
 
