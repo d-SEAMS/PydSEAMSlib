@@ -273,9 +273,9 @@ def test_seams_isolated_atoms_have_an_empty_cutoff_graph():
             _f64(profile.molality, (4,))
             _f64(profile.ice_fraction, (4,))
             pockets = brine.pockets()
-            # The engine still reports pockets when every ice flag is clear.
-            assert pockets.n_pockets == 2
-            assert pockets.reservoir_waters == 1
+            # An all-liquid frame has no brine pockets or reservoir waters.
+            assert pockets.n_pockets == 0
+            assert pockets.reservoir_waters == 0
 
 
 def _empty_userframe(path, text, **kwargs):
