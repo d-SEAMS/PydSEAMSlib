@@ -1,7 +1,9 @@
 project(
     'pydseamslib',
     'cpp',
+    # [[[cog import pydseams_version as v; cog.outl(f"    version: '{v.VERSION}',")]]]
     version: '2.14.1',
+    # [[[end]]]
     default_options: [
         'warning_level=1',
         'cpp_std=c++20',
@@ -9,6 +11,25 @@ project(
     ],
     meson_version: '>=1.3.0',
 )
+
+# Readers. auto is seams-core's own detection: chemfiles from pkg-config
+# or the patched library that seams-core builds, readcon-core from
+# pkg-config or the readcon-core wrap. enabled fails the build when the
+# library is missing. disabled keeps LAMMPS and XYZ only. When a reader
+# is linked, seams-core puts -DSEAMS_HAS_CHEMFILES / -DSEAMS_HAS_READCON
+# on yds_dep, and this extension compiles against that dependency.
+chemfiles_choice = 'auto'
+if get_option('with_chemfiles').enabled()
+    chemfiles_choice = 'enabled'
+elif get_option('with_chemfiles').disabled()
+    chemfiles_choice = 'disabled'
+endif
+readcon_choice = 'auto'
+if get_option('with_readcon').enabled()
+    readcon_choice = 'enabled'
+elif get_option('with_readcon').disabled()
+    readcon_choice = 'disabled'
+endif
 
 # C++ engine. An installed libseams (pkg-config seams, seams-core and
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
@@ -37,8 +58,8 @@ else
             'with_linkcell=enabled',
             'with_minimage=enabled',
             'with_blas=disabled',
-            'with_chemfiles=disabled',
-            'with_readcon=enabled',
+            'with_chemfiles=' + chemfiles_choice,
+            'with_readcon=' + readcon_choice,
             'with_gpulite=disabled',
             'with_openmp_offload=disabled',
             'with_mpi=disabled',
@@ -65,6 +86,30 @@ else
             '-I' + meson.project_source_root() / 'subprojects' / 'seams-core' / 'include',
             '-I' + meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
         ],
+    )
+endif
+
+# seams-core copies the vendored chemfiles library into libdir with no
+# install tag. A wheel built with --tags=runtime,python-runtime then
+# omits it, and libseams.so plus the yoda extension fail to load.
+# Install the same soname with the runtime tag so it sits with the
+# other bundled libraries. A system chemfiles is found by the loader.
+fs = import('fs')
+_chem_vendored = (
+    meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib' / 'libseams-chemfiles.so.0.10.4'
+)
+if fs.exists(_chem_vendored)
+    # A custom target output is a build product, so the install plan
+    # carries the runtime tag. install_data() on the cmake file does not.
+    custom_target(
+        'bundle-seams-chemfiles',
+        output: 'libseams-chemfiles.so.0.10',
+        command: ['cp', _chem_vendored, '@OUTPUT@'],
+        install: true,
+        install_dir: get_option('libdir'),
+        install_tag: 'runtime',
+        install_mode: 'rwxr-xr-x',
+        build_by_default: true,
     )
 endif
 

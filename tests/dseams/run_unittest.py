@@ -85,6 +85,11 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
             libdirs.append(str(Path(value).resolve().parent))
     engine = build / "subprojects" / "seams-core"
     libdirs.extend([str(engine / "src"), str(engine / "bindings")])
+    # The staged yoda extension is a copy, so its build rpath no longer
+    # points at the vendored chemfiles library.
+    chemfiles = engine / "chemfiles-prefix" / "lib"
+    if chemfiles.is_dir():
+        libdirs.append(str(chemfiles))
     libs = []
     for libdir in libdirs:
         if libdir and libdir not in libs:

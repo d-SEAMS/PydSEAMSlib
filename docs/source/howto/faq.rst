@@ -64,7 +64,8 @@ Which formats does ``ds.read`` accept?
     +-----------------------------------------------+--------------------------+
 
 ``available_readers()`` reports which optional C++ readers your build
-includes (``xyz``, ``chemfiles``, ``readcon``). ``lammps`` is always enabled.
+includes (``xyz``, ``chemfiles``, ``readcon``). ``has_chemfiles()`` and
+``has_readcon()`` are the same two flags. ``lammps`` is always enabled.
 
 Does classification write files?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -254,7 +254,8 @@ read
 
 ``pydseams.io.read`` is the suffix-dispatching loader.
 ``pydseams.available_readers`` reports which compiled readers your build
-linked.
+linked. ``pydseams.has_chemfiles`` is true when PDB, GRO, and DCD are
+linked. ``pydseams.has_readcon`` is true when eOn ``.con`` is linked.
 
 .. table::
 
