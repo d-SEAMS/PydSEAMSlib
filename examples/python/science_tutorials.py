@@ -481,13 +481,13 @@ def _svg_fallback(png: Path, reason) -> tuple[bool, None]:
 def _raster_or_fail(png: Path, draw):
     import importlib
 
-    try:
-        for module in ("ovito.data", "ovito.pipeline", "ovito.vis"):
-            importlib.import_module(module)
-    except (ImportError, OSError) as exc:
-        return _svg_fallback(png, exc)
     server = _ensure_display()
     try:
+        try:
+            for module in ("ovito.data", "ovito.pipeline", "ovito.vis"):
+                importlib.import_module(module)
+        except (ImportError, OSError) as exc:
+            return _svg_fallback(png, exc)
         try:
             result = draw()
         except SystemExit as exc:
