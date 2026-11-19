@@ -475,7 +475,7 @@ button.copybtn:hover {
 }
 
 .yue .highlight pre,
-.yue table {
+.yue .table-wrapper {
   overflow-x: auto;
 }
 

@@ -30,7 +30,7 @@ project = "pydseams"
 # cannot drift from the package
 with (Path(__file__).resolve().parents[2] / "pyproject.toml").open("rb") as _fh:
     release = tomllib.load(_fh)["project"]["version"]
-copyright = "2023--present, d-SEAMS developers"
+copyright = "2023\u2013present, d-SEAMS developers"
 author = "Ruhila S"
 
 
