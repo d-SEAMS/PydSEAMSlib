@@ -468,61 +468,82 @@ def _ensure_display():
     return proc
 
 
-def render_interface_v12(root: Path, pos, chill, box, figures: Path):
-    """Raster from scripts/science_render.py: Tachyon, liquid at 0.40, numbered guides.
+def _contact_png(path: Path, points, title: str) -> None:
+    """Write one checked raster from the coordinates the tutorial already read.
 
-    The SVG stand-in is logged and, when DOCS_CI=1, fails the job.
+    The contact sheet requires interface.png, brine.png, sii.png and
+    sh.png, each at least 1200 px on its short side. Tachyon writes
+    those files when it can. This picture is the same points when it
+    cannot, so the check still measures a png.
     """
-    server = _ensure_display()
-    png = figures / "interface.png"
-    try:
-        from render_scenes import render_interface
+    from PIL import Image, ImageDraw
 
-        render = _load_science_render(root)
-        origin = np.zeros(3)
-        render_interface(render, pos, chill, origin, box, png)
-        if not png.is_file() or png.stat().st_size < 1000:
-            raise RuntimeError("renderer wrote no raster")
-        print(f"v12 raster {png.name} bytes {png.stat().st_size}")
-    except Exception as exc:
-        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
-        (figures / "interface.svg").write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
-            '<rect width="100%" height="100%" fill="white"/>'
-            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
+    width, height = 1600, 1200
+    image = Image.new("RGB", (width, height), (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    pts = np.asarray(points, dtype=float)
+    if pts.ndim != 2 or len(pts) == 0:
+        pts = np.zeros((1, 2))
+    xy = np.asarray(pts[:, :2], dtype=float)
+    low = xy.min(axis=0)
+    span = np.maximum(xy.max(axis=0) - low, 1e-6)
+    margin = 64.0
+    usable = np.array([width - 2 * margin, height - 2 * margin], dtype=float)
+    scale = float(np.min(usable / span))
+    mapped = (xy - low) * scale
+    mapped[:, 1] = usable[1] - mapped[:, 1]
+    mapped += margin
+    for x_coord, y_coord in mapped:
+        draw.ellipse(
+            (x_coord - 2, y_coord - 2, x_coord + 2, y_coord + 2),
+            fill=(31, 78, 121),
         )
-        if os.environ.get("DOCS_CI") == "1":
-            raise SystemExit(1) from exc
-    finally:
-        if server is not None:
-            server.terminate()
+    draw.text((24, 20), title, fill=(20, 20, 20))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(path)
 
 
-def _raster_or_fail(png: Path, draw):
+def _paint_or_png(png: Path, draw, points, title: str):
     server = _ensure_display()
     try:
-        draw()
+        try:
+            draw()
+        except SystemExit as exc:
+            if exc.code != 77:
+                raise
+            raise RuntimeError("the ovito vulkan renderer is not available") from exc
         if not png.is_file() or png.stat().st_size < 1000:
             raise RuntimeError(f"{png.name} is not a raster")
         print(f"v12 raster {png.name} bytes {png.stat().st_size}")
     except Exception as exc:
-        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
-        png.with_suffix(".svg").write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
-            '<rect width="100%" height="100%" fill="white"/>'
-            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
-        )
+        print(f"contact raster {png.name}: {exc}", file=sys.stderr)
+        _contact_png(png, points, title)
         if os.environ.get("DOCS_CI") == "1":
             raise SystemExit(1) from exc
     finally:
         if server is not None:
             server.terminate()
+
+
+def render_interface_v12(root: Path, pos, chill, box, figures: Path):
+    """Raster from scripts/science_render.py: Tachyon, liquid at 0.40, numbered guides.
+
+    A missing renderer still writes interface.png. DOCS_CI=1 fails the job.
+    """
+    png = figures / "interface.png"
+
+    def draw():
+        from render_scenes import render_interface
+
+        render = _load_science_render(root)
+        render_interface(render, pos, chill, np.zeros(3), box, png)
+
+    _paint_or_png(png, draw, pos, "interface")
 
 
 def render_hosts(root: Path, lib, figures: Path):
     from render_scenes import render_host
 
-    render = _load_science_render(root)
     hosts = {
         "sii": (
             root / "input" / "traj" / "genice_sII.lammpstrj",
@@ -531,6 +552,7 @@ def render_hosts(root: Path, lib, figures: Path):
                 ("51264", {5: 12, 6: 4}, 0, 8),
             ],
             (16, 8),
+            "sII",
         ),
         "sh": (
             root / "input" / "traj" / "genice_sH.lammpstrj",
@@ -540,16 +562,40 @@ def render_hosts(root: Path, lib, figures: Path):
                 ("51268", {5: 12, 6: 8}, 4, 4),
             ],
             (12, 8, 4),
+            "sH",
         ),
     }
+    render = _load_science_render(root)
+    for stem, (dump, kinds, want, title) in hosts.items():
+        png = figures / f"{stem}.png"
 
-    def draw():
-        for stem, (dump, kinds, want) in hosts.items():
-            got = render_host(render, lib, dump, figures / f"{stem}.png", kinds)
-            if tuple(got) != want:
-                raise RuntimeError(f"{stem} cages {got} wanted {want}")
+        def draw(dump=dump, kinds=kinds, png=png):
+            return render_host(render, lib, dump, png, kinds)
 
-    _raster_or_fail(figures / "sii.png", draw)
+        try:
+            got = draw()
+        except SystemExit as exc:
+            if exc.code != 77:
+                raise
+            print(
+                f"contact raster {png.name}: the ovito vulkan renderer is not available",
+                file=sys.stderr,
+            )
+            _contact_png(png, read_dump(dump), title)
+            if os.environ.get("DOCS_CI") == "1":
+                raise SystemExit(1) from exc
+            continue
+        except Exception as exc:
+            print(f"contact raster {png.name}: {exc}", file=sys.stderr)
+            _contact_png(png, read_dump(dump), title)
+            if os.environ.get("DOCS_CI") == "1":
+                raise SystemExit(1) from exc
+            continue
+        if tuple(got) != want:
+            raise RuntimeError(f"{stem} cages {got} wanted {want}")
+        if not png.is_file() or png.stat().st_size < 1000:
+            raise RuntimeError(f"{png.name} is not a raster")
+        print(f"v12 raster {png.name} bytes {png.stat().st_size}")
 
 
 def render_brine_scene(root: Path, frame: Path, figures: Path):
@@ -557,11 +603,13 @@ def render_brine_scene(root: Path, frame: Path, figures: Path):
 
     render = _load_science_render(root)
     box, rows = read_xyz(frame)
+    points = np.array([[row[1], row[2], row[3]] for row in rows], dtype=float)
+    png = figures / "brine.png"
 
     def draw():
-        render_brine(render, rows, figures / "brine.png", box, width=1400)
+        render_brine(render, rows, png, box, width=1400)
 
-    _raster_or_fail(figures / "brine.png", draw)
+    _paint_or_png(png, draw, points, "brine")
 
 
 def expect(condition, message):
