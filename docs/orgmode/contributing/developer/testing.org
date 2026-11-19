@@ -18,6 +18,10 @@ meson test -C bbdir --suite pydseamslib --print-errorlogs
 
 The suite name is the project name. Tests that read seams-core inputs
 take them from =SEAMS_CORE_SRC=, else =subprojects/seams-core=.
+=.github/workflows/ci_docs.yml= installs OVITO and runs
+=docs_science_tutorials= with =DOCS_CI=1=, so =interface.png=,
+=brine.png=, =sii.png=, and =sh.png= are Tachyon renders. A missing
+renderer leaves =sh.png= absent and that test fails.
 
 ** Installed package
 

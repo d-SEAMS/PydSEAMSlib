@@ -1,1 +1,0 @@
-The science tutorial writes `interface.png`, `brine.png`, `sii.png`, and `sh.png`. When Tachyon is unavailable, those rasters are drawn from the coordinates the tutorial reads, and the contact-sheet check measures them.
