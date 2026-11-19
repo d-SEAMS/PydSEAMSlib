@@ -116,8 +116,12 @@ and `-1` otherwise.
 `dseams.PUBLISHED` (`"paper"`) averages $q_{lm}$ over the four closest
 neighbours; `dseams.OVITO` (`"ovito"`) averages $q_{lm}$ over every
 neighbour inside the cutoff. `dseams.CUTOFF` and `dseams.MUTUAL` select
-the neighbour graph. `dseams.set_num_threads` and `dseams.num_threads`
-configure OpenMP threads. `dseams.version` returns the engine version.
+the neighbour graph for `chill_plus` and `neighbours`. `dseams.cages`
+and `dseams.signature_cages` take a graph name (`"seeded"` or
+`"cutoff"`). `dseams.symmetry` takes `shell_rmsd` (default `0.12`), a
+scale-free residual ceiling. `dseams.set_num_threads` and
+`dseams.num_threads` configure OpenMP threads. `dseams.version` returns
+the engine version.
 `dseams.Frame.set_frame` stores one configuration and `dseams.Frame.count`
 returns the number of points.
 
@@ -155,7 +159,7 @@ neither 3 nor 9 numbers raises `ValueError` before calling the C library.
 | `q4q6`, `q6bar` | `Q4Q6`, `Q6Bar` |
 | `neighbours`, `knn` | `Neighbours`, then `NeighbourCSR` |
 | `rings` | histogram, labels, vertices, fraction |
-| `cages`, `signature` | `CageCounts`, `Signature` |
+| `cages`, `signature` | `CageSet` (`.counts()` is `CageCounts`), `Signature` |
 | `symmetry` | 0 Ih, 1 Ic, 2 stacking, -1 other |
 | `rdf`, `running_cn`, `coordination` | `Radial`, `RunningCN`, float |
 | `hbonds`, `density` | count, `Density` |
@@ -222,8 +226,8 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 
 ### `dseams.Frame.set_frame`
 
-- **Purpose**: Store positions and simulation cell on a `dseams.Frame`.
-- **Parameters**: `positions` `(n, 3)`, `box` (3 edge lengths or 9 LAMMPS numbers).
+- **Purpose**: Store positions and a simulation cell on a `dseams.Frame`. `positions` has shape (n, 3). `box` is 3 edge lengths or 9 LAMMPS numbers.
+- **Parameters**: `positions`, `box`
 - **Returns**: `None`.
 - **Ownership**: Copies coordinates into the frame's `seams_system`.
 - **Errors**: Raises `ValueError` if `box` is not 3 or 9 numbers; `RuntimeError` if the C call fails.
@@ -233,45 +237,46 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 
 - **Purpose**: Number of points stored on a `dseams.Frame`.
 - **Parameters**: `self`
-- **Returns**: Integer atom count.
+- **Returns**: Atom count (`int`).
 - **Units**: dimensionless count
 
 ### `dseams.Frame.chill_plus`
 
 - **Purpose**: CHILL+ labels and nine population counts for the frame.
-- **Parameters**: `self`, `cutoff`, `graph`, `rule`
-- **Returns**: `(labels, counts)` NumPy arrays owned by the caller.
+- **Parameters**: `self`, `cutoff=3.5` (float), `graph=CUTOFF` (int), `rule=PUBLISHED` (int)
+- **Returns**: `(labels, counts)` (`tuple` of NumPy arrays owned by the caller).
 - **Errors**: `RuntimeError` on engine failure.
 - **Units**: `cutoff` in angstrom
 
 ### `dseams.Frame.q4q6`
 
 - **Purpose**: Local Steinhardt $q_4$ and $q_6$ on the cutoff shell.
-- **Parameters**: `self`, `cutoff`
-- **Returns**: `(q4, q6)` NumPy arrays owned by the caller.
+- **Parameters**: `self`, `cutoff=3.5` (float)
+- **Returns**: `(q4, q6)` (`tuple` of NumPy arrays owned by the caller).
 - **Errors**: `RuntimeError` on engine failure.
 - **Units**: `cutoff` in angstrom; `q4` and `q6` are dimensionless
 
 ### `dseams.Frame.neighbours`
 
 - **Purpose**: CSR neighbour list of a `dseams.Frame`, omitting self entries.
-- **Parameters**: `self`, `cutoff`, `graph`
-- **Returns**: `(offsets, columns)` NumPy arrays owned by the caller.
+- **Parameters**: `self`, `cutoff=3.5` (float), `graph=CUTOFF` (int)
+- **Returns**: `(offsets, columns)` (`tuple` of NumPy arrays owned by the caller).
 - **Errors**: `RuntimeError` on engine failure.
 - **Units**: `cutoff` in angstrom
 
 ### `dseams.Frame.rings`
 
 - **Purpose**: Primitive ring sizes, symmetry labels, size histogram, and six-ring fraction.
-- **Parameters**: `self`, `cutoff`, `max_depth`
-- **Returns**: `(sizes, symmetry, histogram, fraction)`.
+- **Parameters**: `self`, `cutoff=3.5` (float), `max_depth=6` (int)
+- **Returns**: `(sizes, symmetry, histogram, fraction)` (`tuple`).
 - **Errors**: `RuntimeError` on engine failure.
 - **Units**: `cutoff` in angstrom
 
 ### `cages`
 
 - **Purpose**: Score hexagonal and double-diamond cage membership.
-- **Parameters**: `positions`, `box`, `cutoff=3.5`, `graph=CUTOFF`, `k=4`, `ring_adjacent=False`
+  `graph` is the string `"seeded"` (default) or `"cutoff"`.
+- **Parameters**: `positions`, `box`, `cutoff=3.5`, `graph="seeded"`, `k=4`
 - **Returns**: `(per_atom, (n_hex, n_cubic, n_water, n_both))`.
 - **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
 - **Units**: coordinates and `cutoff` in angstrom; counts are dimensionless
@@ -318,7 +323,7 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 ### `set_num_threads`
 
 - **Purpose**: Set the process-global OpenMP thread count for `dseams` (`0` restores the library default).
-- **Parameters**: `n` (`int`)
+- **Parameters**: `n` (int)
 - **Returns**: `None`.
 - **Units**: dimensionless thread count
 
@@ -340,8 +345,9 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 
 ### `signature_cages`
 
-- **Purpose**: Count closed cages matching a ring-census specification string (such as `"512"`).
-- **Parameters**: `positions`, `box`, `spec`, `cutoff=3.5`, `graph=CUTOFF`
+- **Purpose**: Count closed cages matching a ring-census specification string.
+  `spec` defaults to `"512"`. `graph` is the string `"cutoff"` by default.
+- **Parameters**: `positions`, `box`, `spec="512"`, `cutoff=3.5`, `graph="cutoff"`
 - **Returns**: `(n_cages, n_atoms)` tuple of integers.
 - **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
 - **Units**: coordinates and `cutoff` in angstrom
@@ -349,10 +355,10 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 ### `symmetry`
 
 - **Purpose**: Shell classification code (`0` Ih, `1` Ic, `2` stacking-disordered, `-1` other).
-- **Parameters**: `positions`, `box`, `cutoff=3.5`
+- **Parameters**: `positions`, `box`, `shell_rmsd=0.12`
 - **Returns**: Integer NumPy array of length `n_atoms`.
 - **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
-- **Units**: coordinates and `cutoff` in angstrom
+- **Units**: coordinates in angstrom; `shell_rmsd` is a dimensionless scale-free residual ceiling
 
 ### `version`
 
@@ -370,7 +376,8 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 ### `userframe.read`
 
 - **Purpose**: Read one trajectory frame with `seams_frame_read`.
-- **Parameters**: `filename`, `frame=1`, `atom_type=None`, `all_atoms=False`
+- **Parameters**: `filename`, `frame=1`, `atom_type=None`, `all_atoms=False`, `**kwargs`.
+  Extra keywords are ignored.
 - **Returns**: A `userframe.Frame`.
 - **Errors**: `RuntimeError` on I/O or parser failure.
 
@@ -458,10 +465,17 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 - **Returns**: `ase.Atoms`.
 - **Errors**: `ImportError` when ASE is not installed.
 
-### `userframe.Frame.to_solvis` / `userframe.to_solvis`
+### `userframe.Frame.to_solvis`
 
 - **Purpose**: Wrap the frame as a `solvis.System` via `to_ase`.
 - **Parameters**: `expand_box=True`
+- **Returns**: `solvis.system.System`.
+- **Errors**: `ImportError` when `solvis-tools` is not installed.
+
+### `userframe.to_solvis`
+
+- **Purpose**: Wrap a `userframe.Frame` as a `solvis.System` via `to_ase`.
+- **Parameters**: `frame`, `expand_box=True`
 - **Returns**: `solvis.system.System`.
 - **Errors**: `ImportError` when `solvis-tools` is not installed.
 
@@ -477,4 +491,5 @@ in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
 ### `userframe.CageScore`
 
 - **Purpose**: Per-atom hexagonal-cage (`hc`) and double-diamond-cage (`ddc`) boolean flags, with dimensionless count properties `n_ih`, `n_ic`, `n_water`, and `n_both`.
+- **Parameters**: `hc`, `ddc`
 <!-- API_SYMBOLS_END -->
