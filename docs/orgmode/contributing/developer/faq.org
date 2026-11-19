@@ -19,6 +19,9 @@ Release wheels and the sdist install in
 =-Dwith_chemfiles=enabled= and =-Dwith_readcon=enabled=.
 The cibuildwheel test command requires both queries to be true.
 A source tree left on =auto= can still build without either library.
+When the subproject vendors chemfiles, configure reads its SONAME with
+patchelf or objdump (otool on macOS). =with_chemfiles=enabled= fails
+configure when that tool or the vendored library is missing.
 
 ** Why does =cog= not write =CHANGELOG.md=?
 

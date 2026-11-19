@@ -97,46 +97,99 @@ endif
 # install tag. A wheel built with --tags=runtime,python-runtime then
 # omits it. Install the file the loader opens, named by patchelf, otool,
 # or objdump, with the runtime tag. auditwheel and delocate repair that
-# copy. A system chemfiles is found by the loader and is not staged here.
-_chem_probe = run_command(
-    find_program('sh'),
-    '-c',
-    '''
-libdir=$0
-real=$(find "$libdir" -maxdepth 1 -type f -name "libseams-chemfiles*" ! -name "*.a" -printf "%s %p\n" 2>/dev/null | sort -nr | awk "NR==1 { \$1=\"\"; sub(/^ /, \"\"); print }")
+# copy. An installed engine is found by the loader and is not staged here.
+# with_chemfiles=enabled, or a subproject that actually vendored the
+# library, fails configure when the tool or the library is missing.
+if not use_installed_engine and not get_option('with_chemfiles').disabled()
+    _chem_libdir = meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib'
+    _chem_vendor = import('fs').is_dir(_chem_libdir)
+    if get_option('with_chemfiles').enabled() or _chem_vendor
+        if host_machine.system() == 'darwin'
+            _soname_tool = find_program(
+                'otool',
+                required: get_option('with_chemfiles'),
+            )
+        else
+            _soname_tool = find_program('patchelf', required: false)
+            if not _soname_tool.found()
+                _soname_tool = find_program(
+                    'objdump',
+                    required: get_option('with_chemfiles'),
+                )
+            endif
+        endif
+        if get_option('with_chemfiles').enabled() and not _chem_vendor
+            error(
+                'with_chemfiles is enabled but the vendored chemfiles library was not built',
+            )
+        endif
+        if not _soname_tool.found()
+            if host_machine.system() == 'darwin'
+                error('reading the vendored chemfiles install name needs otool')
+            else
+                error(
+                    'reading the vendored chemfiles SONAME needs patchelf or objdump',
+                )
+            endif
+        endif
+        _chem_probe = run_command(
+            find_program('sh'),
+            '-c',
+            '''
+libdir=$1
+tool=$2
+real=
+best=0
+for f in "$libdir"/libseams-chemfiles*; do
+  [ -f "$f" ] && [ ! -L "$f" ] || continue
+  case "$f" in
+    *.a) continue ;;
+  esac
+  bytes=$(wc -c < "$f")
+  if [ "$bytes" -gt "$best" ]; then
+    best=$bytes
+    real=$f
+  fi
+done
 if [ -z "$real" ]; then
-  real=$(find "$libdir" -maxdepth 1 -type f -name "libseams-chemfiles*" ! -name "*.a" -exec wc -c {} + 2>/dev/null | sort -nr | awk "NR==1 && \$2 != \"total\" { print \$2 }")
+  echo "vendored chemfiles library not found in $libdir" >&2
+  exit 1
 fi
-[ -n "$real" ] || exit 1
-name=
-if command -v patchelf >/dev/null 2>&1; then
-  name=$(patchelf --print-soname "$real" 2>/dev/null || true)
+base=${tool##*/}
+if [ "$base" = patchelf ]; then
+  name=$("$tool" --print-soname "$real")
+elif [ "$base" = otool ]; then
+  name=$("$tool" -D "$real" | awk 'NR==2 { print $1 }')
+  name=${name##*/}
+else
+  name=$("$tool" -p "$real" | awk '/SONAME/ { print $2; exit }')
 fi
-if [ -z "$name" ] && command -v otool >/dev/null 2>&1; then
-  name=$(otool -D "$real" 2>/dev/null | awk "NR==2 { print \$1 }" | xargs -n1 basename)
+if [ -z "$name" ]; then
+  echo "could not read the SONAME of $real with $tool" >&2
+  exit 1
 fi
-if [ -z "$name" ] && command -v objdump >/dev/null 2>&1; then
-  name=$(objdump -p "$real" 2>/dev/null | awk "/SONAME/ { print \$2; exit }")
-fi
-[ -n "$name" ] || exit 1
-printf "%s\n%s\n" "$real" "$name"
+printf '%s\n%s\n' "$real" "$name"
 ''',
-    meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib',
-    check: false,
-)
-_chem_text = _chem_probe.stdout().strip()
-if _chem_probe.returncode() == 0 and _chem_text != ''
-    _chem_lines = _chem_text.split('\n')
-    custom_target(
-        'bundle-seams-chemfiles',
-        output: _chem_lines[1],
-        command: ['cp', _chem_lines[0], '@OUTPUT@'],
-        install: true,
-        install_dir: get_option('libdir'),
-        install_tag: 'runtime',
-        install_mode: 'rwxr-xr-x',
-        build_by_default: true,
-    )
+            'chemfiles-soname',
+            _chem_libdir,
+            _soname_tool.full_path(),
+            check: true,
+        )
+        _chem_lines = _chem_probe.stdout().strip().split('\n')
+        if _chem_lines.length() != 2 or _chem_lines[0] == '' or _chem_lines[1] == ''
+            error('vendored chemfiles SONAME probe returned no library name')
+        endif
+        custom_target(
+            'bundle-seams-chemfiles',
+            output: _chem_lines[1],
+            command: ['cp', _chem_lines[0], '@OUTPUT@'],
+            install: true,
+            install_dir: get_option('libdir'),
+            install_tag: 'runtime',
+            install_mode: 'rwxr-xr-x',
+            build_by_default: true,
+        )
+    endif
 endif
 
 py = import('python').find_installation(pure: false)
