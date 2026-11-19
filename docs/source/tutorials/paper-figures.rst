@@ -3,11 +3,10 @@ Paper figures
 =============
 
 
-The 2020 d-SEAMS paper figures use datasets hosted in figshare project
-
-1. This guide runs the same Python classification calls on the
-
-bulk cubic ice, sI clathrate, and mixed TIP4P reference structures.
+The 2020 d-SEAMS paper figures use datasets hosted on figshare
+(project 73545). This guide runs the same Python classification calls
+on the bulk cubic ice, sI clathrate, and mixed TIP4P reference
+structures.
 
 Prerequisites
 -------------

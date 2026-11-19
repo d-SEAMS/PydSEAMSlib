@@ -1,12 +1,11 @@
-Python
-======
+C-ABI Ice Ih census
+===================
 
-The frame is a context manager. The ring histogram and the CHILL+ labels
-are NumPy arrays the library fills in place.
+For environments calling ``libseams_lang`` directly over ``ctypes``
+without the compiled Python extensions, :class:`Frame` below wraps the C
+frame handle as a context manager and fills NumPy arrays in place.
+Standard Python workflows installed via ``pip install pydseamslib`` can
+call :mod:`dseams` or :class:`dseams.userframe.Frame` directly instead.
 
 .. literalinclude:: ../../../examples/python/lang_tasks_python.py
    :language: python
-
-``meson test docs_lang_python`` runs this file, and
-``tests/dseams/test_doc_snippets.py`` checks its output on
-``input/traj/ice1h.lammpstrj`` against the installed wheel.
