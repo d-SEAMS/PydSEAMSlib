@@ -441,13 +441,28 @@ def _ensure_display():
     process without libxcb-cursor0. Without both, Qt runs offscreen and
     Tachyon draws in software.
     """
-    if os.environ.get("DISPLAY"):
+    has_display = bool(os.environ.get("DISPLAY"))
+    has_gpu = any(Path("/dev/dri").glob("renderD*"))
+    if has_display and has_gpu:
         return None
     import ctypes.util
+
+    def use_software_renderer():
+        os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
+        icd = "/usr/share/vulkan/icd.d/lvp_icd.json"
+        if os.path.isfile(icd):
+            os.environ["VK_ICD_FILENAMES"] = icd
+            os.environ["VK_DRIVER_FILES"] = icd
+
+    if has_display:
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
+        use_software_renderer()
+        return None
 
     xvfb = shutil.which("Xvfb")
     if xvfb is None or ctypes.util.find_library("xcb-cursor") is None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        use_software_renderer()
         return None
     display = f":{20 + os.getpid() % 50}"
     proc = subprocess.Popen(
@@ -457,11 +472,7 @@ def _ensure_display():
     )
     os.environ["DISPLAY"] = display
     os.environ["QT_QPA_PLATFORM"] = "xcb"
-    os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
-    icd = "/usr/share/vulkan/icd.d/lvp_icd.json"
-    if os.path.isfile(icd):
-        os.environ["VK_ICD_FILENAMES"] = icd
-        os.environ["VK_DRIVER_FILES"] = icd
+    use_software_renderer()
     import time
 
     time.sleep(0.4)
