@@ -28,6 +28,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The `libseams_lang` mutual and union graph paths discard k-nearest candidates beyond the requested cutoff plus 1.5 instead of using that distance only as a search-cell hint.
 - Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through `dseams` instead of returning a frame with zero atoms.
 - Links between docs pages written as Org file links resolve to the built HTML pages instead of missing .rst and .md files.
+- The dseams reference matches the live signatures. `dseams.cages` takes `graph="seeded"`. `dseams.signature_cages` takes `graph="cutoff"` and defaults `spec` to `"512"`. `dseams.symmetry` takes `shell_rmsd` (default `0.12`).
 
 
 ## [2.14.0] - 2026-11-17
@@ -59,7 +60,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The README now pins the released package in its install examples and describes the import names and readers that the 2.14.0 wheel actually contains.
 - The macOS Nix build gives minimage, linkcell and readcon-core a store install name, so importing `pydseams.yoda` loads those libraries from the Nix store.
 - The macOS Nix build passes Cargo's rustc probe. The Darwin install-name flag is an argument to rustc, after cargo-auditable.
-- In exclude mode, ``run_unittest.py`` parses each selected module to find pytest-style tests, so a ``test_*`` function runs even when its module never imports pytest. A meson self-test covers the routing cases.
+- In exclude mode, `run_unittest.py` parses each selected module to find pytest-style tests, so a `test_*` function runs even when its module never imports pytest. A meson self-test covers the routing cases.
 - `meson test python_dseams_no_checkout` runs in both engine modes and covers every `tests/dseams/test_*.py` module except `test_seams_package.py` and `test_doc_snippets.py`. The checkout-dependent pair stays on the subproject-only `python_dseams` test.
 - `meson test` no longer kills `python_dseams` and `python_dseams_no_checkout` with signal 11 or 7 at random. Meson starts the two at once. Each runs `tests/dseams/run_unittest.py`, and that script copied `dseams._core` and the Python sources over the same files in `python-stage`. Rewriting a shared object in place corrupts any process that has it mapped, and `MALLOC_PERTURB_` played no part. The script now writes each file under a temporary name and renames it into place. The new `python_dseams_stage_concurrency` test starts twelve runs at once for ten rounds and checks that a published file gets a new inode.
 
