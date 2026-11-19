@@ -1,0 +1,43 @@
+# Cocogitto 7+ release driver for pydseamslib.
+# Prepare:  cog bump --auto   (or --patch / --minor / --major / --version X.Y.Z)
+# Hooks write pyproject.toml, regenerate the cogapp copies, then towncrier
+# builds CHANGELOG.md. Publishing stays on the v* tag workflow.
+#
+# One version for the bindings. Leave [monorepo] unset.
+
+from_latest_tag = true
+ignore_merge_commits = true
+disable_changelog = true
+disable_bump_commit = false
+generate_mono_repository_global_tag = true
+tag_prefix = "v"
+skip_ci = "[skip ci]"
+skip_untracked = false
+branch_whitelist = ["main"]
+
+pre_bump_hooks = [
+    "python ci/version/pydseams_version.py sync {{version}}",
+    "python -m cogapp -r -I ci/version @ci/version/files.txt",
+    "python -m towncrier build --yes --version {{version}}",
+]
+
+post_bump_hooks = [
+    "git --no-pager show --stat HEAD",
+    "echo \"Prepared v{{version}}. Push the version commit and the tag v{{version}} to publish wheels from build_wheels.yml.\"",
+]
+
+[commit_types]
+feat = { changelog_title = "Features" }
+fix = { changelog_title = "Bug Fixes" }
+perf = { changelog_title = "Performance" }
+refactor = { changelog_title = "Refactoring" }
+docs = { changelog_title = "Documentation" }
+test = { changelog_title = "Tests" }
+build = { changelog_title = "Build System" }
+ci = { changelog_title = "CI" }
+chore = { changelog_title = "Miscellaneous" }
+style = { changelog_title = "Style" }
+revert = { changelog_title = "Reverts" }
+
+[changelog]
+path = "CHANGELOG.md"

@@ -1,0 +1,155 @@
+#+TITLE: Release Process
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+STARTUP: content
+
+* Release Process
+
+pydseamslib has one release version. It is written in
+=[project].version= of =pyproject.toml=.
+=ci/version/files.txt= lists the copies cogapp regenerates:
+=meson.build=, =src/pydseams/__init__.py=,
+=tests/python/test_bindings.py=, and =CITATION.cff=.
+=ci/version/pydseams_version.py= reads the version from =pyproject.toml=.
+=docs/source/conf.py= reads that file at documentation build time and
+is not a second copy.
+
+Git tags are =vX.Y.Z= (=cog.toml= =tag_prefix=).
+The tag must equal =v= plus the =pyproject.toml= version.
+=.github/workflows/build_wheels.yml= checks that equality and publishes
+the sdist and the wheels to PyPI by trusted publishing from
+d-SEAMS/PydSEAMSlib.
+
+Do not hand-edit a =## [X.Y.Z]= section above the towncrier marker.
+Fragments under =changelog.d/= are the input for the next notes block.
+towncrier owns =CHANGELOG.md=. =cog.toml= sets =disable_changelog = true=.
+
+The engine tag moves first, in d-SEAMS/seams-core. This repository then
+moves =subprojects/seams-core.wrap= to that tag. That pin change is its
+own commit.
+
+Requires [[https://docs.cocogitto.io][cocogitto]] 7 or newer and
+cogapp (the =cogapp= distribution, invoked as =python -m cogapp=).
+towncrier is the =towncrier= distribution.
+
+*Canonical changelog*: repository-root =CHANGELOG.md=.
+
+Tooling:
+
+| Tool | Role |
+|------+------|
+| [[https://docs.cocogitto.io][cocogitto]] (=cog=) 7+ | Conventional-commit bump, version commit, annotated tag =vX.Y.Z= |
+| [[https://towncrier.readthedocs.io][towncrier]] | =CHANGELOG.md= from =changelog.d/= |
+| cogapp | Regenerates the version copies in =ci/version/files.txt= |
+| =.github/workflows/build_wheels.yml= | On =v*=: sdist, wheels, PyPI trusted publishing |
+
+** Changelog fragments
+
+One fragment per user-visible change, in the same commit:
+
+#+begin_src bash
+python -m towncrier create --content "Short user-facing note." +slug.added.md
+#+end_src
+
+Types in =towncrier.toml=: =added=, =changed=, =deprecated=, =removed=,
+=fixed=, =security=. The orphan prefix is =+=.
+Preview:
+
+#+begin_src bash
+python -m towncrier build --draft
+#+end_src
+
+** Commit check
+
+Cocogitto 7 checks a positional range. There is no =cog check --from=.
+=--from-latest-tag= is a boolean and shares a group with that range.
+=cog.toml= sets =ignore_merge_commits = true=, which skips a commit
+with more than one parent.
+
+#+begin_src bash
+cog check --ignore-merge-commits v2.14.0..HEAD
+#+end_src
+
+** From a clean clone to a dry run
+
+These steps do not publish. Replace =X.Y.Z= with the seams-core tag
+you are binding.
+
+1. Clone and enter the tree.
+
+   #+begin_src bash
+   git clone https://github.com/d-SEAMS/PydSEAMSlib.git
+   cd PydSEAMSlib
+   #+end_src
+
+2. Install a C++20 compiler, Python 3.11 or newer, Meson 1.3 or newer,
+   Ninja, pkg-config, cmake (only when chemfiles must be vendored), and
+   cargo with Rust 1.88 or newer. Install the Python build tools:
+
+   #+begin_src bash
+   python -m pip install 'meson>=1.3' ninja 'meson-python>=0.18' build \
+     'numpy>=1.24' 'nanobind>=2.4' pytest hypothesis ase towncrier cogapp
+   #+end_src
+
+3. Configure, compile, and test. =--force-fallback-for=eigen3= keeps
+   Eigen inside the source tree. Reader detection is =auto= unless you
+   pass =-Dwith_chemfiles== and =-Dwith_readcon==.
+
+   #+begin_src bash
+   meson setup bbdir --force-fallback-for=eigen3
+   meson compile -C bbdir
+   meson test -C bbdir --suite pydseamslib --print-errorlogs
+   #+end_src
+
+4. Preview the changelog. This does not write =CHANGELOG.md=.
+
+   #+begin_src bash
+   python -m towncrier build --draft
+   #+end_src
+
+5. Dry-run the bump. This prints the next version and does not commit
+   or tag.
+
+   #+begin_src bash
+   cog bump --auto --dry-run
+   #+end_src
+
+6. Check the commits since the current release tag.
+
+   #+begin_src bash
+   cog check --ignore-merge-commits v2.14.0..HEAD
+   #+end_src
+
+7. Build the sdist. This does not upload it.
+
+   #+begin_src bash
+   python -m build --sdist --outdir dist
+   #+end_src
+
+** Cutting the release
+
+Move =subprojects/seams-core.wrap= to the seams-core tag first, in its
+own commit, with a =changed= fragment that names the revision.
+
+=cog bump= runs =pre_bump_hooks= in this order:
+
+- =python ci/version/pydseams_version.py sync {{version}}= writes
+  =[project].version= in =pyproject.toml=
+- =python -m cogapp -r -I ci/version @ci/version/files.txt= regenerates
+  the copies
+- =python -m towncrier build --yes --version {{version}}= updates
+  =CHANGELOG.md= and clears the fragments
+
+#+begin_src bash
+cog bump --version X.Y.Z
+git push origin HEAD --follow-tags
+#+end_src
+
+The tag push runs =build_wheels.yml=. Confirm the sdist and the wheels
+on PyPI after that workflow finishes. Do not upload a wheel by hand
+while the workflow is the publish path.
+
+** Version policy
+
+- One source: =pyproject.toml=.
+- One global tag: =vX.Y.Z=.
+- The published distribution is the PyPI project =pydseamslib=.

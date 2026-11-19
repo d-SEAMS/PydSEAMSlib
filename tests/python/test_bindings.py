@@ -6,7 +6,9 @@ from pydseams import yoda
 
 def test_version():
     assert hasattr(pydseams, "__version__")
+    # [[[cog import pydseams_version as v; cog.outl(f'    assert pydseams.__version__ == "{v.VERSION}"')]]]
     assert pydseams.__version__ == "2.14.1"
+    # [[[end]]]
 
 
 def test_import_yoda():

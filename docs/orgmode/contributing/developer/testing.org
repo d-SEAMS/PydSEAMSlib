@@ -1,0 +1,60 @@
+#+TITLE: Testing
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+STARTUP: content
+
+* Testing
+
+Two runners cover the tree. =meson test= runs the programs registered
+in =meson.build= against the build directory. =pytest= runs the
+installed package.
+
+** Meson
+
+#+begin_src bash
+meson setup bbdir --force-fallback-for=eigen3
+meson compile -C bbdir
+meson test -C bbdir --suite pydseamslib --print-errorlogs
+#+end_src
+
+The suite name is the project name. Tests that read seams-core inputs
+take them from =SEAMS_CORE_SRC=, else =subprojects/seams-core=.
+
+** Installed package
+
+#+begin_src bash
+python -m pip install '.[test,ase]'
+python -m pytest tests/python
+python -m pytest --import-mode=importlib tests/dseams/test_dseams.py \
+  tests/dseams/installed_package.py tests/dseams/docs \
+  tests/dseams/test_doc_snippets.py
+python scripts/check_installed_api.py
+#+end_src
+
+=tests/python= uses pytest's default import mode because those modules
+import one another. =tests/dseams= uses =--import-mode=importlib=.
+
+** Readers
+
+=tests/python/test_readers.py= reads =tests/data/readers/tiny_multi_cuh2.con=
+(the seams-core eOn fixture), =water.pdb=, and =water.gro=. Each file
+test skips only when =has_readcon()= or =has_chemfiles()= is false. A
+build that linked the library runs the read.
+
+The =readers= job in =.github/workflows/build_test.yml= configures
+=-Dwith_chemfiles=enabled -Dwith_readcon=enabled= and asserts both
+queries are true before it runs that file, so a missing library fails
+the job instead of skipping the reads.
+
+#+begin_src bash
+python - <<'PY'
+import pydseams as ds
+assert ds.has_chemfiles() is True
+assert ds.has_readcon() is True
+PY
+python -m pytest -vvv tests/python/test_readers.py
+#+end_src
+
+** Documentation snippets
+
+=tests/dseams/test_doc_snippets.py= runs the Python source blocks of
+the reader pages. It does not run this directory.

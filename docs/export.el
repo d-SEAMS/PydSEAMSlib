@@ -36,7 +36,7 @@
          :publishing-directory "./source/"
          :publishing-function org-rst-publish-to-rst
          :recursive t
-         :exclude "^reference/api\\.org$"
+         :exclude "\\(^reference/api\\.org$\\)\\|\\(^contributing/developer/\\)"
          :headline-levels 4
          :with-toc nil
          :section-numbers nil
