@@ -11,7 +11,7 @@ crystal shows why the two scores can disagree.
 Prerequisites
 -------------
 
-- Python 3.11+ with ``pydseamslib`` installed (``pip install pydseamslib``)
+- Python 3.11+ with ``pydseamslib`` installed (``pip install 'pydseamslib==2.14.1'``)
 
 - Sample trajectories ``exampleTraj.lammpstrj`` (250 TIP4P waters;
   LAMMPS type 2 oxygen, type 1 hydrogen) and ``mW_cubic.lammpstrj``

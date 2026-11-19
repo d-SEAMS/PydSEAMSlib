@@ -33,9 +33,9 @@ Unreleased notes are files under `changelog.d/`. The cut is
 `towncrier build --version X.Y.Z`.
 
 ```bash
-python -m pip install 'pydseamslib==2.14.0'
-python -m pip install 'pydseamslib[ase]==2.14.0'      # ASE Atoms
-python -m pip install 'pydseamslib[solvis]==2.14.0'   # solvis / PyVista
+python -m pip install 'pydseamslib==2.14.1'
+python -m pip install 'pydseamslib[ase]==2.14.1'      # ASE Atoms
+python -m pip install 'pydseamslib[solvis]==2.14.1'   # solvis / PyVista
 ```
 
 Each command installs a wheel containing the bundled engine and all three
@@ -82,7 +82,7 @@ system = frame.to_solvis()  # optional extra
 surface. Helpers (`Frame`, `io`, ASE, solvis) stay in Python.
 `_core` and `cyoda` still name the same module.
 `ds.available_readers()` reports the readers compiled into a wheel. The
-2.14.0 PyPI wheels do not link chemfiles, so `.pdb`, `.gro`, and `.dcd`
+2.14.1 PyPI wheels do not link chemfiles, so `.pdb`, `.gro`, and `.dcd`
 inputs raise `RuntimeError`.
 
 `Frame.density`, `Frame.pairs`, and `Frame.domain` expose the same
@@ -142,7 +142,7 @@ lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
 ## Development
 
 The engine is [seams-core](https://github.com/d-SEAMS/seams-core), a
-Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.0`,
+Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.1`,
 and the other wraps carry the revisions that tag pins. Engine changes
 go to d-SEAMS/seams-core, not to this repository.
 The contributing guide at the repository root has the layout, the test

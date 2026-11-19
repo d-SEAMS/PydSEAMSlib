@@ -1,7 +1,7 @@
 project(
     'pydseamslib',
     'cpp',
-    version: '2.14.0',
+    version: '2.14.1',
     default_options: [
         'warning_level=1',
         'cpp_std=c++20',
@@ -14,9 +14,9 @@ project(
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
 # the subproject, and libyodaLib plus the Rust crates are static inside
 # the shared libraries that the wheel ships.
-seams_core_dep = dependency('seams-core', version: '>=2.14.0', required: false)
-seams_dep = dependency('seams', version: '>=2.14.0', required: false)
-seams_lang_dep = dependency('seams-lang', version: '>=2.14.0', required: false)
+seams_core_dep = dependency('seams-core', version: '>=2.14.1', required: false)
+seams_dep = dependency('seams', version: '>=2.14.1', required: false)
+seams_lang_dep = dependency('seams-lang', version: '>=2.14.1', required: false)
 use_installed_engine = (
     seams_core_dep.found()
     and seams_dep.found()
