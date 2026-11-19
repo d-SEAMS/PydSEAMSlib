@@ -6,7 +6,7 @@ pydseams
 .. raw:: html
 
    <p class="dseams-hero">
-     <img src="_static/dseams/dseams-logo.png" alt="" width="128" height="128" />
+     <img src="_static/dseams/dseams-logo.png" alt="d-SEAMS logo" width="128" height="128" />
    </p>
 
 .. grid:: 1 2 3 3
@@ -19,8 +19,7 @@ pydseams
       :link-type: doc
       :class-card: sd-shadow-sm
 
-      Load a LAMMPS dump, XYZ, PDB, GRO, DCD, or eOn ``.con`` as a
-      ``Frame``.
+      Load a LAMMPS dump, XYZ, eOn ``.con``, or (with chemfiles) PDB, GRO, or DCD file as a ``Frame``.
 
    .. grid-item-card:: Classify
       :link: tutorials/classify-ice
@@ -34,32 +33,46 @@ pydseams
       :link-type: doc
       :class-card: sd-shadow-sm
 
-      Round-trip ASE ``Atoms``. Optional solvis view of the same
-      cloud.
+      Round-trip ASE ``Atoms``. Optional solvis view of the same cloud.
 
 About
 -----
 
-``pydseams`` is the Python package for the d-SEAMS engine. The compiled
-module is ``yoda``. Helpers (``Frame``, ``read``, ASE, solvis) sit on that
-surface. ``import pydseamslib`` still works.
-
-Primary author: Ruhila S. The project started as PSF GSoC 2023
-(``pyseams``; the PyPI name is ``pydseamslib``). Helpers stay in
-Python so the C++ ABI does not grow a second I/O layer.
+``pydseams`` is the Python package for the d-SEAMS molecular simulation
+analysis engine. The compiled extension module is ``pydseams.yoda``,
+wrapped by ``Frame``, ``read``, ASE adapters, and optional solvis
+visualisation. The same wheel also provides ``import pydseamslib`` and
+``import dseams`` (over the C API).
 
 The engine and the ``seams`` CLI live in
 `seams-core <https://github.com/d-SEAMS/seams-core>`_. Lua is
 ``dseams`` in `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_.
-This site documents the Python ``Frame`` API. The header **Ecosystem**
-menu jumps to the engine docs, the Lua front end, and the
-neighbour backends (vesin cutoff lists, linkcell k-NN).
+Use the header **Docs** menu to jump to the engine docs, the Lua front
+end, and the neighbour backends (vesin cutoff lists, linkcell k-NN).
 
 .. code:: python
 
     import pydseams as ds
 
-    frame = ds.read("water.lammpstrj")
+    a = 2.75 * 4 / 3**0.5
+    basis = (
+        (0, 0, 0),
+        (0.5, 0.5, 0),
+        (0.5, 0, 0.5),
+        (0, 0.5, 0.5),
+        (0.25, 0.25, 0.25),
+        (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75),
+        (0.25, 0.75, 0.75),
+    )
+    xyz = [
+        [(i + x) * a, (j + y) * a, (k + z) * a]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in basis
+    ]
+    frame = ds.from_arrays(xyz, [3 * a, 3 * a, 3 * a])
     print(frame.chill_plus())
     print(frame.cages())
 
@@ -69,7 +82,7 @@ Book and video
 The d-SEAMS book covers the Python front end in
 `Python <https://docs.dseams.info/stable/python.html>`_ and the
 `Python Frame <https://docs.dseams.info/reference/python-frame.html>`_
-reference. The walkthrough video is on
+reference. A walkthrough video is on
 `Odysee <https://odysee.com/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa>`_.
 
 .. raw:: html
@@ -152,8 +165,6 @@ framework.
    howto/install
    howto/ase
    howto/solvis
-   howto/ase-integration
-   howto/solvis-dseams
    howto/features
    howto/tools
    howto/faq
@@ -175,6 +186,9 @@ framework.
    reference/index
    reference/python
    api
+   reference/dseams
+   lang/python
+   lang/task-python
 
 .. toctree::
    :maxdepth: 1
@@ -206,21 +220,13 @@ vesin
 License
 -------
 
-MIT. Cite the 2020 d-SEAMS paper (DOI
+MIT. Cite the d-SEAMS paper (DOI
 `10.1021/acs.jcim.0c00031 <https://doi.org/10.1021/acs.jcim.0c00031>`_).
 See `How to cite <explanation/citation.rst>`_.
 
-#+begin\_export rst
 Indices and tables
-``================``
+==================
 
-:ref:\`genindex\`
------------------
-
-:ref:\`modindex\`
------------------
-
-:ref:\`search\`
----------------
-
-#+end\_export
+- :ref:`genindex`
+- :ref:`modindex`
+- :ref:`search`

@@ -3,33 +3,32 @@ Explanation
 ===========
 
 
-Explanation pages are understanding-oriented. Use them for the
-split between the package, the compiled module, and the other
-d-SEAMS front ends.
+Explanation pages cover the architecture and design choices behind
+``pydseams``, ``pydseams.yoda``, ``Frame``, and the other d-SEAMS front ends.
 
 Available explanations
 ----------------------
 
 .. table::
 
-    +----------------------------------------+---------------------------------------------+
-    | Explanation                            | Description                                 |
-    +========================================+=============================================+
-    | `The yoda surface <yoda-surface.rst>`_ | Why helpers stay in Python on ``yoda``      |
-    +----------------------------------------+---------------------------------------------+
-    | `Why Frame <frame.rst>`_               | Why the handle is one snapshot, not a movie |
-    +----------------------------------------+---------------------------------------------+
-    | `How to cite <citation.rst>`_          | 2020 paper and software citation            |
-    +----------------------------------------+---------------------------------------------+
+    +----------------------------------------+-----------------------------------------------------------------+
+    | Explanation                            | Description                                                     |
+    +========================================+=================================================================+
+    | `The yoda surface <yoda-surface.rst>`_ | Why Python helpers sit on top of ``pydseams.yoda``              |
+    +----------------------------------------+-----------------------------------------------------------------+
+    | `Why Frame <frame.rst>`_               | Why ``Frame`` models one snapshot rather than a full trajectory |
+    +----------------------------------------+-----------------------------------------------------------------+
+    | `How to cite <citation.rst>`_          | Paper and software citations                                    |
+    +----------------------------------------+-----------------------------------------------------------------+
 
 Getting help
 ------------
 
 `Tutorials <../tutorials/index.rst>`_
-    learn the ``Frame`` path
+    learn the ``Frame`` workflow
 
 `How-to guides <../howto/index.rst>`_
-    solve a task
+    solve a specific task
 
 `Python surface <../reference/python.rst>`_
-    live names
+    live classes and functions

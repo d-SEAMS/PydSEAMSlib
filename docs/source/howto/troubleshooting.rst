@@ -12,7 +12,7 @@ Installation
 ``ModuleNotFoundError: No module named 'pydseams'``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The package is not installed in the active interpreter.
+The package is not installed in the active Python interpreter:
 
 .. code:: bash
 
@@ -22,7 +22,7 @@ The package is not installed in the active interpreter.
 ``ImportError`` naming ``pip install 'pydseamslib[ase]'``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ASE is not installed. The extra is optional:
+ASE is an optional extra:
 
 .. code:: bash
 
@@ -31,7 +31,7 @@ ASE is not installed. The extra is optional:
 ``ImportError`` naming ``pip install 'pydseamslib[solvis]'``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-solvis-tools is not installed:
+``solvis-tools`` is an optional extra:
 
 .. code:: bash
 
@@ -43,61 +43,61 @@ Loading frames
 ``ValueError: ... has no atoms of type 1 or 2``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``Frame.from_file`` looks for LAMMPS type 2 (oxygen) then type 1.
-The dump has neither, or ``atom_type`` does not match the file.
-Pass ``atom_type`` explicitly, or use ``from_ase`` / ``from_arrays``
-when the types are not 1/2.
+When ``atom_type`` is omitted, ``Frame.from_file`` looks for LAMMPS type 2
+(oxygen) then type 1. Pass ``atom_type`` explicitly if your dump uses a
+different type code, or use ``from_ase`` / ``from_arrays``.
 
 ``ValueError: from_ase requires a cell periodic in all three directions``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Set periodic boundary conditions on all three ASE cell directions.
-Partially periodic configurations do not define the three-dimensional
-periodic geometry required by the engine.
+Enable periodic boundary conditions on all three ASE cell axes
+(``atoms.pbc = True``). Partially periodic configurations do not define
+three-dimensional periodic geometry.
 
 ``ValueError: from_ase cannot convert a singular cell``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Supply a cell with nonzero volume. Orthorhombic and general triclinic
-cells are accepted when they are nonsingular and fully periodic.
+cells are both accepted when nonsingular and fully periodic.
 
 ``ValueError: no atoms matched select=...``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``from_ase(..., select="O")`` found no oxygen. Pass the symbol or
-atomic number that is present, or ``select=None``.
+``from_ase(..., select="O")`` found no oxygen atoms. Pass the chemical
+symbol or atomic number present in your configuration, or ``select=None``.
 
 ``ValueError: bonded="hbond" requires a heavy-atom selection that excludes H``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ASE analysis selection contains hydrogen. Use ``select="O"`` (or
-another heavy species) for hydrogen-bond topology, or use
+The ASE analysis selection includes hydrogen. Use ``select="O"`` (or
+another heavy species) for hydrogen-bond topology, or pass
 ``bonded="cutoff"`` for an all-atom frame.
 
 ``ValueError: Hydrogen-bond analysis needs hydrogens``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``bonded="hbond"`` (or ``"auto"`` when the constructor decided
-``hbond``) needs an H cloud. Pass ASE ``Atoms`` that include ``H``, a
-LAMMPS dump with hydrogen, or set ``bonded="cutoff"``.
+``bonded="hbond"`` (or ``"auto"`` when a heavy-atom selection is used on a
+water frame) requires hydrogens. Pass ASE ``Atoms`` with ``H``, a LAMMPS
+dump containing hydrogen, or set ``bonded="cutoff"``.
 
 ``RuntimeError: chemfiles is not linked in this build of seams-core``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``.pdb`` / ``.gro`` / ``.dcd`` need a wheel that linked chemfiles.
-``available_readers()["chemfiles"]`` is ``False`` on this build.
-Convert to LAMMPS or XYZ, or use a build with chemfiles.
+Reading ``.pdb``, ``.gro``, or ``.dcd`` directly requires a build linked
+against chemfiles (``available_readers()["chemfiles"]`` is ``True``).
+Convert the trajectory to LAMMPS or XYZ (for example via ASE), or
+build from source with chemfiles enabled.
 
 ``RuntimeError: readcon-core is not linked``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-=.con~ needs a wheel that linked readcon-core.
-``available_readers()["readcon"]`` reports the flag.
+Reading ``.con`` requires ``available_readers()["readcon"]`` to be ``True``.
 
 ``RuntimeError: this build has no readXYZ``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-=.xyz~ needs ``yoda.readXYZ``. Check ``available_readers()["xyz"]``.
+Reading ``.xyz`` requires ``yoda.readXYZ``. Check
+``available_readers()["xyz"]``.
 
 Classification
 --------------
@@ -105,38 +105,36 @@ Classification
 Cage score is all water on a mixed snapshot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-That is the fixture result on
-``tests/data/exampleTraj.lammpstrj``: CHILL+ sees local ice,
-``cages()`` finds no finished HC or DDC. See the
-`classify-ice tutorial <../tutorials/classify-ice.rst>`_.
+On mixed snapshots such as ``exampleTraj.lammpstrj``, CHILL+ can detect
+local four-neighbour ice-like stars while ``cages()`` finds zero finished
+HC or DDC polyhedra. See `Classify ice <../tutorials/classify-ice.rst>`_.
 
 Counts differ from a documented dump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Confirm the path, the 1-indexed ``frame``, ``cutoff`` (default 3.5
-Angstroms), and ``atom_type``. A different snapshot is a different
-histogram.
+Confirm the trajectory path, 1-indexed ``frame``, ``cutoff`` (default 3.5
+Angstroms), and ``atom_type``.
 
 Common messages
 ---------------
 
 .. table::
 
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | Error                                      | Cause                   | Action                                                     |
-    +============================================+=========================+============================================================+
-    | ``No module named 'pydseams'``             | Wrong interpreter       | ``python -m pip install pydseamslib``                      |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | ``pip install 'pydseamslib[ase]'``         | ASE extra missing       | install the extra                                          |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | ``periodic in all three directions``       | Partial ASE periodicity | set all three PBC flags or use a compatible input geometry |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | ``cannot convert a singular cell``         | Zero-volume ASE cell    | supply a nonsingular cell                                  |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | ``Hydrogen-bond analysis needs hydrogens`` | No H cloud              | ``bonded="cutoff"`` or pass H                              |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
-    | ``chemfiles is not linked``                | Optional reader         | check ``available_readers()``                              |
-    +--------------------------------------------+-------------------------+------------------------------------------------------------+
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | Error                                      | Cause                   | Action                                                 |
+    +============================================+=========================+========================================================+
+    | ``No module named 'pydseams'``             | Wrong interpreter       | ``python -m pip install pydseamslib``                  |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | ``pip install 'pydseamslib[ase]'``         | ASE extra missing       | install the extra                                      |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | ``periodic in all three directions``       | Partial ASE periodicity | set ``pbc=True`` on all three axes                     |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | ``cannot convert a singular cell``         | Zero-volume ASE cell    | supply a nonsingular cell                              |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | ``Hydrogen-bond analysis needs hydrogens`` | No H cloud              | ``bonded="cutoff"`` or pass H                          |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
+    | ``chemfiles is not linked``                | Optional reader absent  | convert to LAMMPS/XYZ or check ``available_readers()`` |
+    +--------------------------------------------+-------------------------+--------------------------------------------------------+
 
 Getting help
 ------------
@@ -147,5 +145,5 @@ Getting help
 
 3. `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ issues
 
-Include the ``pydseams`` version, Python version, the file suffix,
-and the exact traceback.
+Include the ``pydseams`` version, Python version, file format, and exact
+traceback when reporting an issue.

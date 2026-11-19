@@ -1,28 +1,40 @@
 #+TITLE: Confined water
 #+OPTIONS: toc:nil num:nil
 
-Quasi-one-dimensional ice is a stack of prism blocks (~Frame.find_prisms~).
-Quasi-two-dimensional ice is a sheet of primitive rings (~Frame.monolayer_rings~) plus an in-plane radial distribution (~Frame.rdf_2d~).
-The ~seams~ CLI does not grow a command for the prisms or the sheet.
-~seams rdf~ is the three-dimensional partial RDF, not the in-plane histogram.
+d-SEAMS analyses quasi-one-dimensional ice nanotubes as stacked prism
+blocks (~Frame.find_prisms~) and quasi-two-dimensional ice monolayers
+using primitive rings (~Frame.monolayer_rings~) and an in-plane radial
+distribution function (~Frame.rdf_2d~).
 
-The 2020 nanotube and monolayer dumps are figshare project 73545.
-They are not in this repository, and this page does not invent their counts.
+* Prerequisites
 
-The in-tree confined frame is =input/traj/exampleTraj.lammpstrj=.
-~tests/dseams/test_doc_snippets.py~ runs the Python block on this page.
-Install Python with ~pip install 'pydseamslib==2.14.0'~.
+#+begin_src bash
+pip install pydseamslib
+mkdir -p input/traj
+curl -sLo input/traj/exampleTraj.lammpstrj \
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+#+end_src
+
+* Run confined-water analyses
+
+Unlike bulk ~chill_plus~ and ~cages~, ~rdf_2d~, ~monolayer_rings~, and
+~find_prisms~ write engine output files under the directory passed as
+the first argument (~"output"~ below) in addition to returning results
+to Python:
 
 #+begin_src python
 import pydseams as ds
 
 frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 r, g = frame.rdf_2d("output", cutoff=6.0, binwidth=0.5)
-frame.monolayer_rings("output", sheet_area=1.0, max_depth=6)
-frame.find_prisms(output_dir="output", max_depth=4)
+mono = frame.monolayer_rings("output", sheet_area=1.0, max_depth=6)
+prisms = frame.find_prisms(output_dir="output", max_depth=4)
+print("rdf_2d bins:", len(r))
+print("monolayer:", mono)
+print("prisms:", prisms)
 assert len(r) == len(g) and len(r) > 0
 #+end_src
 
-~sheet_area~ is the area the coverage fraction divides by.
-Use the area of the sheet you loaded.
-The ring counts themselves do not use it.
+~sheet_area~ sets the area used to normalise the monolayer ring
+coverage fraction. Pass the lateral area of the sheet you loaded; the
+raw ring counts do not depend on ~sheet_area~.

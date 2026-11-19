@@ -3,12 +3,23 @@ Bond-orientational order parameters
 ===================================
 
 
-``Frame.steinhardt(l)`` returns the local ``q_l`` and the Lechner-Dellago average for every atom.
-The neighbour list is the cutoff list.
-Degrees 3, 4, 6, 8, and 12 are computed.
-``seams steinhardt`` reports the means of the degrees given to ``--l`` (default :math:`q_4` and :math:`q_6`, from the solid-harmonic kernel). ``--l 3,4,6,8,12`` asks for every degree the library computes.
+``Frame.steinhardt(order_l)`` computes the local Steinhardt parameter
+:math:`q_l(i)` and its Lechner-Dellago neighbour-averaged counterpart
+:math:`\bar{q}_l(i)` for every atom on the cutoff neighbour list. Supported
+degrees are 3, 4, 6, 8, and 12.
 
-``tests/dseams/test_doc_snippets.py`` runs the Python block on this page.
+Prerequisites
+-------------
+
+.. code:: bash
+
+    pip install pydseamslib
+    mkdir -p input/traj
+    curl -sLo input/traj/exampleTraj.lammpstrj \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+
+Compute Steinhardt parameters
+-----------------------------
 
 .. code:: python
 
@@ -16,14 +27,20 @@ Degrees 3, 4, 6, 8, and 12 are computed.
 
     frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
     q3 = frame.steinhardt(3)
+    mean_ql = sum(q3["ql"]) / len(q3["ql"])
+    mean_ql_bar = sum(q3["ql_bar"]) / len(q3["ql_bar"])
+    print(f"mean q3={mean_ql:.6f} mean q3_bar={mean_ql_bar:.6f}")
     assert len(q3["ql"]) == 250
-    assert round(float(sum(q3["ql"]) / len(q3["ql"])), 6) == 0.374897
-    assert round(float(sum(q3["ql_bar"]) / len(q3["ql_bar"])), 6) == 0.187542
+    assert round(float(mean_ql), 6) == 0.374897
+    assert round(float(mean_ql_bar), 6) == 0.187542
 
-``q3["ql"]`` and ``q3["ql_bar"]`` are the per-atom arrays.
-On this frame the finite means are about 0.374897 and 0.187542.
+``q3["ql"]`` and ``q3["ql_bar"]`` are the per-atom arrays. On
+``exampleTraj.lammpstrj``, their means are 0.374897 and 0.187542.
 
-The local parameter is
+Definition
+----------
+
+The local parameter for atom :math:`i` is
 
 
 
@@ -31,10 +48,13 @@ The local parameter is
 
     q_l(i) = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-l}^{l} |q_{lm}(i)|^2}
 
-with
+with complex bond-orientational moments
 
 
 
 .. math::
 
-    q_{lm}(i) = \frac{1}{N_b(i)} \sum_{j \in N(i)} Y_{lm}(\hat r_{ij}).
+    q_{lm}(i) = \frac{1}{N_b(i)} \sum_{j \in N(i)} Y_{lm}(\hat r_{ij}),
+
+where :math:`N(i)` is the cutoff neighbour set of atom :math:`i` and :math:`Y_{lm}` are
+spherical harmonics.

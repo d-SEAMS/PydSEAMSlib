@@ -12,10 +12,13 @@ Install
     pip install pydseamslib
     pip install 'pydseamslib[ase]'
     pip install 'pydseamslib[solvis]'
+    pip install 'pydseamslib[mdanalysis]'
 
-``pydseams`` is the package. The ``[ase]`` extra pulls ASE for ``from_ase``
-/ ``to_ase``. The ``[solvis]`` extra pulls ASE plus solvis-tools for
-``to_solvis``.
+``pydseams`` is the package name to import (``import pydseams as ds``). The
+``[ase]`` extra adds ASE support for ``from_ase`` and ``to_ase``, ``[solvis]``
+adds ASE and solvis-tools for ``to_solvis``, and ``[mdanalysis]`` adds
+MDAnalysis support for ``IceStates``. ``import pydseamslib`` and
+``import dseams`` are included in the same installation.
 
 With pixi, add the PyPI package:
 
@@ -23,69 +26,93 @@ With pixi, add the PyPI package:
 
     pixi add --pypi pydseamslib
 
-Requires Python 3.11+. CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
-the CPython 3.12 limited ABI (one ``abi3`` wheel per platform). A wheel already links the engine; do not
-compile ``yoda`` to use the package.
+Requires Python 3.11 or later. Prebuilt wheels bundle the d-SEAMS C++
+engine so no compilation step is needed.
 
-``import pydseamslib`` is a compatibility alias of ``pydseams``.
-
-From a PydSEAMSlib checkout:
-
-.. code:: bash
-
-    nix build
-    nix develop
-
-``nix build`` produces the ``pydseams`` package. ``nix develop`` is the
-dev shell (pytest, hypothesis).
-
-The full extra table is in the `install
-how-to <howto/install.rst>`_.
+The full extra and source-build details are in the
+`install how-to <howto/install.rst>`_.
 
 Classify a frame
 ----------------
+
+Build a 3x3x3 cubic diamond ice supercell from coordinates and classify
+it with CHILL+ and topological cages:
 
 .. code:: python
 
     import pydseams as ds
 
-    frame = ds.read("water.lammpstrj")   # also .xyz, .pdb, .gro, .dcd, .con
+    a = 2.75 * 4 / 3**0.5
+    basis = (
+        (0, 0, 0),
+        (0.5, 0.5, 0),
+        (0.5, 0, 0.5),
+        (0, 0.5, 0.5),
+        (0.25, 0.25, 0.25),
+        (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75),
+        (0.25, 0.75, 0.75),
+    )
+    xyz = [
+        [(i + x) * a, (j + y) * a, (k + z) * a]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in basis
+    ]
+    frame = ds.from_arrays(xyz, [3 * a, 3 * a, 3 * a])
     print(frame.chill_plus())
     print(frame.cages())
 
-``ds.read`` picks the engine reader from the suffix and returns a
-``Frame``. ``chill_plus`` and ``cages`` do not write files.
-Pass ``all_atoms`` on for mixed-type site analyses such as
-``Frame.pairs`` and ``Frame.domain``.
+Expected output:
 
-``yoda`` is the compiled module. ``_core`` and ``cyoda`` are aliases of
-``yoda``. Helpers (``Frame``, ``read``, ASE, solvis) stay in Python.
+::
 
-ASE ``Atoms``: ``ds.from_ase(atoms)``. See the `ASE
-how-to <howto/ase.rst>`_. A worked mixed ice-water dump is the
-`classify-ice tutorial <tutorials/classify-ice.rst>`_.
+    IceCounts(cubic=216)
+    CageScore(n_ih=0, n_ic=216, n_water=0)
 
-Seeded cages and mixed ASE selections
--------------------------------------
+To read a trajectory file instead, pass its path to ``ds.read(path)``
+(supporting LAMMPS dumps, XYZ, and eOn ``.con``, or PDB/GRO/DCD when
+chemfiles is linked). ``chill_plus`` and ``cages`` compute in memory and do
+not write files. Pass ``all_atoms=True`` to ``ds.read`` when mixed-type
+site analyses such as ``Frame.pairs`` and ``Frame.domain`` need every
+species.
 
-``Frame.seeded_affiliation`` is the hysteresis construction that
-``cages`` with the seeded flag on calls. Ring-adjacent completion fills
-the last vertex of a six-ring whose other vertices carry a label:
+Seeded cages and ring-adjacent completion
+-----------------------------------------
+
+``Frame.seeded_affiliation`` runs the seeded hysteresis cage
+construction that ``Frame.cages(seeded=True)`` wraps. Setting
+``ring_adjacent=True`` fills the last vertex of a six-ring whose other
+five vertices already carry a cage label:
 
 .. code:: python
 
     print(frame.seeded_affiliation(ring_adjacent=True))
     print(frame.cages(seeded=True, ring_adjacent=True))
 
-``IceFeaturizer`` turns the same flag on by default.
+``IceFeaturizer`` turns ``ring_adjacent=True`` on by default.
 
-Pass a sequence to ``from_ase`` when the ASE ``Atoms`` mix water and
-salt. The listed species stay in the cloud:
+Mixed ASE selections
+--------------------
+
+Pass a sequence to ``from_ase`` when an ASE ``Atoms`` object mixes water
+and salt ions. The listed species remain in the cloud:
 
 .. code:: python
 
-    frame = ds.from_ase(atoms, select=("O", "Na", "Cl"))
+    from ase import Atoms
+    import pydseams as ds
 
-The first entry is the analysed water. The other species keep their
-atomic numbers as ``c_type`` for ``ion_environment``. See the
-`features how-to <howto/features.rst>`_.
+    brine = Atoms(
+        "O" * len(xyz) + "Na",
+        positions=xyz + [[1.5 * a, 1.5 * a, 1.5 * a]],
+        cell=[3 * a, 3 * a, 3 * a],
+        pbc=True,
+    )
+    brine_frame = ds.from_ase(brine, select=("O", "Na"), bonded="cutoff")
+    print(brine_frame.n_atoms)
+
+The first entry is the analysed water species. The remaining species
+keep their atomic numbers as ``c_type`` for ``ion_environment``. See the
+`ASE how-to <howto/ase.rst>`_ and `features how-to <howto/features.rst>`_.

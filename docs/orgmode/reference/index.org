@@ -1,22 +1,11 @@
 #+TITLE: Reference
 #+OPTIONS: toc:nil num:nil
 
-Lookup of the live Python names, then Napoleon autodoc.
+API lookup pages for ~pydseams~, ~dseams~, and the compiled
+~pydseams.yoda~ surface.
 
-- [[file:python.org][Python surface]] :: ~Frame~, ~IceCounts~,
-  ~CageScore~, ~read~, ASE, ~pydseams.features~
-- [[file:../../source/api.md][API]] :: ~automodule~ of the helpers,
-  ~pydseams.features~, and the ~yoda~ name table
-- [[file:dseams.md][dseams and the C API]] :: ~import dseams~, the ~seams~
-  ctypes package, and the symbol table
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   python
-   ../api
-   dseams
-   ../lang/python
-   ../lang/task-python
-#+end_export
+- [[file:python.org][Python surface]] :: ~Frame~, ~IceCounts~, ~CageScore~, ~read~, ASE, and ~pydseams.features~
+- [[file:../../source/api.md][API reference]] :: autodoc of the Python helpers, ~pydseams.features~, and the ~pydseams.yoda~ symbol tables
+- [[file:dseams.md][dseams and the C API]] :: ~import dseams~, the C-API symbol reference, and the ~seams~ ctypes wrapper
+- [[file:../../source/lang/python.rst][dseams module reference]] :: autodoc of ~import dseams~
+- [[file:../../source/lang/task-python.rst][C-ABI Ice Ih census]] :: standalone ctypes example over ~libseams_lang~

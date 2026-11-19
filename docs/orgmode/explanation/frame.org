@@ -1,35 +1,37 @@
 #+TITLE: Why Frame
 #+OPTIONS: toc:nil num:nil
 
-CHILL, rings, cages, Steinhardt, and SOAP are per-snapshot. The
-handle is one configuration: neighbours, a bonded graph, and labels
-on that cloud. ~Frame.cages~ is the ice score (HC = Ih, DDC = Ic,
+CHILL, rings, cages, Steinhardt parameters, and SOAP descriptors are
+all per-snapshot quantities. ~Frame~ models one atomic configuration:
+its coordinates, simulation box, neighbour lists, bonded graph, and
+per-atom classifications. ~Frame.cages~ returns the topological cage
+score (hexagonal cages = ice Ih, double-diamond cages = ice Ic,
 neither = water).
 
-Cutoff neighbour lists (~neighbor_list~, CHILL, cutoff-graph
-cages) go through vesin when the engine is built with it. The
-default ice score (~cages(seeded=True)~) uses linkcell k-NN. Those
-backends are not interchangeable.
+Cutoff neighbour lists (~neighbor_list~, CHILL, cutoff-graph cages)
+use vesin when linked, whereas seeded hysteresis cages
+(~cages(seeded=True)~) use linkcell k-nearest neighbours. Those
+neighbour backends serve distinct graph definitions and are not
+interchangeable.
 
-* Runtime knobs
+* Runtime configuration
 
-~pydseams.config~ shares the engine twelve-factor table. Defaults
-live in the module. ~SEAMS_CONFIG~ or ~./seams.env~ fills unset
-keys. The process environment wins the file. Function arguments
-win the environment. ~Frame~ reads ~SEAMS_FRAME~ and ~SEAMS_CUTOFF~
-when those arguments are omitted.
+~pydseams.config~ shares the twelve-factor configuration precedence
+used across d-SEAMS: module defaults are overridden by ~SEAMS_CONFIG~
+or ~./seams.env~, which are overridden by process environment variables,
+which are overridden by explicit function arguments. ~Frame~ reads
+~SEAMS_FRAME~ and ~SEAMS_CUTOFF~ when ~frame~ or ~cutoff~ are omitted.
 
-* One configuration
+* One configuration at a time
 
-~Frame~ is that handle. Multi-frame work is explicit:
-~read(path, frame=n)~ (1-indexed) or ~frame.load_frame(n)~ on a
-path-backed ~Frame~. Arrays-only and ASE-built frames have no path
-and cannot ~load_frame~.
+~Frame~ holds a single snapshot. Multi-frame workflows step through a
+trajectory explicitly with ~read(path, frame=n)~ (1-indexed) or
+~frame.load_frame(n)~ on a file-backed ~Frame~. Frames constructed
+from in-memory arrays or ASE ~Atoms~ have no backing file path and do
+not support ~load_frame~.
 
 * ~Trajectory~ is an alias
 
-~Trajectory~ is a compatibility alias of ~Frame~
-(~src/pydseams/__init__.py~). It does not iterate a movie and does
-not own a campaign. The engine CLI that walks trajectories and
-writes ~output/~ lives in seams-core. This package does not grow a
-second movie object.
+~Trajectory~ is a compatibility alias of ~Frame~. It holds one active
+frame at a time and loads subsequent frames via ~load_frame(n)~ when
+iterated (for example inside ~IceFeaturizer.transform~).
