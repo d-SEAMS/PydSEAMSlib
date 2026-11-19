@@ -6,7 +6,11 @@ from pydseams import yoda
 
 def test_version():
     assert hasattr(pydseams, "__version__")
-    # [[[cog import pydseams_version as v; cog.outl(f'    assert pydseams.__version__ == "{v.VERSION}"')]]]
+    # [[[cog
+    # import tomllib
+    # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+    # cog.outl(f'    assert pydseams.__version__ == "{version}"')
+    # ]]]
     assert pydseams.__version__ == "2.14.1"
     # [[[end]]]
 

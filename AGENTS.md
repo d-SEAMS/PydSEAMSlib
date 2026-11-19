@@ -90,15 +90,15 @@ formatter-only diff on its own with a `style:` subject.
 ## Versions and release
 
 The version is the seams-core release the wheel builds. It is written in
-`pyproject.toml` and copied, with cogapp, into the files listed in
-`ci/version/files.txt`. Follow
+`pyproject.toml`. `ci/version/` holds only `files.txt`. cogapp copies
+that version into the files listed there. Follow
 `docs/orgmode/contributing/developer/release.org` from a clean clone
 through the PyPI publish.
 
 1. d-SEAMS/seams-core tags `vX.Y.Z`.
 2. `subprojects/seams-core.wrap` moves to that tag.
-3. `cog bump --version X.Y.Z` writes that version, builds the changelog,
-   and tags `vX.Y.Z` here.
+3. Set `[project].version` to `X.Y.Z`. `cog bump --version X.Y.Z` regenerates
+   the copies, builds the changelog, and tags `vX.Y.Z` here.
 4. `.github/workflows/build_wheels.yml` builds the sdist and the wheels
    and publishes them to PyPI through trusted publishing from
    d-SEAMS/PydSEAMSlib. The tag must equal `v` plus the

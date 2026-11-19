@@ -1,6 +1,6 @@
 # Cocogitto 7+ release driver for pydseamslib.
 # Prepare:  cog bump --auto   (or --patch / --minor / --major / --version X.Y.Z)
-# Hooks write pyproject.toml, regenerate the cogapp copies, then towncrier
+# Hooks regenerate the cogapp copies from pyproject.toml, then towncrier
 # builds CHANGELOG.md. Publishing stays on the v* tag workflow.
 #
 # One version for the bindings. Leave [monorepo] unset.
@@ -16,9 +16,8 @@ skip_untracked = false
 branch_whitelist = ["main"]
 
 pre_bump_hooks = [
-    "python ci/version/pydseams_version.py sync {{version}}",
-    "python -m cogapp -r -I ci/version @ci/version/files.txt",
-    "python -m towncrier build --yes --version {{version}}",
+    "python3 -m cogapp -I ci/version -r @ci/version/files.txt",
+    "towncrier build --yes --version {{version}}",
 ]
 
 post_bump_hooks = [

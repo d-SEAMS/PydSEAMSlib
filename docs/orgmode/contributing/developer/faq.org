@@ -30,18 +30,18 @@ directory this repository already uses. =cog bump= runs
 ** Where is the version written?
 
 =[project].version= in =pyproject.toml= is the source.
-=ci/version/pydseams_version.py= reads it for cogapp.
-=ci/version/files.txt= lists the copies: =meson.build=,
+=ci/version/= holds only =files.txt=, which lists =meson.build=,
 =src/pydseams/__init__.py=, =tests/python/test_bindings.py=, and
-=CITATION.cff=. =docs/source/conf.py= reads =pyproject.toml= itself, so
-it is not a copy. Regenerate with
+=CITATION.cff=. Those copies read =pyproject.toml= in their cogapp
+blocks. =docs/source/conf.py= reads =pyproject.toml= itself, so it is
+not a copy. Regenerate with
 
 #+begin_src bash
-python -m cogapp -r -I ci/version @ci/version/files.txt
+python3 -m cogapp -I ci/version -r @ci/version/files.txt
 #+end_src
 
-Check with =python -m cogapp --check -I ci/version @ci/version/files.txt=.
-Call cogapp as =python -m cogapp=. The =cog= executable is cocogitto.
+Check with =python3 -m cogapp --check -I ci/version -r @ci/version/files.txt=.
+Call cogapp as =python3 -m cogapp=. The =cog= executable is cocogitto.
 
 ** Why is the release document Org mode?
 

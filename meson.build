@@ -1,7 +1,11 @@
 project(
     'pydseamslib',
     'cpp',
-    # [[[cog import pydseams_version as v; cog.outl(f"    version: '{v.VERSION}',")]]]
+    # [[[cog
+    # import tomllib
+    # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+    # cog.outl(f"    version: '{version}',")
+    # ]]]
     version: '2.14.1',
     # [[[end]]]
     default_options: [

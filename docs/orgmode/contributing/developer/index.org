@@ -42,8 +42,8 @@ meson setup bbdir --force-fallback-for=eigen3 \
 | Task | Command |
 |------+---------|
 | Preview the changelog | =python -m towncrier build --draft= |
-| Regenerate version copies | =python -m cogapp -r -I ci/version @ci/version/files.txt= |
-| Check version copies | =python -m cogapp --check -I ci/version @ci/version/files.txt= |
+| Regenerate version copies | =python3 -m cogapp -I ci/version -r @ci/version/files.txt= |
+| Check version copies | =python3 -m cogapp --check -I ci/version -r @ci/version/files.txt= |
 | Conventional-commit check | =cog check --ignore-merge-commits v2.14.0..HEAD= |
 | Dry-run the next tag | =cog bump --auto --dry-run= |
 | Reader tests | =python -m pytest -vvv tests/python/test_readers.py= |

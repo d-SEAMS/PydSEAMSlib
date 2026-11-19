@@ -6,10 +6,10 @@
 
 pydseamslib has one release version. It is written in
 =[project].version= of =pyproject.toml=.
-=ci/version/files.txt= lists the copies cogapp regenerates:
-=meson.build=, =src/pydseams/__init__.py=,
-=tests/python/test_bindings.py=, and =CITATION.cff=.
-=ci/version/pydseams_version.py= reads the version from =pyproject.toml=.
+=ci/version/= holds only =files.txt=. That file lists the copies
+cogapp regenerates: =meson.build=, =src/pydseams/__init__.py=,
+=tests/python/test_bindings.py=, and =CITATION.cff=. Each copy reads
+=[project].version= from =pyproject.toml= in its cogapp block.
 =docs/source/conf.py= reads that file at documentation build time and
 is not a second copy.
 
@@ -27,9 +27,9 @@ The engine tag moves first, in d-SEAMS/seams-core. This repository then
 moves =subprojects/seams-core.wrap= to that tag. That pin change is its
 own commit.
 
-Requires [[https://docs.cocogitto.io][cocogitto]] 7 or newer and
-cogapp (the =cogapp= distribution, invoked as =python -m cogapp=).
-towncrier is the =towncrier= distribution.
+Requires [[https://docs.cocogitto.io][cocogitto]] 7 or newer,
+cogapp (the =cogapp= distribution, invoked as =python3 -m cogapp=),
+and towncrier (the =towncrier= command).
 
 *Canonical changelog*: repository-root =CHANGELOG.md=.
 
@@ -130,14 +130,13 @@ you are binding.
 Move =subprojects/seams-core.wrap= to the seams-core tag first, in its
 own commit, with a =changed= fragment that names the revision.
 
+Set =[project].version= in =pyproject.toml= to =X.Y.Z= before the bump.
 =cog bump= runs =pre_bump_hooks= in this order:
 
-- =python ci/version/pydseams_version.py sync {{version}}= writes
-  =[project].version= in =pyproject.toml=
-- =python -m cogapp -r -I ci/version @ci/version/files.txt= regenerates
-  the copies
-- =python -m towncrier build --yes --version {{version}}= updates
-  =CHANGELOG.md= and clears the fragments
+- =python3 -m cogapp -I ci/version -r @ci/version/files.txt= regenerates
+  the copies from that version
+- =towncrier build --yes --version {{version}}= updates =CHANGELOG.md=
+  and clears the fragments
 
 #+begin_src bash
 cog bump --version X.Y.Z
