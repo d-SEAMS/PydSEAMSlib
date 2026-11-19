@@ -543,17 +543,13 @@ def render_hosts(root: Path, lib, figures: Path):
         ),
     }
 
-    for stem, (dump, kinds, want) in hosts.items():
-
-        def draw(stem=stem, dump=dump, kinds=kinds, want=want):
+    def draw():
+        for stem, (dump, kinds, want) in hosts.items():
             got = render_host(render, lib, dump, figures / f"{stem}.png", kinds)
             if tuple(got) != want:
                 raise RuntimeError(f"{stem} cages {got} wanted {want}")
 
-        # One fallback per figure. A single draw of both hosts writes only
-        # sii.svg when the renderer is missing, and the contact sheet then
-        # reports sh.png as absent.
-        _raster_or_fail(figures / f"{stem}.png", draw)
+    _raster_or_fail(figures / "sii.png", draw)
 
 
 def render_brine_scene(root: Path, frame: Path, figures: Path):
