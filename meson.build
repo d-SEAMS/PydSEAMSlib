@@ -94,15 +94,33 @@ else
 endif
 
 # seams-core copies the vendored chemfiles library into libdir with no
-# install tag, and that copy uses the Linux soname. A wheel built with
-# --tags=runtime,python-runtime then omits it. Install the file the
-# loader opens (ELF SONAME or Mach-O install id) with the runtime tag,
-# next to the other bundled libraries. auditwheel and delocate, which
-# the wheel workflow already runs, repair that copy. A system chemfiles
-# is found by the loader and is not staged here.
+# install tag. A wheel built with --tags=runtime,python-runtime then
+# omits it. Install the file the loader opens, named by patchelf, otool,
+# or objdump, with the runtime tag. auditwheel and delocate repair that
+# copy. A system chemfiles is found by the loader and is not staged here.
 _chem_probe = run_command(
-    find_program('python3'),
-    files('scripts/chemfiles_soname.py'),
+    find_program('sh'),
+    '-c',
+    '''
+libdir=$0
+real=$(find "$libdir" -maxdepth 1 -type f -name "libseams-chemfiles*" ! -name "*.a" -printf "%s %p\n" 2>/dev/null | sort -nr | awk "NR==1 { \$1=\"\"; sub(/^ /, \"\"); print }")
+if [ -z "$real" ]; then
+  real=$(find "$libdir" -maxdepth 1 -type f -name "libseams-chemfiles*" ! -name "*.a" -exec wc -c {} + 2>/dev/null | sort -nr | awk "NR==1 && \$2 != \"total\" { print \$2 }")
+fi
+[ -n "$real" ] || exit 1
+name=
+if command -v patchelf >/dev/null 2>&1; then
+  name=$(patchelf --print-soname "$real" 2>/dev/null || true)
+fi
+if [ -z "$name" ] && command -v otool >/dev/null 2>&1; then
+  name=$(otool -D "$real" 2>/dev/null | awk "NR==2 { print \$1 }" | xargs -n1 basename)
+fi
+if [ -z "$name" ] && command -v objdump >/dev/null 2>&1; then
+  name=$(objdump -p "$real" 2>/dev/null | awk "/SONAME/ { print \$2; exit }")
+fi
+[ -n "$name" ] || exit 1
+printf "%s\n%s\n" "$real" "$name"
+''',
     meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib',
     check: false,
 )
