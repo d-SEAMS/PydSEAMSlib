@@ -41,7 +41,6 @@ Repository = "https://github.com/d-SEAMS/PydSEAMSlib"
 Documentation = "https://python.dseams.info/"
 Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
-"Ruhila S ORCID" = "https://orcid.org/0000-0002-5443-9356"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0", "hypothesis>=6.0"]

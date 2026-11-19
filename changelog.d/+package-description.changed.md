@@ -1,1 +1,1 @@
-The package description names the analyses and the trajectory readers the bindings expose. Ruhila S's ORCID 0000-0002-5443-9356 is recorded wherever authors are listed.
+The package description names the analyses and the trajectory readers the bindings expose. Ruhila S's ORCID 0000-0002-5443-9356 is recorded in CITATION.cff and the documentation. pyproject authors are name and email only.
