@@ -2,7 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "PydSEAMSlib: Python bindings for the d-SEAMS C++ engine"
 type: software
+# [[[cog import pydseams_version as v; cog.outl(f'version: "{v.VERSION}"')]]]
 version: "2.14.1"
+# [[[end]]]
 date-released: "2026-11-19"
 license: MIT
 repository-code: "https://github.com/d-SEAMS/PydSEAMSlib"
@@ -10,6 +12,7 @@ url: https://dseams.info
 authors:
   - family-names: S
     given-names: Ruhila
+    orcid: "https://orcid.org/0000-0002-5443-9356"
   - family-names: Goswami
     given-names: Amrita
     orcid: "https://orcid.org/0000-0001-8706-2383"

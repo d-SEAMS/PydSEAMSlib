@@ -155,8 +155,9 @@ let
     rev = "v0.4.2";
     hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
   };
-  # seams-core reads .con frames through readcon-core (with_readcon is
-  # enabled in meson.build); the sandbox cannot run its cargo wrap.
+  # seams-core reads .con frames through readcon-core. The binding
+  # option with_readcon defaults to auto and finds this library by
+  # pkg-config; the sandbox cannot run the cargo wrap.
   readcon-core = rustPlatform.buildRustPackage rec {
     pname = "readcon-core";
     version = "0.16.2";
@@ -296,7 +297,7 @@ python3.pkgs.buildPythonPackage {
   ];
 
   meta = {
-    description = "Python bindings for the d-SEAMS C++ engine";
+    description = "Python bindings for the d-SEAMS engine: CHILL+, rings, cages, order parameters, and LAMMPS, XYZ, and CON readers";
     homepage = "https://github.com/d-SEAMS/PydSEAMSlib";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux ++ lib.platforms.darwin;

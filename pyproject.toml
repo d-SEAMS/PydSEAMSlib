@@ -5,7 +5,7 @@ build-backend = "mesonpy"
 [project]
 name = "pydseamslib"
 version = "2.14.1"
-description = "Python bindings for the d-SEAMS C++ engine (import dseams, import pydseams)"
+description = "Python bindings for the d-SEAMS engine (import pydseams, import pydseamslib, import dseams). Analyses: CHILL and CHILL+ ice labels, q4 and q6 Steinhardt parameters, symmetry, primitive rings, hexagonal and double-diamond cages, cage signatures, topological fingerprints, ion environments, hydration-shell rings, guest occupancy, prisms, monolayer rings, radial distribution functions, coordination numbers, density profiles, ion clouds, contact pairs, connected domains, SOAP, Voronoi features, and hydrogen-bond networks. Readers: LAMMPS dumps, XYZ, eOn .con when readcon-core is linked, and PDB, GRO, and DCD when chemfiles is linked."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -41,6 +41,7 @@ Repository = "https://github.com/d-SEAMS/PydSEAMSlib"
 Documentation = "https://python.dseams.info/"
 Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
+"Ruhila S ORCID" = "https://orcid.org/0000-0002-5443-9356"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0", "hypothesis>=6.0"]
