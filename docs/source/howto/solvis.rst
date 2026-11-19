@@ -7,7 +7,8 @@ View a frame in solvis
 Problem
 -------
 
-You have a ``Frame`` and want a solvis ``System`` for a PyVista view.
+You have a classified ``Frame`` and want a ``solvis.System`` for PyVista
+visualisation.
 
 Install the extra
 -----------------
@@ -16,39 +17,53 @@ Install the extra
 
     pip install 'pydseamslib[solvis]'
 
-The extra pulls ASE as well. Without it, ``to_solvis`` raises
-``ImportError`` and names that command.
+This extra installs ASE and ``solvis-tools``. Without it, ``to_solvis``
+raises ``ImportError``.
 
 Wrap the frame
 --------------
+
+Classify the frame before exporting so ``ice_type``, ``hc``, and ``ddc``
+arrays are present on the wrapped ``Atoms``:
 
 .. code:: python
 
     import pydseams as ds
 
-    frame = ds.read("water.lammpstrj")
-    system = frame.to_solvis()
-    # or: system = ds.to_solvis(frame)
-
-solvis wraps the same ``Atoms`` ``to_ase`` would return. Pass
-``expand_box=False`` to turn off the solvis box expansion
-(default ``True``).
-
-Classify first if you want ice labels on the exported ``Atoms``:
-
-.. code:: python
-
+    a = 2.75 * 4 / 3**0.5
+    basis = (
+        (0, 0, 0),
+        (0.5, 0.5, 0),
+        (0.5, 0, 0.5),
+        (0, 0.5, 0.5),
+        (0.25, 0.25, 0.25),
+        (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75),
+        (0.25, 0.75, 0.75),
+    )
+    xyz = [
+        [(i + x) * a, (j + y) * a, (k + z) * a]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in basis
+    ]
+    frame = ds.from_arrays(xyz, [3 * a, 3 * a, 3 * a])
     frame.chill_plus()
     frame.cages()
+
     system = frame.to_solvis()
+    # Equivalent: system = ds.to_solvis(frame)
+    assert type(system).__name__ == "System"
 
-``to_ase`` writes ``arrays["ice_type"]`` after CHILL and
-``arrays["hc"]`` / ``arrays["ddc"]`` after ``cages()``. solvis sees
-those arrays on the wrapped ``Atoms``.
+``solvis`` wraps the ``Atoms`` object returned by ``Frame.to_ase()``, which
+carries ``arrays["ice_type"]`` after CHILL/CHILL+ and ``arrays["hc"]`` /
+``arrays["ddc"]`` after ``cages()``. Pass ``expand_box=False`` to disable
+solvis box expansion (default ``True``).
 
-This is the visualization path. Interactive plots and screenshots
-follow the `solvis examples <https://github.com/amritagos/solvis>`_
-(PyVista; press ``q`` to close the window). OVITO is not required.
+Interactive plots and screenshots follow the
+`solvis examples <https://github.com/amritagos/solvis>`_ (press ``q`` to
+close a PyVista window).
 
 See also
 --------
@@ -57,4 +72,4 @@ See also
     ``from_ase`` / ``to_ase``
 
 `The yoda surface <../explanation/yoda-surface.rst>`_
-    why the viewer stays in Python
+    why visualisation stays in Python

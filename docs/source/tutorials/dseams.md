@@ -1,74 +1,114 @@
 # dseams tutorial
 
-The nanobind module reads a C-contiguous NumPy array in place. This is the eight-atom diamond cell (nearest-neighbour spacing 2.75 Å). Every oxygen is cubic.
+The `dseams` module exposes a zero-copy NumPy array interface over the
+d-SEAMS C API (`seams.h`), alongside `dseams.userframe` for trajectory
+file workflows.
 
-`meson test python_dseams` runs this method. On the eight-atom cell `counts[0]` equals the atom count and every label is 0. `examples/python/core_counts.py` checks Ice Ih and sII through `libseams`. `meson test docs_core_counts` runs it.
+## Classify an eight-atom cubic ice cell
 
-```{literalinclude} ../../../tests/dseams/test_dseams.py
-:language: python
-:lines: 39-62
-```
-
-An ASE `Atoms` or an MDAnalysis universe becomes the same arrays:
+`dseams` reads C-contiguous NumPy arrays directly in place. On the
+eight-atom diamond cubic unit cell (nearest-neighbour spacing 2.75 Å),
+every oxygen is cubic (label `0`) and mean $q_6$ is `0.628539`:
 
 ```python
-import ase.io
+import math
+import numpy as np
 import dseams
 
-atoms = ase.io.read("tests/data/exampleTraj.lammpstrj", format="lammps-dump-text")
-pos, box = dseams.from_ase(atoms)
+edge = 2.75 * 4.0 / math.sqrt(3.0)
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
+pos = np.array([[x * edge, y * edge, z * edge] for x, y, z in sites])
+box = (edge, edge, edge)
 
+frame = dseams.Frame()
+frame.set_frame(pos, box)
+labels, counts = frame.chill_plus(3.5, dseams.CUTOFF, dseams.PUBLISHED)
+q4, q6 = frame.q4q6(3.5)
+offsets, cols = frame.neighbours(3.5, dseams.CUTOFF)
 
-class _Universe:
-    def __init__(self, positions, dimensions):
-        self.positions = positions
-        self.dimensions = dimensions
-        self.atoms = self
-
-    def select_atoms(self, selection):
-        return self
-
-
-universe = _Universe(atoms.get_positions(), atoms.cell.cellpar())
-pos, box = dseams.from_mdanalysis(universe)
-labels, counts = dseams.chill_plus(pos, box, rule=dseams.OVITO)
-assert len(labels) == len(atoms)
-assert int(counts.sum()) == len(atoms)
+assert frame.count() == 8
+assert int(counts[0]) == 8
+assert abs(float(q6.mean()) - 0.628539) < 1e-5
+assert len(offsets) == 9 and len(cols) == 32
+print("cubic:", int(counts[0]), "mean q6:", round(float(q6.mean()), 6))
 ```
+
+## Rings, cages, and shell symmetry on a supercell
+
+Topological cage and primitive-ring analyses require periodic boxes
+wider than twice the neighbour cutoff (`> 7.0` Å). On a 3x3x3 cubic
+diamond supercell (216 atoms), every atom belongs to a double-diamond
+cage (`n_cubic == 216`) and every primitive ring is a six-ring:
+
+```python
+import math
+import numpy as np
+import dseams
+
+edge = 2.75 * 4.0 / math.sqrt(3.0)
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
+pos = np.array(
+    [
+        [(i + x) * edge, (j + y) * edge, (k + z) * edge]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in sites
+    ]
+)
+box = (3 * edge, 3 * edge, 3 * edge)
+
+sizes, symmetry, hist, fraction = dseams.rings(pos, box)
+per_atom, (n_hex, n_cubic, n_water, n_both) = dseams.cages(pos, box)
+n_cages, n_atoms = dseams.signature_cages(pos, box, spec="512")
+shell = dseams.symmetry(pos, box)
+
+assert int(hist[6]) == 432 and fraction == 1.0
+assert (n_hex, n_cubic, n_water, n_both) == (0, 216, 0, 0)
+assert (n_cages, n_atoms) == (0, 0)
+assert np.all(shell == 1)
+print("six-rings:", int(hist[6]), "DDC atoms:", n_cubic)
+```
+
+## Convert ASE or MDAnalysis frames
+
+`dseams.from_ase(atoms)` rotates any nonsingular periodic ASE cell into
+LAMMPS restricted-triclinic coordinates, and `dseams.from_mdanalysis`
+extracts positions and cell parameters from an MDAnalysis universe or
+atom group:
+
+```python
+from ase import Atoms
+import dseams
+
+atoms = Atoms("O" * len(pos), positions=pos, cell=list(box), pbc=True)
+apos, abox = dseams.from_ase(atoms)
+labels, counts = dseams.chill_plus(apos, abox, rule=dseams.OVITO)
+assert len(labels) == len(atoms)
+assert int(counts[0]) == 216
+```
+
+You can also run the built-in cubic-cell self-check from the command
+line:
 
 ```bash
-python -m unittest -v tests/dseams/test_dseams.py
 python -m dseams
-```
-
-The verbose run reports three cases: both CHILL+ rules with q4/q6 and rings, ASE and MDAnalysis frames, and a triclinic cell.
-
-## The rest of the call set
-
-`examples/python/python_api.py` is the program `meson test docs_api_python` runs.
-When the nanobind module is absent it calls `libseams` through ctypes.
-On the eight-atom cell that program prints:
-
-```
-python call q6bar 0.628539361055
-python call cubic 8
-python call cages 0 0 8 0
-python call cn 4.57142857143
-python call hbond 0
-python call sheet 0
-python call vert 4 0
-```
-
-`q6bar` is `seams_steinhardt` with the Lechner-Dellago buffer.
-`cages` is `seams_cages` (`n_hex`, `n_cubic`, `n_water`, `n_both`).
-`cn` is `seams_coordination`. `hbond` is `seams_hbonds`.
-`sheet` is the six-ring bin of `seams_monolayer`.
-`vert` is the first ring from `seams_rings_vertices`.
-The same run also calls `seams_rdf`, `seams_running_cn`, `seams_density_axis`,
-`seams_fingerprint`, `seams_contact_pairs`, `seams_domains`, `seams_prisms`,
-`seams_neighbours_knn`, and `seams_site_table`.
-On `input/traj/genice_sI.lammpstrj` the `512` signature prints:
-
-```
-python call sig 2 40
 ```

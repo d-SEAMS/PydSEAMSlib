@@ -43,3 +43,19 @@
          :with-author nil)))
 
 (org-publish "pydseams-rst" t)
+
+;; Verify no Org syntax leaked into the generated reStructuredText.
+(let ((leaks '()))
+  (dolist (file (directory-files-recursively "./source" "\\.rst$"))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\|^#\\+[A-Z_]+:\\|:ref:\\\\`\\|\\[\\[file:" nil t)
+        (push (format "%s:%d: %s"
+                      file
+                      (line-number-at-pos)
+                      (buffer-substring (line-beginning-position) (line-end-position)))
+              leaks))))
+  (when leaks
+    (error "Org syntax leaked into generated RST:\n%s"
+           (mapconcat #'identity (nreverse leaks) "\n"))))

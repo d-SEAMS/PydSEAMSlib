@@ -1,14 +1,14 @@
 #+TITLE: MDAnalysis, OVITO and notebooks
 #+OPTIONS: toc:nil num:nil
 
-~pydseams.adapters~ connects the engine to the tools a trajectory
-already lives in.
+~pydseams.adapters~ connects d-SEAMS to MDAnalysis, OVITO, and ASE
+pipelines.
 
 * MDAnalysis
 
 ~IceStates~ is an ~AnalysisBase~ subclass over an oxygen
-~AtomGroup~; ions are a second group read against the assignment.
-Boxes must be orthorhombic.
+~AtomGroup~; ions can be passed as a second ~AtomGroup~ and are read
+against the water cage assignment. Boxes must be orthorhombic.
 
 #+begin_src python
 import MDAnalysis as mda
@@ -23,9 +23,9 @@ an.results.ion_states    # frames x ions, codes in an.results.ion_state_names
 
 * OVITO
 
-~ice_states~ is a Python modifier function. Append it to a pipeline
-and colour by the ~Ice state~ particle property (0 water, 1 cubic,
-2 hexagonal, 3 mixed; ~-1~ outside the oxygen type).
+~ice_states~ is an OVITO Python modifier function. Append it to a
+pipeline and colour by the ~Ice state~ particle property (0 water, 1
+cubic, 2 hexagonal, 3 mixed; ~-1~ outside the selected oxygen type).
 
 #+begin_src python
 from functools import partial
@@ -42,14 +42,14 @@ Triclinic OVITO cells pass through as LAMMPS bound spans and tilts.
 
 * Command line
 
-Without Python, ~seams cages dump.lammpstrj --per-atom labelled.lammpstrj~
-appends a dump frame with a ~cage~ column (0 water, 1 hexagonal cage,
-2 double-diamond cage, 3 both); ~fingerprint~ writes ~class~ or
-~label~ and ~ions~ writes ~state~. Any visualiser that reads LAMMPS
-dumps colours by that column.
+With the ~seams~ CLI from seams-core,
+~seams cages dump.lammpstrj --per-atom labelled.lammpstrj~ writes a
+dump frame with a ~cage~ column (0 water, 1 hexagonal cage, 2
+double-diamond cage, 3 both); ~fingerprint~ writes ~class~ or
+~label~ and ~ions~ writes ~state~ for any trajectory visualiser.
 
 * Notebook
 
-~notebooks/classify_ice.ipynb~ installs the wheel, fetches one frame of
-the cubic mW lattice and runs the assignment, CHILL+ and a fingerprint;
-the README carries a Colab badge for it.
+~notebooks/classify_ice.ipynb~ installs ~pydseamslib~, fetches a frame
+of the cubic mW lattice, and runs cage assignment, CHILL+, and
+topological fingerprinting in Google Colab.

@@ -3,44 +3,63 @@ Paper figures
 =============
 
 
-The 2020 JCIM figures are drawn from figshare project 73545.
-This page is the same calls on the dumps that are in the tree.
-``tests/dseams/test_doc_snippets.py`` runs the Python block on this page.
-Python is ``pip install 'pydseamslib==2.14.0'``. The signature cage count
-and vertex total come from ``dseams.userframe``.
+The 2020 d-SEAMS paper figures use datasets hosted on figshare
+(project 73545). This guide runs the same Python classification calls
+on the bulk cubic ice, sI clathrate, and mixed TIP4P reference
+structures.
+
+Prerequisites
+-------------
+
+.. code:: bash
+
+    pip install pydseamslib
+    mkdir -p input/traj
+    curl -sLo input/traj/mW_cubic.lammpstrj \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/mW_cubic.lammpstrj
+    curl -sLo input/traj/genice_sI.lammpstrj \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/genice_sI.lammpstrj
+
+Reference summary
+-----------------
 
 .. table::
 
-    +------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
-    | figure                 | dump in this tree                      | call                          | result                                    |
-    +========================+========================================+===============================+===========================================+
-    | cubic ice, CHILL+      | ``mW_cubic.lammpstrj`` frame 1, type 1 | ``chill_plus()``              | 4096 cubic                                |
-    +------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
-    | cubic ice, cages       | the same frame                         | ``cages()``                   | ``n_ic`` 4096                             |
-    +------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
-    | sI 5\ :sup:`12`\ cages | ``genice_sI.lammpstrj``, type 1        | ``cages_by_signature("512")`` | 2 cages, 40 atoms                         |
-    +------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
-    | mixed frame            | ``exampleTraj.lammpstrj``, type 2      | cutoff CHILL+ versus cages    | 9 interfacial clathrate, no complete cage |
-    +------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
+    +-------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
+    | figure                  | dump                                   | call                          | result                                    |
+    +=========================+========================================+===============================+===========================================+
+    | cubic ice, CHILL+       | ``mW_cubic.lammpstrj`` frame 1, type 1 | ``chill_plus()``              | 4096 cubic                                |
+    +-------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
+    | cubic ice, cages        | ``mW_cubic.lammpstrj`` frame 1, type 1 | ``cages()``                   | ``n_ic`` 4096                             |
+    +-------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
+    | sI :math:`5^{12}` cages | ``genice_sI.lammpstrj``, type 1        | ``cages_by_signature("512")`` | 2 cages, 40 atoms                         |
+    +-------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
+    | mixed frame             | ``exampleTraj.lammpstrj``, type 2      | cutoff CHILL+ vs cages        | 9 interfacial clathrate, no complete cage |
+    +-------------------------+----------------------------------------+-------------------------------+-------------------------------------------+
 
-The R and Julia fronts also report 4096 cubic on the first row.
-They call ``libseams_lang`` with the cutoff neighbour list, the same default as ``Frame.chill_plus``.
-On this lattice that list and the mutual four-neighbour list agree.
+Run the bulk and clathrate checks
+---------------------------------
 
-The nucleation, nanotube, monolayer, and in-plane RDF figures need the figshare dumps.
-Point the same functions at those files.
+``Frame.chill_plus`` and ``Frame.cages`` run on the cubic mW cell, while
+``dseams.userframe.Frame.cages_by_signature`` counts the sI :math:`5^{12}`
+cages and their distinct vertex atoms:
 
 .. code:: python
 
     import pydseams as ds
-
-    ice = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
-    print(ice.chill_plus().cubic, ice.cages().n_ic)
-    assert ice.chill_plus().cubic == 4096 and ice.cages().n_ic == 4096
-
     from dseams import userframe
 
+    ice = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
+    print("cubic:", ice.chill_plus().cubic, "ddc:", ice.cages().n_ic)
+    assert ice.chill_plus().cubic == 4096 and ice.cages().n_ic == 4096
+
     guest = userframe.read("input/traj/genice_sI.lammpstrj", atom_type=1)
-    print(len(guest.cages_by_signature("512")))
-    assert len(guest.cages_by_signature("512")) == 2
-    assert guest.cages_by_signature("512").n_atoms == 40
+    found = guest.cages_by_signature("512")
+    print("5^12 cages:", len(found), "atoms:", found.n_atoms)
+    assert len(found) == 2
+    assert found.n_atoms == 40
+
+Point the same calls (``chill_plus``, ``cages``, ``cages_by_signature``,
+``find_prisms``, ``monolayer_rings``, and ``rdf_2d``) at the figshare
+project 73545 trajectories to reproduce the nucleation, nanotube, and
+monolayer figures.

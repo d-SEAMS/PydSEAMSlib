@@ -2,20 +2,19 @@
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+OPTIONS: toc:nil num:nil
 
-Explanation pages are understanding-oriented. Use them for the
-split between the package, the compiled module, and the other
-d-SEAMS front ends.
+Explanation pages cover the architecture and design choices behind
+~pydseams~, ~pydseams.yoda~, ~Frame~, and the other d-SEAMS front ends.
 
 * Available explanations
 
 | Explanation | Description |
 |-------------+-------------|
-| [[file:yoda-surface.org][The yoda surface]] | Why helpers stay in Python on ~yoda~ |
-| [[file:frame.org][Why Frame]] | Why the handle is one snapshot, not a movie |
-| [[file:citation.org][How to cite]] | 2020 paper and software citation |
+| [[file:yoda-surface.org][The yoda surface]] | Why Python helpers sit on top of ~pydseams.yoda~ |
+| [[file:frame.org][Why Frame]] | Why ~Frame~ models one snapshot rather than a full trajectory |
+| [[file:citation.org][How to cite]] | Paper and software citations |
 
 * Getting help
 
-- [[file:../tutorials/index.org][Tutorials]] :: learn the ~Frame~ path
-- [[file:../howto/index.org][How-to guides]] :: solve a task
-- [[file:../reference/python.org][Python surface]] :: live names
+- [[file:../tutorials/index.org][Tutorials]] :: learn the ~Frame~ workflow
+- [[file:../howto/index.org][How-to guides]] :: solve a specific task
+- [[file:../reference/python.org][Python surface]] :: live classes and functions

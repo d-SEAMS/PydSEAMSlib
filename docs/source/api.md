@@ -1,29 +1,33 @@
 # API reference
 
-Napoleon autodoc of the Python helpers. Human lookup of
+Napoleon autodoc of the Python helpers. Quick lookup of
 {class}`~pydseams.frame.Frame`, {class}`~pydseams.frame.IceCounts`,
 {class}`~pydseams.frame.CageScore`,
 {class}`~pydseams.frame.DensityProfile`,
 {class}`~pydseams.frame.ContactPairs`,
 {class}`~pydseams.frame.DomainStats`, {func}`~pydseams.io.read`,
-{mod}`pydseams.features`, and
-ASE is the [Python surface](reference/python) page.
+{mod}`pydseams.features`, and ASE is on the
+[Python surface](reference/python) page.
 
 The public constructors live on the {mod}`pydseams` package:
 {func}`~pydseams.from_ase`, {func}`~pydseams.from_arrays`,
 {func}`~pydseams.from_xyz`, {func}`~pydseams.from_chemfiles`,
-{func}`~pydseams.from_con`, {func}`~pydseams.to_solvis`.
+{func}`~pydseams.from_con`, and {func}`~pydseams.to_solvis`.
 {meth}`~pydseams.frame.Frame.to_ase` is the inverse of
 {func}`~pydseams.from_ase`.
 
-The compiled extension is nanobind {mod}`pydseams.yoda`.
-`_core` and `cyoda` are aliases of `yoda`. `Trajectory` is an alias
-of `Frame`.
+The compiled extension is the nanobind module `pydseams.yoda`.
+`_core` and `cyoda` are compatibility aliases of `yoda`. `Trajectory`
+is an alias of `Frame`.
 
 Classification ({meth}`~pydseams.frame.Frame.chill_plus`,
-{meth}`~pydseams.frame.Frame.cages`) does not write files. Prism,
-monolayer, and {meth}`~pydseams.frame.Frame.rdf_2d` do.
-{meth}`~pydseams.frame.Frame.rdf` does not.
+{meth}`~pydseams.frame.Frame.chill`,
+{meth}`~pydseams.frame.Frame.cages`) does not write files.
+{meth}`~pydseams.frame.Frame.find_prisms`,
+{meth}`~pydseams.frame.Frame.monolayer_rings`, and
+{meth}`~pydseams.frame.Frame.rdf_2d` write engine output files.
+{meth}`~pydseams.frame.Frame.rdf` computes in memory without writing
+files.
 
 ```{eval-rst}
 .. automodule:: pydseams
@@ -44,10 +48,9 @@ monolayer, and {meth}`~pydseams.frame.Frame.rdf_2d` do.
 
 ## Features
 
-Per-frame kinetic-model vectors and ion first-shell classes.
-{mod}`pydseams.features` is the walkthrough on the
-[features how-to](howto/features). Human lookup is the
-[Python surface](reference/python) page.
+Per-frame kinetic-model vectors and ion first-shell classes. See the
+[features how-to](howto/features) for a walkthrough and the
+[Python surface](reference/python) page for a summary table.
 
 ```{eval-rst}
 .. automodule:: pydseams.features
@@ -89,25 +92,16 @@ Implementation of {func}`~pydseams.to_solvis` and
 
 ## Compiled module (`pydseams.yoda`)
 
-`yoda` is mocked in the Sphinx build (`autodoc_mock_imports`), so
-automodule cannot list live signatures. The tables below are every
-public name registered in `src/bindings.cpp`: 134 names (113
-functions, 19 types, and the `Kind` / `Family` type aliases). Four
-functions are compile-gated and absent
-from builds that did not link the extra:
-`readChemfiles` (`SEAMS_HAS_CHEMFILES`), `readCon`
-(`SEAMS_HAS_READCON`), `ira_match` and `sofi_point_group`
-(`SEAMS_HAS_IRA`).
+`pydseams.yoda` is the compiled nanobind extension module. The tables
+below list every public symbol registered by the module: 134 names
+(113 functions, 19 types, and the `Kind` / `Family` type aliases). Four
+functions are compile-gated and absent from builds without the
+corresponding optional engine dependency: `readChemfiles` (chemfiles),
+`readCon` (readcon-core), `ira_match` and `sofi_point_group` (libira).
 
-Application code uses {class}`~pydseams.frame.Frame` /
-{func}`~pydseams.io.read` / {func}`~pydseams.from_ase`. Call `yoda`
-directly for the raw engine.
-
-```{eval-rst}
-.. automodule:: pydseams.yoda
-   :members:
-   :undoc-members:
-```
+Application code normally calls {class}`~pydseams.frame.Frame`,
+{func}`~pydseams.io.read`, or {func}`~pydseams.from_ase`. Call
+`pydseams.yoda` directly for low-level engine primitives.
 
 ### I/O
 
@@ -119,8 +113,8 @@ directly for the raw engine.
 | `readLammpsTrj` | One LAMMPS frame, every atom type. |
 | `readBonds` | Read bond connectivity from a formatted bond file. |
 | `atomInSlice` | True when each component is in the closed interval, or that axis has `lo == hi`. |
-| `readChemfiles` | Read any trajectory format supported by chemfiles (PDB, GRO, DCD, ...). Linked when `SEAMS_HAS_CHEMFILES`. |
-| `readCon` | Read a `.con` file (eOn saddle-point search trajectories). Linked when `SEAMS_HAS_READCON`. |
+| `readChemfiles` | Read any trajectory format supported by chemfiles (PDB, GRO, DCD, ...). Available when linked with chemfiles. |
+| `readCon` | Read a `.con` file (eOn saddle-point search trajectories). Available when linked with readcon-core. |
 | `writeDump` | Write a LAMMPS dump file for the current point cloud. |
 
 ### Neighbours and hydrogen bonds
@@ -136,7 +130,7 @@ directly for the raw engine.
 | `neighList` | Build a full neighbour list for two atom types within a cutoff. |
 | `neighListO` | Build a full neighbour list for a single atom type within a cutoff. |
 | `neighListPair` | I-J neighbour list (like-type reuses `neighListO`). |
-| `SiteTable` / `parseSiteSpec` | Type-to-kind map. Type 1 is not a chemistry. |
+| `SiteTable` / `parseSiteSpec` | Type-to-kind map. |
 | `Kind` / `Family` | Aliases of `SiteKind` / `SiteFamily`. |
 | `indicesOf` | Cloud indices whose mapped site kind matches, including polar/apolar unions. |
 | `lammpsTypeOfKind` | Unique LAMMPS type mapped to a site kind. |
@@ -153,12 +147,10 @@ directly for the raw engine.
 | `populateHbondsWithInputClouds` | Build hydrogen bonds from pre-loaded oxygen and hydrogen point clouds. |
 | `trimBonds` | Remove duplicate bonds from a bond list. |
 
-`neighListPair`, `SiteTable`, `parseSiteSpec`, `ionCloud`,
-`partialRdfHist`, `coordinationNumber`, `runningCN`,
-`firstMinimumBin`, `populateHbondsFromDonors`, and
-`donatedHydrogenBond` are bound. `Frame.rdf` returns `(r, g)`.
-`Frame.cn`, `Frame.running_cn`, `Frame.ion_cloud`, and
-`Frame.hbonds_from_donors` call the new symbols.
+`Frame.rdf` wraps `partialRdf` and returns `(r, g)`. `Frame.cn`,
+`Frame.running_cn`, `Frame.ion_cloud`, and `Frame.hbonds_from_donors`
+wrap `coordinationNumber`, `runningCN`, `ionCloud`, and
+`populateHbondsFromDonors`.
 
 ### Rings and cages
 
@@ -205,7 +197,7 @@ directly for the raw engine.
 | `polygonRingAnalysis` | Classify rings in a quasi-2D monolayer and write output. |
 | `bulkPolygonRingAnalysis` | Classify rings in a bulk system and write output. |
 | `prismAnalysis` | Prism identification on rings up to `maxDepth`; writes output. |
-| `rmAxialTranslations` | Remove axial translations from an ice nanotube for visualization. |
+| `rmAxialTranslations` | Remove axial translations from an ice nanotube for visualisation. |
 
 ### Topological unit matching
 
@@ -266,8 +258,8 @@ directly for the raw engine.
 | `voronoiFacetWeights` | Voronoi facet neighbours and area weights for every particle. |
 | `LinearClassifier` | Linear classifier used by `Frame.fit_classifier`. |
 | `ira_available` | True when this build linked libira (IRA/SOFI). |
-| `ira_match` | IRA overlay of two `n x 3` point sets. Linked when `SEAMS_HAS_IRA`. |
-| `sofi_point_group` | SOFI point group of an `n x 3` cloud. Linked when `SEAMS_HAS_IRA`. |
+| `ira_match` | IRA overlay of two `n x 3` point sets. Available when linked with libira. |
+| `sofi_point_group` | SOFI point group of an `n x 3` cloud. Available when linked with libira. |
 | `lookupTableQ4Vec` | Lookup table for Q4 (`m=0` to `m=8`). |
 | `lookupTableQ4` | Lookup table for Q4 at a single `m` (`m=0` to `m=8`). |
 | `lookupTableQ8Vec` | Lookup table for Q8 (`m=0` to `m=16`). |
@@ -278,9 +270,9 @@ directly for the raw engine.
 | name | role |
 |------|------|
 | `clusterAnalysis` | Cluster ice-like particles and return the largest ice cluster. |
-| `recenterClusterCloud` | Recenter a cluster point cloud for visualization. |
+| `recenterClusterCloud` | Recenter a cluster point cloud for visualisation. |
 | `rdf2Danalysis_AA` | 2D radial distribution function for identical atom types. |
-| `partialRdf` | Partial 3D RDF ``g_IJ(r)``. Returns ``(r, g)``. |
+| `partialRdf` | Partial 3D RDF `g_IJ(r)`. Returns `(r, g)`. |
 | `runningCN` | Running CN `4 pi rho_J int s^2 g ds`. Returns a list. |
 | `densityZ` | Cartesian number-density histogram by particle type or mapped site kind and axis. |
 | `largestDomain` | Size and fraction of the largest connected component in a selected subset. |

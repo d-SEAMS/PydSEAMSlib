@@ -3,20 +3,19 @@ Python surface
 ==============
 
 
-Human lookup of ``Frame``, ``IceCounts``, ``CageScore``, ``DensityProfile``,
+Quick lookup of ``Frame``, ``IceCounts``, ``CageScore``, ``DensityProfile``,
 ``ContactPairs``, ``DomainStats``, ``read``, the ASE helpers, and
-``pydseams.features``. Napoleon autodoc of every signature is
-`api.md <../../source/api.md>`_.
+``pydseams.features``. Full signatures are in the
+`API reference <../../source/api.md>`_.
 
 Frame
 -----
 
-``pydseams.frame.Frame`` is the one-frame handle. Load a LAMMPS dump,
-an ASE ``Atoms``, or raw arrays, then call classification, density,
-pairing, or domain methods. Classification does not write files.
-Prefer ``pydseams.io.read``,
-``Frame.from_ase``, or ``Frame.from_arrays`` over constructing ``Frame``
-by filename.
+``pydseams.frame.Frame`` is the single-snapshot handle. Load a LAMMPS
+dump, an ASE ``Atoms``, or raw coordinate arrays, then call
+classification, density, pairing, or domain methods. Prefer
+``pydseams.io.read``, ``Frame.from_ase``, or ``Frame.from_arrays`` over
+constructing ``Frame`` directly.
 
 ``Trajectory`` is an alias of ``Frame``.
 
@@ -32,7 +31,7 @@ Constructors
     +--------------------------+--------------------------------------------------------+
     | ``Frame.from_ase``       | ASE ``Atoms``; ``select="O"``, ``None``, or a sequence |
     +--------------------------+--------------------------------------------------------+
-    | ``Frame.from_arrays``    | ``(N, 3)`` positions and three box lengths             |
+    | ``Frame.from_arrays``    | ``(N, 3)`` positions and box lengths or tilts          |
     +--------------------------+--------------------------------------------------------+
     | ``Frame.from_xyz``       | XYZ via ``yoda.readXYZ``                               |
     +--------------------------+--------------------------------------------------------+
@@ -42,8 +41,7 @@ Constructors
     +--------------------------+--------------------------------------------------------+
 
 Package-level aliases: ``pydseams.from_ase``, ``from_arrays``,
-``from_xyz``, ``from_chemfiles``, ``from_con``. Autodoc:
-`api.md <../../source/api.md>`_.
+``from_xyz``, ``from_chemfiles``, ``from_con``.
 
 Geometry and graphs
 ~~~~~~~~~~~~~~~~~~~
@@ -70,21 +68,6 @@ Geometry and graphs
 
 ``box`` is three lengths for an orthorhombic frame. Triclinic frames use
 dump bound spans followed by ``xy``, ``xz``, and ``yz`` tilts.
-
-``yoda.neighListPair``, ``yoda.SiteTable``, ``yoda.parseSiteSpec``,
-``yoda.Kind`` / ``yoda.Family`` (aliases of ``SiteKind`` / ``SiteFamily``),
-``yoda.ionCloud`` (``table``, ``cationType`` / ``anionType``, or
-``typeToKind``), ``yoda.partialRdfHist``, ``yoda.coordinationNumber``,
-``yoda.runningCN``, ``yoda.populateHbondsFromDonors``, and
-``yoda.donatedHydrogenBond`` are bound. ``yoda.densityZ``,
-``yoda.mutualNearestUnlike``, and ``yoda.largestDomain`` provide the raw
-site-analysis primitives. ``Frame.rdf`` is ``(r, g)``;
-``Frame.cn`` integrates that histogram; ``Frame.running_cn`` is the
-running integral with ``rho_J = nJ / volume``; ``Frame.ion_cloud``
-and ``Frame.hbonds_from_donors`` wrap the site and donor-H paths.
-``Frame.density``, ``Frame.pairs``, and ``Frame.domain`` expose
-type/site-resolved density, mutual cation--anion pairing, and the
-largest connected site domain.
 
 Classification
 ~~~~~~~~~~~~~~
@@ -117,12 +100,11 @@ Classification
     | ``classify_topology``     | atoms named by one key library, or by several at different hops   |
     +---------------------------+-------------------------------------------------------------------+
 
-``cages`` with the seeded flag on is the hysteresis construction
-(``seeded_affiliation``). Cutoff-graph affiliation on this frame's
-six-rings is the other path. ``ring_adjacent`` on ``cages`` or
-``seeded_affiliation`` fills the last vertex of a six-ring whose other
-vertices carry a label. ``IceFeaturizer`` and ``Frame.ion_environment``
-turn that flag on by default.
+``cages`` with ``seeded=True`` runs the hysteresis construction
+(``seeded_affiliation``); ``seeded=False`` uses cutoff-graph affiliation
+on six-rings. Passing ``ring_adjacent=True`` fills the last vertex of a
+six-ring whose other five vertices carry a label. ``IceFeaturizer`` and
+``Frame.ion_environment`` enable ``ring_adjacent=True`` by default.
 
 Export and descriptors
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -132,9 +114,9 @@ Export and descriptors
     +------------------------+--------------------------------------------------------+
     | name                   | role                                                   |
     +========================+========================================================+
-    | ``to_ase``             | ASE ``Atoms``; needs ``pydseams[ase]``                 |
+    | ``to_ase``             | ASE ``Atoms``; needs ``pydseamslib[ase]``              |
     +------------------------+--------------------------------------------------------+
-    | ``to_solvis``          | solvis ``System``; needs ``pydseams[solvis]``          |
+    | ``to_solvis``          | solvis ``System``; needs ``pydseamslib[solvis]``       |
     +------------------------+--------------------------------------------------------+
     | ``steinhardt``         | local and neighbour-averaged ``ql``                    |
     +------------------------+--------------------------------------------------------+
@@ -159,8 +141,8 @@ Export and descriptors
     | ``hbonds_from_donors`` | H-bond net from an explicit H-index list               |
     +------------------------+--------------------------------------------------------+
 
-Prism, monolayer, and ``rdf_2d`` write engine output. ``Frame.rdf``
-does not. See the Frame autodoc on `api.md <../../source/api.md>`_.
+``find_prisms``, ``monolayer_rings``, and ``rdf_2d`` write engine output
+files. ``Frame.rdf`` computes in memory without writing files.
 
 IceCounts
 ---------
@@ -171,16 +153,16 @@ IceCounts
 Keys are the ``AtomStateType`` names (``cubic``, ``hexagonal``, ``water``,
 ``interfacial``, ``clathrate``, ``interClathrate``, ``unclassified``,
 ``reCubic``, ``reHex``). Missing keys read as ``0`` via attribute access,
-so ``counts.cubic`` and ``counts["hexagonal"]`` are equivalent.
-``repr`` omits zero-count labels.
+so ``counts.cubic`` and ``counts["cubic"]`` are equivalent. ``repr`` omits
+zero-count labels.
 
 CageScore
 ---------
 
-``pydseams.frame.CageScore`` is the per-atom score returned by
-``cages``.
+``pydseams.frame.CageScore`` is the per-atom score returned by ``cages``.
 
-A molecule in an HC is ice Ih; a molecule in a DDC is ice Ic.
+A molecule in a hexagonal cage (HC) is ice Ih; a molecule in a
+double-diamond cage (DDC) is ice Ic.
 
 .. table::
 
@@ -222,11 +204,8 @@ per-molecule states for kinetic models.
     | ``to_pyemma_featurizer`` | register the vector with PyEMMA                   |
     +--------------------------+---------------------------------------------------+
 
-The per-frame vector comes from ``IceFeaturizer``, which calls
-``Frame.seeded_affiliation`` with ring-adjacent completion on by
-default. Walkthrough:
-`features how-to <../howto/features.rst>`_. Autodoc:
-`api.md <../../source/api.md>`_.
+See the `features how-to <../howto/features.rst>`_ for a complete
+walkthrough.
 
 .. automodule:: pydseams.features
    :members:
@@ -255,20 +234,27 @@ Use a site table when the analysis is chemistry-resolved:
 
 .. code:: python
 
-    frame = ds.read("ions.lammpstrj", all_atoms=True, atom_type=1)
+    import pydseams as ds
+
+    frame = ds.from_arrays(
+        [[1.0, 1.0, 1.0], [2.2, 1.0, 1.0], [7.0, 7.0, 7.0], [8.2, 7.0, 7.0]],
+        [12.0, 12.0, 12.0],
+        numbers=[1, 2, 1, 2],
+    )
     sites = ds.yoda.parseSiteSpec("1=polar,2=apolar")
-    profile = frame.density(table=sites, kind=ds.yoda.Kind.polar)
-    domain = frame.domain(sites, ds.yoda.Kind.polar)
+    profile = frame.density(bins=4, table=sites, kind=ds.yoda.Kind.polar)
+    domain = frame.domain(sites, ds.yoda.Kind.polar, cutoff=3.5)
 
     ions = ds.yoda.parseSiteSpec("1=cationHead,2=anion")
     pairs = frame.pairs(ions)
+    print(profile.site_kind, domain.largest, pairs.count)
 
 read
 ----
 
 ``pydseams.io.read`` is the suffix-dispatching loader.
-``pydseams.available_readers`` reports which compiled readers this
-build linked.
+``pydseams.available_readers`` reports which compiled readers your build
+linked.
 
 .. table::
 
@@ -284,18 +270,18 @@ build linked.
     | ``.lammpstrj``, ``.dump``, ``.lammps``, other | ``Frame.from_file``      |
     +-----------------------------------------------+--------------------------+
 
-Common kwargs: ``frame`` (1-indexed), ``cutoff`` (Angstroms, default
-3.5), ``bonded`` (``"auto"``, ``"hbond"``, ``"cutoff"``), ``atom_type``,
+Common keyword arguments: ``frame`` (1-indexed), ``cutoff`` (Angstroms,
+default 3.5), ``bonded`` (``"auto"``, ``"hbond"``, ``"cutoff"``), ``atom_type``,
 ``region``, and ``all_atoms``. ``all_atoms=True`` retains every LAMMPS type
-for mixed-site analyses; ``atom_type`` still selects the species used by
-neighbour and ice methods. It cannot be combined with ``region``. For
-LAMMPS readers, ``bonded="auto"`` uses hydrogen bonds when hydrogens are
-available.
+for mixed-site analyses; ``atom_type`` selects the species used by
+neighbour and ice methods. ``all_atoms=True`` cannot be combined with
+``region``. For LAMMPS readers, ``bonded="auto"`` uses hydrogen bonds when
+hydrogens are available.
 
-``region`` is ``(lo, hi)`` passed to ``yoda.readLammpsTrjreduced``.
-``nop`` is the kept count. An axis with ``lo == hi`` is unconstrained,
-so ``([0, 0, 0], [50, 0, 0])`` slices ``x`` only. ``yoda.readLammpsTrjO``
-keeps every atom of the type and only sets ``inSlice``.
+``region`` is ``(lo, hi)`` passed to ``yoda.readLammpsTrjreduced``. ``nop`` is
+the kept count. An axis with ``lo == hi`` is unconstrained, so
+``([0, 0, 0], [50, 0, 0])`` slices ``x`` only. ``yoda.readLammpsTrjO`` keeps
+every atom of the type and only sets ``inSlice``.
 
 Builds without chemfiles or readcon raise ``RuntimeError`` when those
 suffixes are used.
@@ -303,34 +289,30 @@ suffixes are used.
 ASE
 ---
 
-``pydseams.from_ase`` / ``Frame.from_ase`` build a ``Frame`` from an ASE
-``Atoms``. ``Frame.to_ase`` is the inverse.
+``pydseams.from_ase`` and ``Frame.from_ase`` build a ``Frame`` from an ASE
+``Atoms`` object, and ``Frame.to_ase`` converts it back.
 
-Install: ``pip install 'pydseamslib[ase]'``. The cell must be
+Install with ``pip install 'pydseamslib[ase]'``. The cell must be
 nonsingular and periodic in all three directions. General cells are
-rotated into LAMMPS restricted-triclinic form for analysis;
-``to_ase`` restores the imported cell orientation and displacement.
-``select`` is a symbol, an atomic number, ``None`` (every atom), or a
-sequence such as ``("O", "Na", "Cl")``. Default ``select="O"``. A sequence
-keeps the listed species and analyses the first, so ions stay in the
-cloud for ``pydseams.features.ion_environment``.
+rotated into LAMMPS restricted-triclinic form for analysis; ``to_ase``
+restores the imported cell orientation and displacement. ``select``
+accepts a symbol, an atomic number, ``None`` (every atom), or a sequence
+such as ``("O", "Na", "Cl")`` (default ``select="O"``). A sequence keeps
+all listed species and analyses the first, so ions remain in the cloud
+for ``pydseams.features.ion_environment``.
 
-For ASE input, ``bonded="auto"`` uses hydrogen bonds only when the
-input contains ``H`` and the selected analysis cloud excludes ``H``.
-Thus ``select=None`` uses cutoff bonding. Explicit ``bonded="hbond"``
+For ASE input, ``bonded="auto"`` uses hydrogen bonds only when the input
+contains ``H`` and the selected analysis cloud excludes ``H``. Thus
+``select=None`` uses cutoff bonding, and explicit ``bonded="hbond"``
 requires a heavy-atom selection such as ``select="O"``.
 
 ``to_ase`` writes ``arrays["ice_type"]`` after CHILL and
-``arrays["hc"]`` / ``arrays["ddc"]`` after ``cages()``. A frame loaded
-from a LAMMPS dump (no ASE symbols) uses ``O`` as the fallback
-species.
+``arrays["hc"]`` / ``arrays["ddc"]`` after ``cages()``. A frame loaded from a
+LAMMPS dump without element symbols uses ``O`` as the fallback species.
 
-Implementation autodoc is the ASE helpers section of
-`api.md <../../source/api.md>`_. Walkthrough:
-`ASE how-to <../howto/ase.rst>`_.
-
-``pydseams.to_solvis`` wraps the same ``Atoms``. Install:
-``pip install 'pydseamslib[solvis]'``.
+See the `ASE how-to <../howto/ase.rst>`_ for worked examples.
+``pydseams.to_solvis`` wraps the same ``Atoms`` object when
+``pydseamslib[solvis]`` is installed.
 
 Package names
 -------------
@@ -344,19 +326,15 @@ Package names
     +-------------------------+-------------------------------------+
     | ``pydseamslib``         | compatibility alias of ``pydseams`` |
     +-------------------------+-------------------------------------+
-    | ``pydseams.yoda``       | compiled registrations              |
+    | ``pydseams.yoda``       | compiled module                     |
     +-------------------------+-------------------------------------+
-    | ``pydseams._core``      | alias of ``yoda``                   |
+    | ``pydseams._core``      | compatibility alias of ``yoda``     |
     +-------------------------+-------------------------------------+
-    | ``pydseams.cyoda``      | alias of ``yoda``                   |
+    | ``pydseams.cyoda``      | compatibility alias of ``yoda``     |
     +-------------------------+-------------------------------------+
     | ``pydseams.Trajectory`` | alias of ``Frame``                  |
     +-------------------------+-------------------------------------+
     | ``pydseams.features``   | kinetic vectors and ion environment |
     +-------------------------+-------------------------------------+
 
-Requires Python 3.11+. CPython 3.11 has a version-specific wheel; Python 3.12 and newer
-use the CPython 3.12 limited ABI.
-
-``yoda`` names (mocked in the Sphinx build) are tabulated on
-`api.md <../../source/api.md>`_.
+Requires Python 3.11 or later.

@@ -1,25 +1,22 @@
 # dseams and the C API
 
-Three packages call the same engine.
+Three Python modules call the same d-SEAMS engine:
 
-`seams` is the ctypes package in `src/seams`. It wraps seams-core's `include/seams.h`.
-It is not in the wheel; put `src` on `PYTHONPATH` and set `SEAMS_LIB`.
-NumPy arrays go in and come back out. Results are frozen dataclasses.
-A failing call raises `seams.SeamsError`. `status` is the `seams_status`
-code and `message` is the Python copy of `seams_handle_error`.
-
-`dseams` is the nanobind module over `seams.h`. It covers
-`chill_plus`, `q4q6`, neighbours, rings, and `Frame`. NumPy arrays are
-C-contiguous and are read in place. `pydseamslib` (`import pydseams`) is the
-trajectory package on PyPI. `seams.from_pydseams(frame)` copies
-`frame.positions` and `frame.box` into a `System` when an analysis lives
-only on the C API.
-
-Set `SEAMS_LIB` to `libseams.so` (`libseams.dylib` on macOS). Importing `seams` does not load the library.
+- `dseams` (and `dseams.userframe`) is the nanobind and C-ABI module
+  included in `pip install pydseamslib`. It reads C-contiguous NumPy
+  arrays in place.
+- `pydseams` (`pydseamslib`) is the high-level `Frame` package in
+  `pip install pydseamslib`.
+- `seams` is a pure-Python `ctypes` wrapper over `seams.h` for source
+  checkouts (add `src` to `PYTHONPATH` and set `SEAMS_LIB` to
+  `libseams.so` or `libseams.dylib`). Results are frozen dataclasses,
+  and failing calls raise `seams.SeamsError` with `status` and
+  `message`. `seams.from_pydseams(frame)` copies `frame.positions` and
+  `frame.box` into a `System`.
 
 ## Quickstart
 
-### `seams`
+### `seams` (source checkout ctypes wrapper)
 
 ```python
 import math
@@ -44,7 +41,7 @@ with System() as sys:
     assert abs(float(order.q6.mean()) - 0.628539) < 1e-6
 ```
 
-`examples/python/seams_ctypes_quick.py` runs that cell. The program prints:
+`examples/python/seams_ctypes_quick.py` runs that cell against a local `libseams` shared library. The program prints:
 
 ```
 version 2.14.0
@@ -57,17 +54,15 @@ fraction 0.0
 cn 4.571429
 ```
 
-Mean q6 is 0.628539 and each atom has four neighbours. This cell holds
-no primitive six-ring. It is thinner than twice the cutoff, so the
-cage census is refused and the script leaves that call out. A 2 by 2
-by 2 supercell, which `python_seams_ctypes` also runs, has a six-ring
-fraction above 0.5. `meson test python_seams_ctypes` runs the pytest
-file and the doctests.
+Mean `q6` is `0.628539` and each atom has four neighbours. An 8-atom
+unit cell is narrower than twice the cutoff, so cage census calls are
+refused on it; a 2x2x2 supercell has a six-ring fraction above 0.5.
 
 ### `dseams`
 
-The same eight sites through the nanobind module, in a box three cells
-wide so that the cage calls are not refused:
+These calls run directly against `pip install pydseamslib`, in a box
+three cells wide so that topological cage and primitive-ring calls are
+not clipped by the minimum-image cutoff:
 
 ```python
 import math
@@ -86,7 +81,15 @@ sites = (
     (0.75, 0.25, 0.75),
     (0.25, 0.75, 0.75),
 )
-positions = np.array([[x * edge, y * edge, z * edge] for x, y, z in sites])
+positions = np.array(
+    [
+        [(i + x) * edge, (j + y) * edge, (k + z) * edge]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in sites
+    ]
+)
 box = (3 * edge, 3 * edge, 3 * edge)
 labels, counts = dseams.chill_plus(positions, box)
 q4, q6 = dseams.q4q6(positions, box)
@@ -95,36 +98,37 @@ sizes, symmetry, hist, fraction = dseams.rings(positions, box)
 per_atom, (n_hex, n_cubic, n_water, n_both) = dseams.cages(positions, box)
 n_cages, n_atoms = dseams.signature_cages(positions, box, spec="512")
 shell = dseams.symmetry(positions, box)
-assert len(labels) == 8 and int(counts.sum()) == 8
-assert len(q4) == 8 and len(q6) == 8
-assert len(offsets) == 9
-assert n_hex + n_cubic + n_water + n_both == 8
+assert len(labels) == 216 and int(counts.sum()) == 216
+assert len(q4) == 216 and len(q6) == 216
+assert len(offsets) == 217
+assert n_hex + n_cubic + n_water + n_both == 216
 assert (n_cages, n_atoms) == (0, 0)
-assert len(shell) == 8
+assert len(shell) == 216
 ```
 
-`dseams.cages` is the six-ring ice score from `frames.cages`: a per-atom code
-and the hexagonal, cubic, water, and both counts. `dseams.signature_cages`
-counts closed polyhedra whose ring census matches `spec` and returns
-`(n_cages, n_atoms)`. `dseams.symmetry` is the shell label: 0 ice Ih, 1 ice
-Ic, 2 stacking-disordered, and -1 otherwise.
+`dseams.cages` returns a per-atom code and `(n_hex, n_cubic, n_water, n_both)`.
+`dseams.signature_cages` counts closed polyhedra whose ring census
+matches `spec` and returns `(n_cages, n_atoms)`. `dseams.symmetry`
+returns the shell label: `0` ice Ih, `1` ice Ic, `2` stacking-disordered,
+and `-1` otherwise.
 
-`box` is three lengths or nine LAMMPS numbers. `dseams.PUBLISHED` (`"paper"`)
-averages q_lm over the four closest neighbours. `dseams.OVITO` (`"ovito"`)
-averages q_lm over every neighbour inside the cutoff. `dseams.CUTOFF` and `dseams.MUTUAL`
-select the graph. `dseams.set_num_threads` and `dseams.num_threads` match the
-C calls. `dseams.version` is the library version. `Frame.set_frame` stores one
-cell. `Frame.count` is the number of points.
+`box` accepts three lengths or nine LAMMPS numbers (`ox, oy, oz, lx, ly, lz, xy, xz, yz`).
+`dseams.PUBLISHED` (`"paper"`) averages $q_{lm}$ over the four closest
+neighbours; `dseams.OVITO` (`"ovito"`) averages $q_{lm}$ over every
+neighbour inside the cutoff. `dseams.CUTOFF` and `dseams.MUTUAL` select
+the neighbour graph. `dseams.set_num_threads` and `dseams.num_threads`
+configure OpenMP threads. `dseams.version` returns the engine version.
+`dseams.Frame.set_frame` stores one configuration and `dseams.Frame.count`
+returns the number of points.
 
 ## Ownership
 
-`System`, `Neighbours`, `Rings`, `CageSet`, `Fingerprint`, and `Brine`
-are context managers. `close` frees the handle. A second `close` does
-nothing. `__del__` frees a handle that left the `with` block by an
-exception before `close`. Neighbour, ring, cage, fingerprint, and brine
-handles keep their own copies, so they stay valid after the `System`
-is closed. `Neighbours.copy` fills caller-owned NumPy arrays.
-`seams_neighbours_csr` is deprecated and is not wrapped.
+In the `seams` ctypes wrapper, `System`, `Neighbours`, `Rings`,
+`CageSet`, `Fingerprint`, and `Brine` are context managers. `close()`
+frees the handle (repeated calls are safe), and `__del__` releases
+unclosed handles. Neighbour, ring, cage, fingerprint, and brine handles
+keep independent copies and remain valid after `System` is closed.
+`Neighbours.copy` fills caller-owned NumPy arrays.
 
 ## Errors
 
@@ -139,9 +143,8 @@ with System() as sys:
         assert err.status == 5
 ```
 
-An empty frame raises status 5 (`SEAMS_ERR_STATE`). The message is the
-handle string. A box that is neither 3 nor 9 numbers raises `ValueError`
-before the library is called.
+An empty frame raises status `5` (`SEAMS_ERR_STATE`). A box that is
+neither 3 nor 9 numbers raises `ValueError` before calling the C library.
 
 ## Analyses
 
@@ -160,872 +163,318 @@ before the library is called.
 | `contact_pairs`, `domains`, `prisms`, `monolayer`, `site_table` | dataclasses or arrays |
 | `brine` | fronts, rejection, profile, pockets |
 
-`CUTOFF` is 0, `MUTUAL` is 1, `SEEDED` is 2. `PUBLISHED` is 0, `OVITO` is 1.
-`q4q6`, `q6bar`, `ql`, and `steinhardt` keep their scratch per calling thread, so
-separate frames may run them in separate threads. `set_num_threads` is process-global.
+`CUTOFF` is `0`, `MUTUAL` is `1`, and `SEEDED` is `2`. `PUBLISHED` is
+`0` and `OVITO` is `1`. `q4q6`, `q6bar`, `ql`, and `steinhardt` keep
+scratch buffers per calling thread, so separate frames can run in
+separate threads. `set_num_threads` is process-global.
 
-## Native reference
+## Adapters and utilities
 
-Docstrings are numpydoc. `sphinx.ext.napoleon` and `sphinx.ext.autodoc`
-render `seams` when the package imports, the same split rgpot uses
-between the narrative page and the generated API. The generated page is
-the docstrings of `src/seams`. `mypy --strict` and `pyright` check
-`src/seams`. `py.typed` ships with the package.
-Doctests cover `as_box9` and `SeamsError`.
+`dseams.from_ase(atoms)` rotates an ASE cell into the LAMMPS frame and
+returns `(positions, box)` where `box` is the nine-number cell vector.
+`dseams.from_mdanalysis(universe, select="all")` reads
+`universe.dimensions` and atom positions into the same format.
 
-The nanobind module and the language-binding examples stay below.
-
-```{literalinclude} ../../../examples/python/seams_ctypes_quick.py
-:language: python
-```
-
-`examples/python/core_counts.py` is the Ice Ih and sII census.
-`meson test docs_core_counts` runs it. `SEAMS_LIBDIR`
-is the directory that holds `libseams.so` (`libseams.dylib` on macOS).
-
-```pycon
->>> import core_counts
->>> core_counts.check()
-hexagonal 128
-rings6 256
-clathrate 136
-rings5 144
-```
-
-`examples/python/minimal_py.py` reads
-`input/traj/genice_sI.lammpstrj` and calls the C API for neighbours, q6,
-CHILL+, and rings. `meson test docs_minimal_python` runs it.
-
-```{literalinclude} ../../../examples/python/minimal_py.py
-:language: python
-```
-
-`dseams.from_ase(atoms)` rotates an ASE cell into the LAMMPS frame and returns
-positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
-`universe.dimensions` (lengths and angles) and `universe.atoms.positions`.
-
-```python
-# excerpt: src/dseams/__init__.py
-def from_ase(atoms):
-```
-
-```python
-# excerpt: src/dseams/__init__.py
-def from_mdanalysis(universe, select="all"):
-```
-
-`python -m dseams` labels one cubic cell.
-
-`cages`, `signature_cages`, and `symmetry` load `libseams_lang` through
-`frames.py`. Set `SEAMS_LANG_LIB` to that shared library. The nanobind
-calls (`chill_plus`, `q4q6`, `neighbours`, `rings`, `Frame`) use `libseams`.
-
-`meson test docs_api_python` runs the eight-atom program below. On that cell the ctypes path prints `python call cubic 8`, `python call q6bar 0.628539361055`, `python call cages 0 0 8 0`, `python call cn 4.57142857143`, `python call hbond 0`, `python call sheet 0`, and `python call vert 4 0`. The `512` signature on the sI guest frame prints `python call sig 2 40`. It calls
-`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports.
-The ctypes fallback calls those two and also `seams_system_read`,
-`seams_chill`, `seams_steinhardt`, `seams_cages`, `seams_signature_cages`,
-`seams_neighbours_knn`, `seams_rdf`, `seams_running_cn`, `seams_coordination`,
-`seams_hbonds`, `seams_density_axis`, `seams_fingerprint`,
-`seams_contact_pairs`, `seams_domains`, `seams_prisms`, `seams_monolayer`,
-`seams_rings_vertices`, and `seams_site_table`.
-`meson test python_dseams` runs `tests/dseams/test_dseams.py`.
-
-
-```{literalinclude} ../../../examples/python/python_api.py
-:language: python
-```
-
-```{literalinclude} ../../../tests/dseams/test_dseams.py
-:language: python
-:lines: 41-74,80-93
-```
-
+`cages`, `signature_cages`, and `symmetry` use `libseams_lang` (bundled
+in the wheel, or pointed to by `SEAMS_LANG_LIB` for custom builds).
+`chill_plus`, `q4q6`, `neighbours`, `rings`, and `dseams.Frame` call
+`libseams`.
 
 <!-- API_SYMBOLS_BEGIN -->
 
 ## Symbol reference
 
-### CUTOFF
+### `CUTOFF`
 
-Purpose: Graph id of the cutoff neighbour list.
+- **Purpose**: Graph id of the cutoff neighbour list (`0`).
+- **Parameters**: none
+- **Returns**: Integer constant.
+- **Units**: dimensionless
 
-Parameters: none
+### `MUTUAL`
 
-Returns: The integer code.
+- **Purpose**: Graph id of the mutual k-nearest neighbour list (`1`).
+- **Parameters**: none
+- **Returns**: Integer constant.
+- **Units**: dimensionless
 
-Ownership: No allocation.
+### `OVITO`
 
-Errors: None.
+- **Purpose**: CHILL+ rule (`1`) that averages $q_{lm}$ over every neighbour inside the cutoff.
+- **Parameters**: none
+- **Returns**: Integer constant.
+- **Units**: dimensionless
 
-Units: dimensionless
+### `PUBLISHED`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: CHILL+ rule (`0`) that averages $q_{lm}$ over the four closest neighbours.
+- **Parameters**: none
+- **Returns**: Integer constant.
+- **Units**: dimensionless
 
-### Frame
+### `dseams.Frame`
 
-Purpose: One stored cell and the classifiers that read it.
+- **Purpose**: Single-snapshot handle holding coordinates and box dimensions for in-place `dseams` classifiers.
+- **Parameters**: none
+- **Returns**: A `dseams.Frame` instance.
+- **Ownership**: Owns its underlying C `seams_system` and frees it on destruction.
+- **Errors**: Methods raise `RuntimeError` with the engine error string when a C call fails.
 
-Parameters: none
+### `dseams.Frame.set_frame`
 
-Returns: A Frame object.
+- **Purpose**: Store positions and simulation cell on a `dseams.Frame`.
+- **Parameters**: `positions` `(n, 3)`, `box` (3 edge lengths or 9 LAMMPS numbers).
+- **Returns**: `None`.
+- **Ownership**: Copies coordinates into the frame's `seams_system`.
+- **Errors**: Raises `ValueError` if `box` is not 3 or 9 numbers; `RuntimeError` if the C call fails.
+- **Units**: coordinates in angstrom
 
-Ownership: The object owns its seams_system and frees it when the object is destroyed.
+### `dseams.Frame.count`
 
-Errors: None on construction. Later methods raise RuntimeError with seams_last_error text.
+- **Purpose**: Number of points stored on a `dseams.Frame`.
+- **Parameters**: `self`
+- **Returns**: Integer atom count.
+- **Units**: dimensionless count
 
-Units: object
+### `dseams.Frame.chill_plus`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: CHILL+ labels and nine population counts for the frame.
+- **Parameters**: `self`, `cutoff`, `graph`, `rule`
+- **Returns**: `(labels, counts)` NumPy arrays owned by the caller.
+- **Errors**: `RuntimeError` on engine failure.
+- **Units**: `cutoff` in angstrom
 
-### Frame.chill_plus
+### `dseams.Frame.q4q6`
 
-Purpose: CHILL+ labels and the nine population counts for the atoms on a dseams.Frame.
+- **Purpose**: Local Steinhardt $q_4$ and $q_6$ on the cutoff shell.
+- **Parameters**: `self`, `cutoff`
+- **Returns**: `(q4, q6)` NumPy arrays owned by the caller.
+- **Errors**: `RuntimeError` on engine failure.
+- **Units**: `cutoff` in angstrom; `q4` and `q6` are dimensionless
 
-Parameters: self; cutoff; graph; rule
+### `dseams.Frame.neighbours`
 
-Returns: A pair of NumPy arrays, labels and counts.
+- **Purpose**: CSR neighbour list of a `dseams.Frame`, omitting self entries.
+- **Parameters**: `self`, `cutoff`, `graph`
+- **Returns**: `(offsets, columns)` NumPy arrays owned by the caller.
+- **Errors**: `RuntimeError` on engine failure.
+- **Units**: `cutoff` in angstrom
 
-Ownership: The caller owns the returned arrays. The frame still owns the seams_system.
+### `dseams.Frame.rings`
 
-Errors: RuntimeError whose text is seams_last_error.
+- **Purpose**: Primitive ring sizes, symmetry labels, size histogram, and six-ring fraction.
+- **Parameters**: `self`, `cutoff`, `max_depth`
+- **Returns**: `(sizes, symmetry, histogram, fraction)`.
+- **Errors**: `RuntimeError` on engine failure.
+- **Units**: `cutoff` in angstrom
 
-Units: coordinates and cutoff in angstrom
+### `cages`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Score hexagonal and double-diamond cage membership.
+- **Parameters**: `positions`, `box`, `cutoff=3.5`, `graph=CUTOFF`, `k=4`, `ring_adjacent=False`
+- **Returns**: `(per_atom, (n_hex, n_cubic, n_water, n_both))`.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom; counts are dimensionless
 
-### Frame.count
+### `chill_plus`
 
-Purpose: Return the number of points stored on a dseams.Frame.
+- **Purpose**: Label each atom with CHILL+.
+- **Parameters**: `positions`, `box`, `rule=PUBLISHED`, `graph=CUTOFF`, `cutoff=3.5`
+- **Returns**: `(labels, counts)` NumPy arrays owned by the caller.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom
 
-Parameters: self
+### `from_ase`
 
-Returns: The atom count.
+- **Purpose**: Convert an ASE `Atoms` object into positions and a 9-element LAMMPS cell vector.
+- **Parameters**: `atoms`
+- **Returns**: `(positions, box)` NumPy arrays.
+- **Errors**: `ValueError` on degenerate cell vectors.
+- **Units**: positions and box lengths in angstrom
 
-Ownership: No allocation.
+### `from_mdanalysis`
 
-Errors: None.
+- **Purpose**: Extract positions and a 9-element LAMMPS cell vector from an MDAnalysis universe or atom group.
+- **Parameters**: `universe`, `select="all"`
+- **Returns**: `(positions, box)` NumPy arrays.
+- **Errors**: `ValueError` if `dimensions` has fewer than 6 values or zero volume.
+- **Units**: positions in angstrom; cell angles in degrees
 
-Units: coordinates and cutoff in angstrom
+### `neighbours`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Build a cutoff or mutual k-nearest neighbour list as CSR arrays.
+- **Parameters**: `positions`, `box`, `cutoff=3.5`, `graph=CUTOFF`
+- **Returns**: `(offsets, columns)` NumPy arrays.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom
 
-### Frame.neighbours
+### `num_threads`
 
-Purpose: CSR neighbour list of a dseams.Frame, self entries omitted.
+- **Purpose**: Query the OpenMP thread count used by `dseams`.
+- **Parameters**: none
+- **Returns**: Integer thread count.
+- **Units**: dimensionless thread count
 
-Parameters: self; cutoff; graph
+### `set_num_threads`
 
-Returns: A pair of NumPy arrays, offsets and columns.
+- **Purpose**: Set the process-global OpenMP thread count for `dseams` (`0` restores the library default).
+- **Parameters**: `n` (`int`)
+- **Returns**: `None`.
+- **Units**: dimensionless thread count
 
-Ownership: The caller owns the returned arrays. The temporary C neighbour list is freed inside the call.
+### `q4q6`
 
-Errors: RuntimeError whose text is seams_last_error.
+- **Purpose**: Local Steinhardt $q_4$ and $q_6$ on the cutoff shell.
+- **Parameters**: `positions`, `box`, `cutoff=3.5`
+- **Returns**: `(q4, q6)` NumPy arrays.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom; `q4` and `q6` are dimensionless
 
-Units: coordinates and cutoff in angstrom
+### `rings`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Compute primitive-ring sizes, symmetry, histogram, and six-ring fraction.
+- **Parameters**: `positions`, `box`, `cutoff=3.5`, `max_depth=6`
+- **Returns**: `(sizes, symmetry, histogram, fraction)`.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom; `max_depth` is dimensionless
 
-### Frame.q4q6
+### `signature_cages`
 
-Purpose: Local q4 and q6 on the cutoff shell of a dseams.Frame.
+- **Purpose**: Count closed cages matching a ring-census specification string (such as `"512"`).
+- **Parameters**: `positions`, `box`, `spec`, `cutoff=3.5`, `graph=CUTOFF`
+- **Returns**: `(n_cages, n_atoms)` tuple of integers.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom
 
-Parameters: self; cutoff
+### `symmetry`
 
-Returns: A pair of NumPy arrays, q4 and q6.
+- **Purpose**: Shell classification code (`0` Ih, `1` Ic, `2` stacking-disordered, `-1` other).
+- **Parameters**: `positions`, `box`, `cutoff=3.5`
+- **Returns**: Integer NumPy array of length `n_atoms`.
+- **Errors**: `ValueError` on invalid `box`; `RuntimeError` on engine failure.
+- **Units**: coordinates and `cutoff` in angstrom
 
-Ownership: The caller owns the returned arrays.
+### `version`
 
-Errors: RuntimeError whose text is seams_last_error.
+- **Purpose**: Return the underlying engine version string.
+- **Parameters**: none
+- **Returns**: Version string (`str`).
 
-Units: coordinates and cutoff in angstrom
+### `userframe.Frame`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: File-backed frame handle backed by `libseams_lang`.
+- **Parameters**: `ptr`, `symbols=None`, `cutoff=3.5`
+- **Ownership**: Owns the `seams_frame` pointer; `close()` or deletion frees it.
+- **Errors**: Raises `RuntimeError` when `ptr` is null.
 
-### Frame.rings
+### `userframe.read`
 
-Purpose: Ring sizes, symmetry labels, a size histogram, and the six-ring fraction.
+- **Purpose**: Read one trajectory frame with `seams_frame_read`.
+- **Parameters**: `filename`, `frame=1`, `atom_type=None`, `all_atoms=False`
+- **Returns**: A `userframe.Frame`.
+- **Errors**: `RuntimeError` on I/O or parser failure.
 
-Parameters: self; cutoff; max_depth
+### `userframe.from_ase`
 
-Returns: Sizes, symmetry, histogram, and the six-ring fraction.
+- **Purpose**: Create a `userframe.Frame` from an ASE `Atoms` selection.
+- **Parameters**: `atoms`, `select="O"`, `cutoff=None`, `bonded="auto"`
+- **Returns**: A `userframe.Frame`.
+- **Errors**: `TypeError` if `atoms` has no positions; `ValueError` if `select` matches nothing.
 
-Ownership: The caller owns the returned arrays. The C ring set is freed inside the call.
+### `userframe.Frame.n_atoms`
 
-Errors: RuntimeError whose text is seams_last_error.
+- **Purpose**: Number of atoms stored on the frame.
+- **Returns**: Integer atom count.
 
-Units: coordinates and cutoff in angstrom
+### `userframe.Frame.positions`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Copy of the atomic coordinates stored on the frame.
+- **Returns**: `(n, 3)` NumPy float64 array in angstrom.
 
-### Frame.set_frame
+### `userframe.Frame.box`
 
-Purpose: Store positions and a cell on a dseams.Frame.
+- **Purpose**: Simulation cell stored on the frame.
+- **Returns**: Three edge lengths, or nine LAMMPS numbers when tilts are non-zero, in angstrom.
 
-Parameters: positions; box
+### `userframe.Frame.chill_plus`
 
-Returns: Nothing.
+- **Purpose**: CHILL+ histogram for this frame.
+- **Parameters**: `self`, `graph="cutoff"`
+- **Returns**: `userframe.IceCounts` mapping label name to population count.
+- **Errors**: `RuntimeError` on engine failure.
 
-Ownership: The frame copies the coordinates into the seams_system it owns.
+### `userframe.Frame.cages`
 
-Errors: ValueError when box is not 3 lengths or 9 LAMMPS numbers. RuntimeError with seams_last_error text when the C call fails.
+- **Purpose**: Hexagonal and double-diamond cage membership.
+- **Parameters**: `self`, `seeded=True`, `k=4`, `ring_adjacent=False`
+- **Returns**: `userframe.CageScore`.
+- **Errors**: `RuntimeError` on engine failure.
 
-Units: coordinates and cutoff in angstrom
+### `userframe.Frame.cages_by_signature`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Enumerate closed polyhedra matching a ring-census signature.
+- **Parameters**: `self`, `signature`, `max_ring_size=None`, `edge=None`
+- **Returns**: List of dicts (`{"signature": ..., "vertices": [...]}`) with `.n_atoms` giving the distinct vertex count.
+- **Errors**: `RuntimeError` on engine failure.
 
-### MUTUAL
+### `userframe.Frame.steinhardt`
 
-Purpose: Graph id of the mutual neighbour list.
+- **Purpose**: Local $q_l$ and Lechner-Dellago averaged $\bar{q}_l$.
+- **Parameters**: `self`, `order_l=6`
+- **Returns**: Dictionary with `"ql"` and `"ql_bar"` lists.
+- **Errors**: `RuntimeError` on engine failure.
 
-Parameters: none
+### `userframe.Frame.ring_census`
 
-Returns: The integer code.
+- **Purpose**: Primitive-ring counts grouped by ring size.
+- **Parameters**: `self`, `max_size=8`, `graph=None`
+- **Returns**: Dictionary `{size: count}` (zero counts omitted).
+- **Errors**: `RuntimeError` on engine failure.
 
-Ownership: No allocation.
+### `userframe.Frame.rdf_2d`
 
-Errors: None.
+- **Purpose**: In-plane 2D radial distribution function $g(r)$.
+- **Parameters**: `self`, `output_dir`, `cutoff=12.0`, `binwidth=0.05`
+- **Returns**: `(radii, values)` lists; also writes output under `output_dir`.
+- **Errors**: `RuntimeError` on engine failure.
 
-Units: dimensionless
+### `userframe.Frame.monolayer_rings`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Quasi-2D monolayer ring counts and areal coverage.
+- **Parameters**: `self`, `output_dir`, `sheet_area`, `max_depth=4`
+- **Returns**: Dictionary `{size: {"count": n, "coverage_xy": area}}`; writes `topoMonolayer` under `output_dir`.
+- **Errors**: `RuntimeError` on engine failure.
 
-### OVITO
+### `userframe.Frame.find_prisms`
 
-Purpose: CHILL+ definition that averages q_lm over every neighbour inside the cutoff.
+- **Purpose**: Quasi-1D prism census.
+- **Parameters**: `self`, `output_dir="output/"`, `max_depth=6`, `shape_matching=False`
+- **Returns**: List of `{"size": ..., "perfect": ..., "imperfect": ...}` rows.
+- **Errors**: `RuntimeError` on engine failure.
 
-Parameters: none
+### `userframe.Frame.to_ase`
 
-Returns: The integer code.
+- **Purpose**: Convert this frame to an ASE `Atoms` object with `ice_type`, `hc`, and `ddc` arrays when computed.
+- **Returns**: `ase.Atoms`.
+- **Errors**: `ImportError` when ASE is not installed.
 
-Ownership: No allocation.
+### `userframe.Frame.to_solvis` / `userframe.to_solvis`
 
-Errors: None.
+- **Purpose**: Wrap the frame as a `solvis.System` via `to_ase`.
+- **Parameters**: `expand_box=True`
+- **Returns**: `solvis.system.System`.
+- **Errors**: `ImportError` when `solvis-tools` is not installed.
 
-Units: dimensionless
+### `userframe.Frame.close`
 
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Free the underlying `seams_frame` handle immediately (safe to call multiple times).
+- **Returns**: `None`.
 
-### PUBLISHED
+### `userframe.IceCounts`
 
-Purpose: CHILL+ definition that averages q_lm over the four closest neighbours.
+- **Purpose**: Dictionary subclass holding CHILL+ population counts; missing labels return `0`.
 
-Parameters: none
+### `userframe.CageScore`
 
-Returns: The integer code.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: dimensionless
-
-Example: `examples/python/minimal_py.py`
-
-### cages
-
-Purpose: Score hexagonal and double-diamond cage membership.
-
-Parameters: positions; box; or a Frame
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom; counts are dimensionless
-
-Example: `examples/python/minimal_py.py`
-
-### chill_plus
-
-Purpose: Label each atom with CHILL+.
-
-Parameters: positions; box; rule; graph; cutoff
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `examples/python/minimal_py.py`
-
-### count
-
-Purpose: Number of points stored on a Frame.
-
-Parameters: frame
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: dimensionless count
-
-Example: `examples/python/minimal_py.py`
-
-### from_ase
-
-Purpose: Turn an ASE atoms object into positions and a LAMMPS cell.
-
-Parameters: atoms
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: positions and box lengths in angstrom
-
-Example: `examples/python/minimal_py.py`
-
-### from_mdanalysis
-
-Purpose: Turn an MDAnalysis universe into positions and a LAMMPS cell.
-
-Parameters: universe; select
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: positions in angstrom; angles inside the universe are degrees
-
-Example: `examples/python/minimal_py.py`
-
-### neighbours
-
-Purpose: Cutoff or mutual neighbour list as CSR.
-
-Parameters: positions; box; cutoff; graph
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `examples/python/minimal_py.py`
-
-### num_threads
-
-Purpose: OpenMP width the next call will use.
-
-Parameters: none
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: dimensionless thread count
-
-Example: `examples/python/minimal_py.py`
-
-### q4q6
-
-Purpose: Local q4 and q6 on the cutoff shell.
-
-Parameters: positions; box; cutoff
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom; q4 and q6 are dimensionless
-
-Example: `examples/python/minimal_py.py`
-
-### rings
-
-Purpose: Primitive-ring sizes, symmetry, histogram, and fraction.
-
-Parameters: positions; box; cutoff; max_depth
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom; max_depth is a dimensionless ring size
-
-Example: `examples/python/minimal_py.py`
-
-### set_frame
-
-Purpose: Store one cell on a Frame.
-
-Parameters: frame; positions; box
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `examples/python/minimal_py.py`
-
-### set_num_threads
-
-Purpose: Set the OpenMP width for the next call.
-
-Parameters: n
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: dimensionless thread count; 0 restores the library default
-
-Example: `examples/python/minimal_py.py`
-
-### signature_cages
-
-Purpose: Count closed cages matching a ring-census spec.
-
-Parameters: positions; box; spec
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom; spec is text such as 512
-
-Example: `examples/python/minimal_py.py`
-
-### symmetry
-
-Purpose: Shell label for Ih, Ic, stacking disorder, or other.
-
-Parameters: positions; box
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: coordinates and cutoff in angstrom; labels are dimensionless codes
-
-Example: `examples/python/minimal_py.py`
-
-### userframe.CageScore
-
-Purpose: Boolean membership of the hexagonal and double-diamond cages.
-
-Parameters: hc; ddc
-
-Returns: A CageScore.
-
-Ownership: The caller owns the object.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.CageScore.n_both
-
-Purpose: Number of atoms in both cages.
-
-Parameters: self
-
-Returns: The count.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.CageScore.n_ic
-
-Purpose: Number of atoms in the double-diamond cage.
-
-Parameters: self
-
-Returns: The count.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.CageScore.n_ih
-
-Purpose: Number of atoms in the hexagonal cage.
-
-Parameters: self
-
-Returns: The count.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.CageScore.n_water
-
-Purpose: Number of atoms in neither cage.
-
-Parameters: self
-
-Returns: The count.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame
-
-Purpose: One configuration whose classifiers call libseams_lang.
-
-Parameters: ptr; symbols; cutoff
-
-Returns: A Frame.
-
-Ownership: The object owns the seams_frame pointer. close() or deletion calls seams_frame_free.
-
-Errors: RuntimeError when ptr is null.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.box
-
-Purpose: Cell stored on the frame.
-
-Parameters: self
-
-Returns: Three edge lengths, or nine LAMMPS numbers when a tilt is set.
-
-Ownership: The caller owns the returned array.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.cages
-
-Purpose: Hexagonal and double-diamond membership from seams_frame_cages.
-
-Parameters: self; seeded; k; ring_adjacent
-
-Returns: A CageScore.
-
-Ownership: The caller owns the score. The frame keeps the same object.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.cages_by_signature
-
-Purpose: Closed cages of one ring census.
-
-Parameters: self; signature; max_ring_size; edge
-
-Returns: A list whose length is the cage count. n_atoms is the vertex count.
-
-Ownership: The caller owns the list. The C call does not return one vertex list per cage.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.chill_plus
-
-Purpose: Published CHILL+ histogram for this frame.
-
-Parameters: self; graph
-
-Returns: An IceCounts mapping of label name to population.
-
-Ownership: The caller owns the dictionary. Labels are also stored on the frame.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.close
-
-Purpose: Free the libseams_lang frame.
-
-Parameters: self
-
-Returns: Nothing.
-
-Ownership: Frees the pointer this Frame owns. A second call is a no-op.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.find_prisms
-
-Purpose: Prism census from seams_frame_prisms.
-
-Parameters: self; output_dir; max_depth; shape_matching
-
-Returns: A list of size, perfect, and imperfect rows.
-
-Ownership: The caller owns the list.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.monolayer_rings
-
-Purpose: Quasi-2D ring counts from seams_frame_monolayer.
-
-Parameters: self; output_dir; sheet_area; max_depth
-
-Returns: A dictionary of size to count and coverage.
-
-Ownership: The caller owns the dictionary. The call writes topoMonolayer under output_dir.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.n_atoms
-
-Purpose: Number of atoms on the frame.
-
-Parameters: self
-
-Returns: The count from seams_frame_nop.
-
-Ownership: No allocation.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.positions
-
-Purpose: Copy of the coordinates stored on the frame.
-
-Parameters: self
-
-Returns: An (n, 3) NumPy array in angstrom.
-
-Ownership: The caller owns the copy. The frame keeps its own buffer.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.rdf_2d
-
-Purpose: In-plane g(r) from seams_frame_rdf2d.
-
-Parameters: self; output_dir; cutoff; binwidth
-
-Returns: Radius and g(r) lists.
-
-Ownership: The caller owns the lists. The call also writes under output_dir.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.ring_census
-
-Purpose: Primitive rings by size from seams_frame_rings.
-
-Parameters: self; max_size
-
-Returns: A dictionary of size to count, empty sizes omitted.
-
-Ownership: The caller owns the dictionary.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.steinhardt
-
-Purpose: Local q_l and the Lechner-Dellago average from seams_frame_steinhardt.
-
-Parameters: self; order_l
-
-Returns: A dictionary with ql and ql_bar lists.
-
-Ownership: The caller owns the dictionary.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.to_ase
-
-Purpose: ASE Atoms for this frame.
-
-Parameters: self
-
-Returns: An ASE Atoms object. Ice labels and cage flags are arrays when those calls have run.
-
-Ownership: The caller owns the Atoms object.
-
-Errors: ImportError when ASE is not installed.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.Frame.to_solvis
-
-Purpose: Solvis System built from to_ase.
-
-Parameters: self; expand_box
-
-Returns: A solvis System.
-
-Ownership: The caller owns the System.
-
-Errors: ImportError when solvis-tools is not installed.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.IceCounts
-
-Purpose: CHILL+ population counts keyed by label name.
-
-Parameters: mapping of name to count
-
-Returns: An IceCounts dictionary.
-
-Ownership: The caller owns the dictionary.
-
-Errors: None.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.from_ase
-
-Purpose: Frame for one ASE species. Coordinates go through seams_frame_from_arrays.
-
-Parameters: atoms; select; cutoff; bonded
-
-Returns: A userframe.Frame.
-
-Ownership: The caller owns the Frame.
-
-Errors: TypeError when atoms has no positions. ValueError when the selection matches nothing.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.read
-
-Purpose: Read one frame with seams_frame_read. pydseams.read is this function.
-
-Parameters: filename; frame; atom_type; all_atoms
-
-Returns: A userframe.Frame.
-
-Ownership: The caller owns the Frame and frees it with close() or by dropping it.
-
-Errors: RuntimeError whose text is seams_last_error.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### userframe.to_solvis
-
-Purpose: Call to_solvis on a frame.
-
-Parameters: frame; expand_box
-
-Returns: The solvis System returned by the frame.
-
-Ownership: The caller owns the System.
-
-Errors: ImportError when solvis-tools is not installed.
-
-Units: coordinates and cutoff in angstrom
-
-Example: `docs/orgmode/reference/python-frame.org`
-
-### version
-
-Purpose: Library version text.
-
-Parameters: none
-
-Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
-
-Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
-
-Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
-
-Units: text
-
-Example: `examples/python/minimal_py.py`
+- **Purpose**: Per-atom hexagonal-cage (`hc`) and double-diamond-cage (`ddc`) boolean flags, with dimensionless count properties `n_ih`, `n_ic`, `n_water`, and `n_both`.
 <!-- API_SYMBOLS_END -->

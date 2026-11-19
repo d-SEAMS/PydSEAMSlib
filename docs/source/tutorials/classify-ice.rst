@@ -13,34 +13,21 @@ Prerequisites
 
 - ``pydseams`` installed: ``pip install pydseamslib``
 
-- The engine fixture dump, either:
+- The sample mixed TIP4P dump ``exampleTraj.lammpstrj``
 
-  - from a PydSEAMSlib checkout: ``tests/data/exampleTraj.lammpstrj``
+Learning goals
+--------------
 
-  - from `seams-core <https://github.com/d-SEAMS/seams-core>`_:
-    ``input/traj/exampleTraj.lammpstrj`` (same file)
+In this tutorial you learn to:
 
-A wheel already links the C++ engine. The ``seams`` CLI lives in
-seams-core; Lua is ``dseams`` in
-`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_. This tutorial
-does not run those front ends.
-
-Learning Objectives
--------------------
-
-By the end of this tutorial you will be able to:
-
-1. Load one configuration with ``ds.read``
+1. Download the sample LAMMPS dump and load it with ``ds.read``
 
 2. Classify every analysed oxygen with ``Frame.chill_plus``
 
-3. Score hexagonal-cage and double-diamond-cage membership with
-   ``Frame.cages``
+3. Score hexagonal-cage (HC) and double-diamond-cage (DDC) membership
+   with ``Frame.cages``
 
 4. Read ``IceCounts`` and ``CageScore``
-
-5. Point at the ``seams`` CLI and the Lua ``dseams`` module when you
-   want those front ends
 
 Step 1: Install pydseams
 ------------------------
@@ -49,18 +36,20 @@ Step 1: Install pydseams
 
     pip install pydseamslib
 
-``pydseams`` is the Python package. ``import pydseamslib`` is a
-compatibility alias of ``pydseams``. Requires Python 3.11+.
+``pydseams`` is the primary import name. ``import pydseamslib`` is an alias
+of ``pydseams``.
 
-Step 2: Locate the fixture dump
--------------------------------
+Step 2: Fetch the sample dump
+-----------------------------
 
-From a PydSEAMSlib checkout, at the repository root, the vendored
-copy is ``tests/data/exampleTraj.lammpstrj``.
+Download the sample TIP4P ice-water dump (``exampleTraj.lammpstrj``, 750
+atoms: 250 oxygens of type 2 and 500 hydrogens of type 1):
 
-That file is the seams-core engine fixture
-``input/traj/exampleTraj.lammpstrj``. If you installed from PyPI only,
-copy the seams-core path and pass that filename to ``ds.read``.
+.. code:: bash
+
+    mkdir -p input/traj
+    curl -sLo input/traj/exampleTraj.lammpstrj \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
 
 Step 3: Load the frame
 ----------------------
@@ -69,13 +58,13 @@ Step 3: Load the frame
 
     import pydseams as ds
 
-    frame = ds.read("tests/data/exampleTraj.lammpstrj")
+    frame = ds.read("input/traj/exampleTraj.lammpstrj")
     print(frame.n_atoms)
     print(frame.atom_type)
 
-``ds.read`` looks at the suffix and calls the matching constructor.
-``.lammpstrj`` goes through ``Frame.from_file``, which keeps LAMMPS type
-2 (oxygen) when that type is present.
+``ds.read`` selects the reader from the file suffix. For ``.lammpstrj``, it
+calls ``Frame.from_file``, which automatically selects LAMMPS type 2
+(oxygen) when present.
 
 Expected output:
 
@@ -84,37 +73,40 @@ Expected output:
     250
     2
 
-``read`` keeps the 250 oxygen atoms. Classification does not write
-files.
+``read`` keeps the 250 oxygen atoms for analysis. Classification does not
+write output files.
 
 Step 4: Classify with CHILL+
 ----------------------------
 
 .. code:: python
 
-    print(frame.chill_plus())
+    counts = frame.chill_plus()
+    print(counts)
+    assert str(counts) == "IceCounts(interClathrate=9, water=241)"
 
 Expected output:
 
 ::
 
-    IceCounts(interClathrate=12, water=238)
+    IceCounts(interClathrate=9, water=241)
 
-These counts are the engine fixture result for seams-core
-``input/traj/exampleTraj.lammpstrj``, vendored here as
-``tests/data/exampleTraj.lammpstrj``. CHILL+ labels each oxygen from
-its four neighbours: 12 interfacial clathrate (three eclipsed bonds)
-and 238 water.
+CHILL+ classifies each oxygen from its four-neighbour bond geometry: 9
+interfacial clathrate molecules (three eclipsed bonds) and 241 water
+molecules.
 
-``IceCounts`` is a histogram. ``counts.cubic`` and ``counts["cubic"]``
-are the same value. Missing labels read as ``0``.
+``IceCounts`` behaves like a dictionary and an attribute record:
+``counts.cubic`` and ``counts["cubic"]`` return the same integer, and
+missing labels return ``0``.
 
 Step 5: Score cages
 -------------------
 
 .. code:: python
 
-    print(frame.cages())
+    cages = frame.cages()
+    print(cages)
+    assert str(cages) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
 
 Expected output:
 
@@ -124,28 +116,24 @@ Expected output:
 
 ``cages()`` scores complete hexagonal cages (HC, ice Ih) and
 double-diamond cages (DDC, ice Ic). This mixed snapshot has no
-finished HC or DDC, so every oxygen stays water under the cage
-score. ``n_ih``, ``n_ic``, and ``n_water`` are atom counts, not cage
-counts.
+complete HC or DDC, so every oxygen remains water under the cage
+score. ``n_ih``, ``n_ic``, and ``n_water`` are atom counts, not cage counts.
 
-Default ``cages()`` is the seeded (hysteresis) construction. Pass
-``seeded=False`` for cutoff-graph affiliation on this frame's
-six-rings.
+Default ``cages()`` uses the seeded (hysteresis) construction. Pass
+``seeded=False`` for cutoff-graph affiliation on this frame's six-rings.
 
-``Frame.seeded_affiliation`` is that construction on its own. Pass
-``ring_adjacent`` on ``cages`` or ``seeded_affiliation`` to fill the last
-vertex of a six-ring whose other vertices carry a label.
-``IceFeaturizer`` turns that flag on by default. Mixed water-salt ASE
-input uses ``from_ase(atoms, select=("O", "Na", "Cl"))``.
+``Frame.seeded_affiliation`` exposes that construction directly. Pass
+``ring_adjacent=True`` on ``cages`` or ``seeded_affiliation`` to fill the last
+vertex of a six-ring whose other five vertices carry a label.
 
 Cage scores and CHILL+ answer different questions on the same cloud.
-CHILL+ is a four-neighbour local label. Cages require a finished
-HC or DDC.
+CHILL+ evaluates four-neighbour local coordination, whereas cages
+require a closed HC or DDC polyhedron.
 
-Step 6: The same engine elsewhere
----------------------------------
+Step 6: Inspect the compiled module
+-----------------------------------
 
-``Frame`` calls the compiled module ``yoda``. Same session:
+``Frame`` delegates numerical work to the compiled module ``pydseams.yoda``:
 
 .. code:: python
 
@@ -157,46 +145,32 @@ Step 6: The same engine elsewhere
 Expected output includes ``d-SEAMS compiled surface (yoda)`` and
 ``<class 'pydseams.yoda.PointCloudDouble'>``.
 
-The ``seams`` CLI in seams-core and ``require("dseams")`` in yodaStruct
-run ``libyodaLib``, the same engine ``yoda`` binds. Use those projects
-for the command-line and Lua workflows. Stay on ``Frame`` for Python.
-
 Troubleshooting
 ---------------
 
 ``ModuleNotFoundError: No module named 'pydseams'``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Install into the active interpreter:
+Install into the active Python interpreter:
 
 .. code:: bash
 
     python -m pip install pydseamslib
 
-``FileNotFoundError`` on the dump
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``ValueError`` or missing dump file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-From a checkout, run at the repository root or pass an absolute
-path to ``tests/data/exampleTraj.lammpstrj``. From PyPI, copy
-seams-core ``input/traj/exampleTraj.lammpstrj``.
+Verify that ``input/traj/exampleTraj.lammpstrj`` exists in your working
+directory, or pass the full path to the downloaded dump to ``ds.read``.
 
-Counts do not match the fixture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Counts differ on another trajectory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The numbers above are the engine fixture result for that dump.
-A different trajectory, frame index, cutoff, or ``atom_type``
-produces a different histogram. ``ds.read(path, frame=1)`` is
-1-indexed.
+The counts above apply to ``exampleTraj.lammpstrj``. A different
+trajectory, 1-indexed ``frame``, ``cutoff``, or ``atom_type`` produces a
+different histogram.
 
-You want the CLI or Lua
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Do not compile ``yoda`` from this tutorial. Install
-`seams-core <https://github.com/d-SEAMS/seams-core>`_ for ``seams``,
-and `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_ for
-``require("dseams")``.
-
-Next Steps
+Next steps
 ----------
 
 `Classify ASE Atoms <../howto/ase.rst>`_
@@ -206,7 +180,7 @@ Next Steps
     ``IceFeaturizer`` / ``ion_environment``
 
 `View a frame in solvis <../howto/solvis.rst>`_
-    optional extra
+    optional visualisation extra
 
 `The yoda surface <../explanation/yoda-surface.rst>`_
     why helpers stay in Python
@@ -217,15 +191,12 @@ Next Steps
 Summary
 -------
 
-You learned to:
+In this tutorial you:
 
-1. Install ``pydseams`` and load the engine fixture dump
+1. Installed ``pydseamslib`` and loaded a LAMMPS trajectory frame
 
-2. Call ``ds.read`` to get a ``Frame``
+2. Loaded oxygen atoms with ``ds.read``
 
-3. Print CHILL+ labels with ``frame.chill_plus()``
+3. Computed CHILL+ labels with ``frame.chill_plus()``
 
-4. Print HC / DDC membership with ``frame.cages()``
-
-5. Leave the ``seams`` CLI and Lua ``dseams`` module to their own
-   repositories
+4. Scored HC / DDC cage membership with ``frame.cages()``

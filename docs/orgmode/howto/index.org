@@ -2,41 +2,22 @@
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+OPTIONS: toc:nil num:nil
 
-How-to guides are goal-oriented. Use them to solve a specific
-problem.
+How-to guides are goal-oriented recipes for specific tasks.
 
-* Available how-tos
+* Available guides
 
 | Guide | Description |
 |-------+-------------|
-| [[file:install.org][Install pydseams]] | pip, pixi, extras, checkout |
-| [[file:ase.org][Classify ASE Atoms]] | ~from_ase~, ~to_ase~, select, bonding |
-| [[file:solvis.org][View a frame in solvis]] | ~to_solvis~ extra |
-| [[file:features.org][Features and ions]] | ~IceFeaturizer~, deeptime, PyEMMA, ions |
-| [[file:tools.org][Tools: MDAnalysis, OVITO]] | ~IceStates~, ~ice_states~, Colab |
-| [[file:faq.org][FAQ]] | Names, extras, formats |
-| [[file:troubleshooting.org][Troubleshooting]] | Import errors, cells, hydrogens |
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   install
-   ase
-   solvis
-   features
-   tools
-   faq
-   troubleshooting
-#+end_export
-
-* Structure
-
-Each how-to states the problem, shows the command or snippet, and
-links to the tutorial or the reference.
+| [[file:install.org][Install pydseams]] | pip, pixi, extras, and building from source |
+| [[file:ase.org][Classify ASE Atoms]] | ~from_ase~, ~to_ase~, selections, and bonding |
+| [[file:solvis.org][View a frame in solvis]] | Interactive PyVista views with ~to_solvis~ |
+| [[file:features.org][Features and ions]] | ~IceFeaturizer~, deeptime, PyEMMA, and ion shells |
+| [[file:tools.org][MDAnalysis, OVITO and notebooks]] | ~IceStates~, ~ice_states~, and Colab |
+| [[file:faq.org][FAQ]] | Package names, formats, and compatibility |
+| [[file:troubleshooting.org][Troubleshooting]] | Common installation, cell, and reader errors |
 
 * Getting help
 
-- [[file:../tutorials/index.org][Tutorials]] :: learn the ~Frame~ path
-- [[file:../reference/python.org][Python surface]] :: live names
-- [[file:../explanation/index.org][Explanation]] :: design
+- [[file:../tutorials/index.org][Tutorials]] :: learn the ~Frame~ workflow
+- [[file:../reference/python.org][Python surface]] :: live classes and methods
+- [[file:../explanation/index.org][Explanation]] :: design and architecture

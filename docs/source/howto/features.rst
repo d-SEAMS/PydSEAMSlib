@@ -8,128 +8,165 @@ Problem
 -------
 
 You have a nucleation trajectory and want one feature vector per frame
-for a Markov state model or a committor fit, one integer state per
-molecule per frame, and the first-shell class of each ion when ions
-sit in the cloud.
+for a Markov state model or committor fit, one integer state per
+molecule per frame, and the first-shell ice class of each ion when ions
+are present.
 
 Per-frame features
 ------------------
 
+Create a multi-frame trajectory (or load an existing LAMMPS dump with
+``Trajectory``) and pass it to ``IceFeaturizer``:
+
 .. code:: python
 
+    from pathlib import Path
+    import tempfile
     from pydseams import Trajectory
-    from pydseams.features import IceFeaturizer
+    from pydseams.features import IceFeaturizer, discretize_nmax
 
-    traj = Trajectory("nucleation.lammpstrj", frame=1, atom_type=2, cutoff=3.5)
-    feat = IceFeaturizer(traj, ring_adjacent=True)
-    X, S = feat.transform()
-    print(feat.feature_names)
+    a = 2.75 * 4 / 3**0.5
+    basis = (
+        (0, 0, 0),
+        (0.5, 0.5, 0),
+        (0.5, 0, 0.5),
+        (0, 0.5, 0.5),
+        (0.25, 0.25, 0.25),
+        (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75),
+        (0.25, 0.75, 0.75),
+    )
+    xyz = [
+        [(i + x) * a, (j + y) * a, (k + z) * a]
+        for i in range(3)
+        for j in range(3)
+        for k in range(3)
+        for x, y, z in basis
+    ]
+    L = 3 * a
+    header = (
+        f"ITEM: NUMBER OF ATOMS\n{len(xyz)}\n"
+        f"ITEM: BOX BOUNDS pp pp pp\n0 {L}\n0 {L}\n0 {L}\n"
+        "ITEM: ATOMS id mol type x y z\n"
+    )
+    body = "".join(
+        f"{idx} {idx} 1 {x:.6f} {y:.6f} {z:.6f}\n"
+        for idx, (x, y, z) in enumerate(xyz, start=1)
+    )
+    dump_text = f"ITEM: TIMESTEP\n0\n{header}{body}ITEM: TIMESTEP\n100\n{header}{body}"
 
-``IceFeaturizer`` calls ``Frame.seeded_affiliation`` on each frame.
-Ring-adjacent completion is the featurizer default: it fills the last
-vertex of a six-ring whose other vertices already carry a label.
-``Frame.cages`` and ``Frame.seeded_affiliation`` leave that flag off unless
-you pass it.
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "nucleation.lammpstrj"
+        path.write_text(dump_text, encoding="utf-8")
+        traj = Trajectory(str(path), frame=1, atom_type=1, cutoff=3.5)
+        feat = IceFeaturizer(traj, ring_adjacent=True)
+        X, S = feat.transform()
+        print("shape:", X.shape, S.shape)
+        print("features:", feat.feature_names)
 
-``X`` lists cage counts (``n_ice``, ``n_ic``, ``n_ih``, ``n_mixed``), the
-largest connected cage cluster ``n_max`` and the cluster count, the
-cubicity, the ``chill_plus`` counts on the cutoff graph, the largest
-``chill_plus`` bulk cluster, and the six-ring count. ``S`` lists
-``STATE_WATER``, ``STATE_IC``, ``STATE_IH``, or ``STATE_MIXED`` per molecule.
-Both arrays are plain NumPy and both are deterministic: a feature file
-from one machine equals the same file from another to the last integer.
+``IceFeaturizer`` calls ``Frame.seeded_affiliation`` on each frame with
+``ring_adjacent=True`` by default, filling the last vertex of any
+six-ring whose other five vertices carry a label. ``Frame.cages`` and
+``Frame.seeded_affiliation`` leave ``ring_adjacent=False`` unless passed
+explicitly.
+
+``X`` records cage counts (``n_ice``, ``n_ic``, ``n_ih``, ``n_mixed``), the
+largest connected cage cluster ``n_max`` and cluster count, cubicity,
+``chill_plus`` counts on the cutoff graph, the largest bulk ``chill_plus``
+cluster, and the six-ring count. ``S`` records ``STATE_WATER``, ``STATE_IC``,
+``STATE_IH``, or ``STATE_MIXED`` per molecule. Both arrays are plain NumPy
+and deterministic.
 
 deeptime
 --------
 
+``discretize_nmax`` bins the largest-cluster series (``X[:, 1]``) into
+integer states for ``deeptime.markov.msm.MaximumLikelihoodMSM``.
+``to_deeptime`` fits a time-lagged independent component analysis (TICA)
+model on the full feature matrix:
+
 .. code:: python
 
-    from pydseams.features import discretize_nmax, to_deeptime
-
     dtrajs = discretize_nmax(X[:, 1], edges=[10, 50, 150, 400])
-    msm = to_deeptime(X, lagtime=5)
+    print("discrete states:", dtrajs)
 
-``discretize_nmax`` bins the largest-cluster series into integer states
-for ``deeptime.markov.msm.MaximumLikelihoodMSM``. ``to_deeptime`` fits a
-time-lagged independent component analysis (TICA) on the full vector
-and returns the fitted model.
+With ``deeptime`` installed:
+
+.. code:: text
+
+    from pydseams.features import to_deeptime
+
+    msm = to_deeptime(X, lagtime=5)
 
 PyEMMA
 ------
 
-.. code:: python
+With PyEMMA installed, ``to_pyemma_featurizer`` registers the per-frame
+vector as a custom feature:
+
+.. code:: text
 
     from pydseams.features import to_pyemma_featurizer
 
     featurizer = to_pyemma_featurizer(feat, topology="nucleation.pdb")
 
-The per-frame vector registers as a custom feature. PyEMMA is
-unmaintained; deeptime succeeds it.
+PyEMMA is in maintenance mode; ``deeptime`` is its successor.
 
 Ions
 ----
 
-Ions sit outside the hydrogen-bond network. The cage assignment runs
-on the water and the ions are read against it. Build the frame with
-every species in the cloud and name the ion types.
+Ions sit outside the hydrogen-bond network. Cage assignment runs on
+water alone, and each ion is classified against the water assignment in
+its first hydration shell.
 
-Pass a sequence to ``Frame.from_ase`` when the ASE ``Atoms`` mix water and
-salt. The listed species stay in the cloud. The first entry is the
-analysed water:
+With ASE, pass a sequence to ``from_ase`` so water and ions remain in the
+same cloud; the first entry is the analysed water species and the
+remaining species keep their atomic numbers as ``c_type``:
+
+.. code:: text
+
+    frame = ds.from_ase(atoms, select=("O", "Na", "Cl"), bonded="cutoff")
+
+With a LAMMPS dump or ``from_arrays``, retain all species (``all_atoms=True``
+when reading a file) and pass the ion ``c_type`` codes as ``ion_types``:
 
 .. code:: python
 
     import pydseams as ds
-
-    frame = ds.from_ase(atoms, select=("O", "Na", "Cl"), bonded="cutoff")
-
-``select=("O", "Na", "Cl")`` keeps oxygen, sodium, and chlorine. The
-analysed species is oxygen (atomic number 8). Sodium and chlorine keep
-their atomic numbers as ``c_type``. ``pydseams.features.ion_environment``
-and ``Frame.ion_environment`` read those codes.
-
-A LAMMPS dump stores integer type codes, not atomic numbers. Keep every
-type with ``all_atoms`` on and pass those codes as ``ion_types``:
-
-.. code:: python
-
-    from pydseams import Trajectory
     from pydseams.features import ION_ICE, IceFeaturizer, ion_environment
 
-    traj = Trajectory("brine.lammpstrj", frame=1, atom_type=1, all_atoms=True)
-    feat = IceFeaturizer(traj, ion_types=(3, 4))  # LAMMPS types
-    x, states = feat.frame_features()
-    ions, shell, fraction, ion_states = ion_environment(traj, states, (3, 4))
+    brine_xyz = xyz + [[1.5 * a, 1.5 * a, 1.5 * a]]
+    numbers = [1] * len(xyz) + [3]
+    brine = ds.from_arrays(brine_xyz, [L, L, L], numbers=numbers)
+    brine_feat = IceFeaturizer(brine, ion_types=(3,))
+    x_brine, states = brine_feat.frame_features()
+    ions, shell, fraction, ion_states = ion_environment(brine, states, (3,))
     trapped = ions[ion_states == ION_ICE]
+    print("ion shell size:", shell, "fraction:", fraction, "trapped:", trapped)
 
-Those LAMMPS type codes classify each ion from its first water
-shell. Water is type 1 on this dump; 3 and 4 are the ions, not atomic
-numbers (Na is 11, Cl is 17). The return is the water count within
-``cutoff``, the ice fraction of that shell, and a class. ``ION_ICE``
-means every neighbour in the shell is ice. ``ION_LIQUID`` means none of
-it is. ``ION_FRONT`` is the rest. ``ion_types`` adds ``n_ion_ice``,
-``n_ion_front``, ``n_ion_liquid`` and the mean shell ice fraction to the
+``ion_environment`` returns the ion indices, first-shell water counts
+within ``cutoff``, ice fraction of each shell, and per-ion classes:
+``ION_ICE`` (every shell water is ice), ``ION_LIQUID`` (none is ice), or
+``ION_FRONT`` (mixed). Setting ``ion_types`` on ``IceFeaturizer`` appends
+``n_ion_ice``, ``n_ion_front``, ``n_ion_liquid``, and ``ion_shell_ice`` to the
 feature vector.
 
-``Frame.ion_environment`` is the compiled path for the same first-shell
-class. That method turns ``ring_adjacent`` on by default and passes the
-flag through to ``seeded_affiliation``. Its result lists each ion's
-shell in ``members``.
+``Frame.ion_environment`` runs the compiled path for the same first-shell
+classification (with ``ring_adjacent=True`` by default) and exposes each
+ion's shell members in ``members``.
 
-``Frame.hydration_shell_rings`` counts the primitive rings of the water
-network that pass through each shell, by ring size. An ion is not a
-vertex of the network, so the rings it would have closed are gone; the
-shell census says how far the network survives around it:
+``Frame.hydration_shell_rings`` counts primitive rings of the water
+network that pass through each ion's first shell, grouped by ring size:
 
 .. code:: python
 
-    env, census = frame.hydration_shell_rings((3, 4))
+    env, census = brine.hydration_shell_rings((3,))
     for ion, row in zip(env.ion, census):
-        print(ion, row[6], "six-rings through the shell")
+        print("ion", ion, "six-rings through shell:", row[6])
 
-``Frame.guest_occupancy`` places guests (methane, THF, ions) in cages
-given as vertex index lists, by the nearest periodic cage centroid
-within a radius, and reports occupied, multiply occupied and free.
+``Frame.guest_occupancy`` assigns guests (such as methane, THF, or ions)
+to enumerated cages by nearest periodic cage centroid within a cutoff
+radius, reporting occupied, multiply occupied, and free cages.
 
 See also
 --------

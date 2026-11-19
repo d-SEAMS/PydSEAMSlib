@@ -3,32 +3,30 @@
 #+OPTIONS: toc:nil num:nil
 
 Tutorials are learning-oriented. Follow them in order to learn the
-~Frame~ API.
+~Frame~ and ~dseams~ Python APIs.
 
 * Available tutorials
 
 | Tutorial | Description |
 |----------+-------------|
 | [[file:classify-ice.org][Classify ice]] | Load a mixed ice-water dump, print CHILL+, score cages |
-| [[file:dseams.md][dseams]] | CHILL+, q4/q6 and rings on NumPy arrays through ~import dseams~ |
-| [[file:bulk-ice.org][Bulk ice]] | CHILL+ and cages on the mixed TIP4P frame, CLI and Python |
-| [[file:ice-and-clathrate.org][Ice and clathrate]] | CHILL+ stars and signature cages on sI |
-| [[file:rings.org][Primitive rings]] | Hydrogen-bond and cutoff ring census |
+| [[file:dseams.md][dseams]] | CHILL+, q4/q6, rings, and cages on NumPy arrays through ~import dseams~ |
+| [[file:bulk-ice.org][Bulk ice]] | Compare cutoff CHILL+, mutual-4 CHILL+, and cages on mixed TIP4P and cubic ice |
+| [[file:ice-and-clathrate.org][Ice and clathrate]] | CHILL+ stars and signature cages on sI clathrate |
+| [[file:rings.org][Primitive rings]] | Hydrogen-bond and cutoff primitive ring census |
 | [[file:order-parameters.org][Order parameters]] | Steinhardt q_l and the Lechner-Dellago average |
-| [[file:confined-water.org][Confined water]] | In-plane RDF, monolayer rings, prisms |
-| [[file:paper-figures.org][Paper figures]] | The 2020 JCIM figure calls on in-tree dumps |
+| [[file:confined-water.org][Confined water]] | In-plane RDF, monolayer rings, and prisms |
+| [[file:paper-figures.org][Paper figures]] | Reproduce key d-SEAMS paper structural analyses in Python |
 
 * What a tutorial covers
 
-Each tutorial states prerequisites, lists learning objectives, and
-walks numbered steps with expected output. The flagship path is
-~ds.read~ to ~Frame.chill_plus~ to ~Frame.cages~.
-
-Sibling packages (~seams~ in seams-core, ~require("dseams")~ in
-yodaStruct) share the same engine. These tutorials stay on Python.
+Each tutorial states prerequisites, lists learning goals, and walks
+through runnable steps with expected output. The main workflow is
+~ds.read~ (or ~ds.from_arrays~) to ~Frame.chill_plus~ and
+~Frame.cages~.
 
 * Getting help
 
 - [[file:../howto/index.org][How-to guides]] :: solve a specific task
-- [[file:../reference/python.org][Python surface]] :: live names
+- [[file:../reference/python.org][Python surface]] :: live names and records
 - [[file:../explanation/index.org][Explanation]] :: why the surface is split

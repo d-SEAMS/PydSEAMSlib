@@ -9,35 +9,37 @@ Frequently asked questions
 Names
 -----
 
-Why is the package ``pydseams`` and the module ``yoda``?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Why is the package ``pydseams`` and the compiled module ``yoda``?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``pydseams`` is the Python package. ``yoda`` is the compiled nanobind
-extension inside it. That is the 2020 compiled surface name
-(``libyodaLib`` in seams-core). Helpers sit on ``yoda`` the way
-application code sits on a C API.
+``pydseams`` is the Python package, and ``yoda`` (``pydseams.yoda``) is the
+compiled nanobind extension inside it, named after the underlying
+``libyodaLib`` engine in seams-core. High-level helpers (``Frame``, ``read``,
+ASE, solvis) sit in Python on top of ``yoda``.
 
 See `The yoda surface <../explanation/yoda-surface.rst>`_.
 
 What is ``pydseamslib``?
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The PyPI project (``pip install pydseamslib``). ``import pydseamslib``
-is a compatibility alias of ``pydseams``. New code imports ``pydseams``.
+The PyPI distribution name (``pip install pydseamslib``).
+``import pydseamslib`` is an alias of ``pydseams``. New code imports
+``pydseams`` (or ``dseams`` for the array API).
 
-What are ``_core`` and ``cyoda``?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+What are ``_core``, ``cyoda``, and ``Trajectory``?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aliases of ``pydseams.yoda``. ``assert ds._core is ds.yoda`` and
-``assert ds.cyoda is ds.yoda``. New code imports ``yoda``.
-``pydseams.Trajectory`` is an alias of ``Frame``.
+``_core`` and ``cyoda`` are compatibility aliases of ``pydseams.yoda``
+(``ds._core is ds.yoda`` and ``ds.cyoda is ds.yoda``). ``pydseams.Trajectory``
+is an alias of ``pydseams.Frame``.
 
-Do I compile ``yoda`` to use the package?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Do I need to compile ``yoda`` to use the package?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-No. ``pip install pydseamslib`` installs a wheel that already links the
-engine. Compile only if you develop the bindings from a checkout
-(``nix build`` / ``nix develop``).
+No. ``pip install pydseamslib`` installs a wheel that bundles the
+compiled d-SEAMS engine. Compiling from source is only needed when
+developing the bindings or building with optional engine libraries
+such as chemfiles.
 
 Usage
 -----
@@ -45,7 +47,7 @@ Usage
 Which formats does ``ds.read`` accept?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Suffix dispatch:
+``ds.read`` dispatches by file suffix:
 
 .. table::
 
@@ -61,22 +63,23 @@ Suffix dispatch:
     | ``.lammpstrj``, ``.dump``, ``.lammps``, other | ``Frame.from_file``      |
     +-----------------------------------------------+--------------------------+
 
-``available_readers()`` reports which optional C++ readers this build
-linked (``xyz``, ``chemfiles``, ``readcon``). ``lammps`` is always present.
+``available_readers()`` reports which optional C++ readers your build
+includes (``xyz``, ``chemfiles``, ``readcon``). ``lammps`` is always enabled.
 
 Does classification write files?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``chill_plus``, ``chill``, and ``cages`` do not write files. Prism,
-monolayer, and RDF helpers do.
+``chill_plus``, ``chill``, and ``cages`` do not write files. ``find_prisms``,
+``monolayer_rings``, and ``rdf_2d`` write engine output files to the
+directory passed to them.
 
-Can the ASE cell be triclinic?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Can ASE cells be triclinic?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Yes. ``from_ase`` rotates any nonsingular, fully periodic ASE cell into
-the engine's LAMMPS restricted-triclinic representation. ``to_ase``
-restores the imported cell orientation, positions, and cell
-displacement. Partially periodic and singular cells are rejected.
+the engine's LAMMPS restricted-triclinic representation, and ``to_ase``
+restores the original cell orientation, positions, and displacement.
+Partially periodic and singular cells are rejected.
 
 How do I keep every atom, not just oxygen?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,21 +88,21 @@ How do I keep every atom, not just oxygen?
 
     frame = ds.from_ase(atoms, select=None)
 
-Default ``select="O"``. A symbol or an atomic number keeps that
-species. A sequence such as ``("O", "Na", "Cl")`` keeps the listed
-species and analyses the first. A mixed selection containing ``H`` uses
+The default is ``select="O"``. A symbol or atomic number selects that
+species. A sequence such as ``("O", "Na", "Cl")`` keeps all listed
+species and analyses the first. Mixed selections containing ``H`` use
 cutoff bonding; hydrogen-bond topology requires a heavy-atom selection
-such as ``select="O"``.
+such as ``select="O"``. For LAMMPS files, pass ``all_atoms=True`` to
+``ds.read``.
 
 How do I view a classified frame?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-solvis. ``pip install 'pydseamslib[solvis]'``, then ``frame.to_solvis()``.
-That is the visualization path. See
-`View a frame in solvis <solvis.rst>`_. OVITO is not required.
+Use solvis: ``pip install 'pydseamslib[solvis]'``, then
+``frame.to_solvis()``. See `View a frame in solvis <solvis.rst>`_.
 
-How do I cite this?
-~~~~~~~~~~~~~~~~~~~
+How do I cite d-SEAMS?
+~~~~~~~~~~~~~~~~~~~~~~
 
 Cite the 2020 d-SEAMS paper. See
 `How to cite <../explanation/citation.rst>`_.
@@ -110,16 +113,15 @@ Compatibility
 Which Python versions are supported?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.11+. CPython 3.11 has a version-specific wheel; Python 3.12 and newer
-use the CPython 3.12 limited ABI. Free-threaded
-CPython has no limited ABI and is not a target.
+Python 3.11 and later (Linux and macOS). Free-threaded CPython is not
+supported.
 
-How is this different from ``seams`` and Lua ``dseams``?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How is ``pydseams`` related to ``seams`` and Lua ``dseams``?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Same engine, different front end. ``seams`` is the CLI in seams-core.
-``require("dseams")`` is the Lua / Fennel module in yodaStruct.
-``pydseams`` is the Python ``Frame`` API.
+They share the same C++ engine (``libyodaLib``). ``seams`` is the CLI in
+seams-core, ``require("dseams")`` is the Lua / Fennel interface in
+yodaStruct, and ``pydseams`` / ``dseams`` are the Python bindings.
 
 See also
 --------
