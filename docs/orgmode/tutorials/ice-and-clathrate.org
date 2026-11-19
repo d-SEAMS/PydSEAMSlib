@@ -5,7 +5,7 @@ You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
 ~tests/dseams/test_doc_snippets.py~ runs the Python blocks on this page.
-Python is ~pip install 'pydseamslib==2.14.0'~.
+Python is ~pip install 'pydseamslib==2.14.1'~.
 The mixed-frame census uses ~pydseams~; the signature cages use the 2.14
 frame, ~dseams.userframe~, which takes the ~edge~ window.
 

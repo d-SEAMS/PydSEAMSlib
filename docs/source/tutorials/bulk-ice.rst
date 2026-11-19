@@ -166,7 +166,7 @@ The Frame package the paper uses is separate:
 
 .. code:: bash
 
-    pip install 'pydseamslib==2.14.0'
+    pip install 'pydseamslib==2.14.1'
 
 .. code:: python
 
@@ -203,7 +203,7 @@ Troubleshooting
   Commands are ``read``, ``chill``, ``chill-plus``, and ``cages``.
 
 - ``ModuleNotFoundError: pydseams``: that name is the released Frame package.
-  ``pip install 'pydseamslib==2.14.0'``. The in-tree module is ``import dseams``.
+  ``pip install 'pydseamslib==2.14.1'``. The in-tree module is ``import dseams``.
 
 - Lua ``require("dseams")``: that module lives in yodaStruct.
 

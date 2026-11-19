@@ -25,7 +25,7 @@ this repository.
 The C++ engine, its C API and the CLI live in
 [d-SEAMS/seams-core](https://github.com/d-SEAMS/seams-core).
 `subprojects/seams-core.wrap` pins one engine revision, the tag
-`v2.14.0`.
+`v2.14.1`.
 The other wraps (`linkcell`, `minimage`, `readcon-*`, `vesin`, `gpulite`,
 `eigen`) carry the revisions and patches seams-core pins at that revision.
 

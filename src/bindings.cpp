@@ -43,10 +43,14 @@
 #include <selection.hpp>
 #include <site.hpp>
 #include <stdexcept>
+#include <string>
 #include <structure_desc.hpp>
 #include <topo_fingerprint.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 #include <voronoi_qlm.hpp>
 
 namespace nb = nanobind;

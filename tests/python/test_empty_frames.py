@@ -228,7 +228,8 @@ def test_isolated_atoms_have_no_cutoff_neighbours(tmp_path):
     assert monolayer[4]["count"] == 0 and monolayer[4]["coverage_xy"] == 0.0
     centres, gram = frame.rdf_2d(tmp_path / "rdf2d", cutoff=6.0, binwidth=0.5)
     assert list(centres) == [0.25 + 0.5 * i for i in range(12)]
-    assert len(gram) == 12 and all(np.isnan(value) for value in gram)
+    assert len(gram) == 12
+    assert gram == [0.0] * 12
 
 
 def test_featurizer_and_band_on_isolated_atoms():

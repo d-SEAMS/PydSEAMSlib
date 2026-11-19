@@ -13,7 +13,7 @@ They are not in this repository, and this page does not invent their counts.
 
 The in-tree confined frame is ``input/traj/exampleTraj.lammpstrj``.
 ``tests/dseams/test_doc_snippets.py`` runs the Python block on this page.
-Install Python with ``pip install 'pydseamslib==2.14.0'``.
+Install Python with ``pip install 'pydseamslib==2.14.1'``.
 
 .. code:: python
 

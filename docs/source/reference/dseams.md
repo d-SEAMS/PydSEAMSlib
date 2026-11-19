@@ -47,7 +47,7 @@ with System() as sys:
 `examples/python/seams_ctypes_quick.py` runs that cell. The program prints:
 
 ```
-version 2.14.0
+version 2.14.1
 n 8
 cubic 8
 q6 0.628539

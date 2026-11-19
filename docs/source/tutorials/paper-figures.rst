@@ -6,7 +6,7 @@ Paper figures
 The 2020 JCIM figures are drawn from figshare project 73545.
 This page is the same calls on the dumps that are in the tree.
 ``tests/dseams/test_doc_snippets.py`` runs the Python block on this page.
-Python is ``pip install 'pydseamslib==2.14.0'``. The signature cage count
+Python is ``pip install 'pydseamslib==2.14.1'``. The signature cage count
 and vertex total come from ``dseams.userframe``.
 
 .. table::
