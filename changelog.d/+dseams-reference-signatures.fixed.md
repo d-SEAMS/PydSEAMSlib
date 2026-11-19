@@ -1,0 +1,1 @@
+The dseams reference matches the live signatures. `dseams.cages` takes `graph="seeded"`. `dseams.signature_cages` takes `graph="cutoff"` and defaults `spec` to `"512"`. `dseams.symmetry` takes `shell_rmsd` (default `0.12`).
