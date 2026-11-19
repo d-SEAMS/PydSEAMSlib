@@ -68,6 +68,7 @@ jobs:
           "$RUNNER_TEMP/sdist-venv"/bin/python -m pytest -q -p no:cacheprovider --import-mode=importlib \
             --rootdir "$GITHUB_WORKSPACE" \
             "$GITHUB_WORKSPACE/tests/dseams/test_dseams.py" \
+            "$GITHUB_WORKSPACE/tests/dseams/test_dseams_empty_frames.py" \
             "$GITHUB_WORKSPACE/tests/dseams/installed_package.py" \
             "$GITHUB_WORKSPACE/tests/dseams/docs" \
             "$GITHUB_WORKSPACE/tests/dseams/test_doc_snippets.py"

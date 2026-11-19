@@ -53,7 +53,8 @@ python -m build --sdist
 python -m pip install dist/pydseamslib-*.whl pytest hypothesis ase
 python -m pytest tests/python
 python -m pytest --import-mode=importlib tests/dseams/test_dseams.py \
-  tests/dseams/installed_package.py tests/dseams/docs tests/dseams/test_doc_snippets.py
+  tests/dseams/test_dseams_empty_frames.py tests/dseams/installed_package.py \
+  tests/dseams/docs tests/dseams/test_doc_snippets.py
 python scripts/check_installed_api.py
 ```
 
