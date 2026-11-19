@@ -23,11 +23,12 @@ Install with `pip install pydseamslib`; extras are `[ase]`, `[mdanalysis]` and `
 
 ## How-to guides
 
+- [Install](https://python.dseams.info/howto/install.html): Wheels, source builds and optional extras.
 - [ASE](https://python.dseams.info/howto/ase.html): Build a Frame from ASE Atoms and write labels back.
-- [ASE integration](https://python.dseams.info/howto/ase-integration.html): Label the TIP4P dump read through ASE.
 - [solvis](https://python.dseams.info/howto/solvis.html): View a classified frame with solvis.
-- [View a classified frame](https://python.dseams.info/howto/solvis-dseams.html): CHILL+ and cage labels into a solvis System.
 - [Features](https://python.dseams.info/howto/features.html): Per-frame feature vectors from `pydseams.features`.
+- [Tools](https://python.dseams.info/howto/tools.html): MDAnalysis, OVITO, and notebooks.
+- [FAQ](https://python.dseams.info/howto/faq.html): Package names, formats, and compatibility.
 - [Troubleshooting](https://python.dseams.info/howto/troubleshooting.html): Import, reader and type-selection errors.
 
 ## Reference
@@ -35,8 +36,8 @@ Install with `pip install pydseamslib`; extras are `[ase]`, `[mdanalysis]` and `
 - [Python surface](https://python.dseams.info/reference/python.html): `Frame`, `IceCounts`, `CageScore`, `read`, ASE and `pydseams.features`.
 - [API](https://python.dseams.info/api.html): Autodoc of the `pydseams` helpers and the `yoda` name table.
 - [dseams and the C API](https://python.dseams.info/reference/dseams.html): `import dseams`, the `seams` ctypes package and the symbol table.
-- [dseams module](https://python.dseams.info/lang/python.html): Autodoc of `dseams` and the ice Ih census.
-- [Language task](https://python.dseams.info/lang/task-python.html): The ice Ih census every d-SEAMS language front prints, in Python against `libseams_lang`.
+- [dseams module reference](https://python.dseams.info/lang/python.html): Autodoc of `dseams` and the cubic ice verification.
+- [C-ABI Ice Ih census](https://python.dseams.info/lang/task-python.html): The ice Ih census in Python against `libseams_lang`.
 
 ## Explanation
 

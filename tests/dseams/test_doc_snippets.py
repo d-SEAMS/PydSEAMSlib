@@ -30,12 +30,16 @@ ORG_SRC = re.compile(
 RST_DOCTEST = re.compile(r"^\.\. doctest::\s*\n((?:\n|   .*\n)+)", re.MULTILINE)
 OPTIONAL = ("ase", "MDAnalysis", "solvis")
 
-# The pages written against the seams-core inputs. The other org pages
-# show calls on placeholder files (water.lammpstrj) and are not run.
 ORG_PAGES = [
-    "docs/orgmode/howto/ase-integration.org",
-    "docs/orgmode/howto/solvis-dseams.org",
+    "docs/orgmode/index.org",
+    "docs/orgmode/quickstart.org",
+    "docs/orgmode/explanation/yoda-surface.org",
+    "docs/orgmode/howto/ase.org",
+    "docs/orgmode/howto/features.org",
+    "docs/orgmode/howto/solvis.org",
+    "docs/orgmode/reference/python.org",
     "docs/orgmode/tutorials/bulk-ice.org",
+    "docs/orgmode/tutorials/classify-ice.org",
     "docs/orgmode/tutorials/confined-water.org",
     "docs/orgmode/tutorials/ice-and-clathrate.org",
     "docs/orgmode/tutorials/order-parameters.org",

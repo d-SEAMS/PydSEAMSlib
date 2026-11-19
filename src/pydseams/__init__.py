@@ -6,14 +6,25 @@
 ``_core`` and ``cyoda`` are aliases of ``yoda``. ``Trajectory`` is an
 alias of :class:`~pydseams.frame.Frame`.
 
-Load a frame and ask for ice::
+Load a frame from coordinates and classify ice::
 
     import pydseams as ds
-    frame = ds.read("water.lammpstrj")
+    a = 2.75 * 4 / 3**0.5
+    basis = (
+        (0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5),
+        (0.25, 0.25, 0.25), (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75), (0.25, 0.75, 0.75),
+    )
+    xyz = [
+        [(i + x) * a, (j + y) * a, (k + z) * a]
+        for i in range(3) for j in range(3) for k in range(3)
+        for x, y, z in basis
+    ]
+    frame = ds.from_arrays(xyz, [3 * a, 3 * a, 3 * a])
     print(frame.chill_plus())
     print(frame.cages())
 
-ASE Atoms work the same way::
+ASE ``Atoms`` work the same way::
 
     frame = ds.from_ase(atoms)          # default: oxygen
     atoms = frame.to_ase()
