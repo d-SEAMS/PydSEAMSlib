@@ -18,5 +18,5 @@ Software Foundation (PSF) in the
 
 ## Team
 
-Primary author: Ruhila S (PSF GSoC 2023). The d-SEAMS engine and the
+Primary author: Ruhila S (https://orcid.org/0000-0002-5443-9356, PSF GSoC 2023). The d-SEAMS engine and the
 2020 paper are by Amrita Goswami, Rohit Goswami, and Jayant K. Singh.

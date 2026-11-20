@@ -85,17 +85,20 @@ formatter-only diff on its own with a `style:` subject.
 - Every user-visible change adds a fragment in the same commit:
   `changelog.d/+slug.<type>.md` or `<issue>.<type>.md`, with `type` one
   of `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`.
-- The release cut is `towncrier build --version X.Y.Z`.
+- The release cut is `docs/orgmode/contributing/developer/release.org`.
 
 ## Versions and release
 
-The version is the seams-core release the wheel builds. It appears in
-`meson.build`, `pyproject.toml`, `src/pydseams/__init__.py`,
-`tests/python/test_bindings.py` and `CITATION.cff`; change them together.
+The version is the seams-core release the wheel builds. It is written in
+`pyproject.toml`. `ci/version/` holds only `files.txt`. cogapp copies
+that version into the files listed there. Follow
+`docs/orgmode/contributing/developer/release.org` from a clean clone
+through the PyPI publish.
 
 1. d-SEAMS/seams-core tags `vX.Y.Z`.
 2. `subprojects/seams-core.wrap` moves to that tag.
-3. Cut the changelog, tag `vX.Y.Z` here.
+3. Set `[project].version` to `X.Y.Z`. `cog bump --version X.Y.Z` regenerates
+   the copies, builds the changelog, and tags `vX.Y.Z` here.
 4. `.github/workflows/build_wheels.yml` builds the sdist and the wheels
    and publishes them to PyPI through trusted publishing from
    d-SEAMS/PydSEAMSlib. The tag must equal `v` plus the

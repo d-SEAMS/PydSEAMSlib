@@ -1,7 +1,13 @@
 project(
     'pydseamslib',
     'cpp',
+    # [[[cog
+    # import tomllib
+    # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+    # cog.outl(f"    version: '{version}',")
+    # ]]]
     version: '2.14.1',
+    # [[[end]]]
     default_options: [
         'warning_level=1',
         'cpp_std=c++20',
@@ -9,6 +15,25 @@ project(
     ],
     meson_version: '>=1.3.0',
 )
+
+# Readers. auto is seams-core's own detection: chemfiles from pkg-config
+# or the patched library that seams-core builds, readcon-core from
+# pkg-config or the readcon-core wrap. enabled fails the build when the
+# library is missing. disabled keeps LAMMPS and XYZ only. When a reader
+# is linked, seams-core puts -DSEAMS_HAS_CHEMFILES / -DSEAMS_HAS_READCON
+# on yds_dep, and this extension compiles against that dependency.
+chemfiles_choice = 'auto'
+if get_option('with_chemfiles').enabled()
+    chemfiles_choice = 'enabled'
+elif get_option('with_chemfiles').disabled()
+    chemfiles_choice = 'disabled'
+endif
+readcon_choice = 'auto'
+if get_option('with_readcon').enabled()
+    readcon_choice = 'enabled'
+elif get_option('with_readcon').disabled()
+    readcon_choice = 'disabled'
+endif
 
 # C++ engine. An installed libseams (pkg-config seams, seams-core and
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
@@ -37,8 +62,8 @@ else
             'with_linkcell=enabled',
             'with_minimage=enabled',
             'with_blas=disabled',
-            'with_chemfiles=disabled',
-            'with_readcon=enabled',
+            'with_chemfiles=' + chemfiles_choice,
+            'with_readcon=' + readcon_choice,
             'with_gpulite=disabled',
             'with_openmp_offload=disabled',
             'with_mpi=disabled',
@@ -66,6 +91,105 @@ else
             '-I' + meson.project_build_root() / 'subprojects' / 'seams-core' / 'src',
         ],
     )
+endif
+
+# seams-core copies the vendored chemfiles library into libdir with no
+# install tag. A wheel built with --tags=runtime,python-runtime then
+# omits it. Install the file the loader opens, named by patchelf, otool,
+# or objdump, with the runtime tag. auditwheel and delocate repair that
+# copy. An installed engine is found by the loader and is not staged here.
+# with_chemfiles=enabled, or a subproject that actually vendored the
+# library, fails configure when the tool or the library is missing.
+if not use_installed_engine and not get_option('with_chemfiles').disabled()
+    _chem_libdir = meson.project_build_root() / 'subprojects' / 'seams-core' / 'chemfiles-prefix' / 'lib'
+    _chem_vendor = import('fs').is_dir(_chem_libdir)
+    if get_option('with_chemfiles').enabled() or _chem_vendor
+        if host_machine.system() == 'darwin'
+            _soname_tool = find_program(
+                'otool',
+                required: get_option('with_chemfiles'),
+            )
+        else
+            _soname_tool = find_program('patchelf', required: false)
+            if not _soname_tool.found()
+                _soname_tool = find_program(
+                    'objdump',
+                    required: get_option('with_chemfiles'),
+                )
+            endif
+        endif
+        if get_option('with_chemfiles').enabled() and not _chem_vendor
+            error(
+                'with_chemfiles is enabled but the vendored chemfiles library was not built',
+            )
+        endif
+        if not _soname_tool.found()
+            if host_machine.system() == 'darwin'
+                error('reading the vendored chemfiles install name needs otool')
+            else
+                error(
+                    'reading the vendored chemfiles SONAME needs patchelf or objdump',
+                )
+            endif
+        endif
+        _chem_probe = run_command(
+            find_program('sh'),
+            '-c',
+            '''
+libdir=$1
+tool=$2
+real=
+best=0
+for f in "$libdir"/libseams-chemfiles*; do
+  [ -f "$f" ] && [ ! -L "$f" ] || continue
+  case "$f" in
+    *.a) continue ;;
+  esac
+  bytes=$(wc -c < "$f")
+  if [ "$bytes" -gt "$best" ]; then
+    best=$bytes
+    real=$f
+  fi
+done
+if [ -z "$real" ]; then
+  echo "vendored chemfiles library not found in $libdir" >&2
+  exit 1
+fi
+base=${tool##*/}
+if [ "$base" = patchelf ]; then
+  name=$("$tool" --print-soname "$real")
+elif [ "$base" = otool ]; then
+  name=$("$tool" -D "$real" | awk 'NR==2 { print $1 }')
+  name=${name##*/}
+else
+  name=$("$tool" -p "$real" | awk '/SONAME/ { print $2; exit }')
+fi
+if [ -z "$name" ]; then
+  echo "could not read the SONAME of $real with $tool" >&2
+  exit 1
+fi
+printf '%s\n%s\n' "$real" "$name"
+''',
+            'chemfiles-soname',
+            _chem_libdir,
+            _soname_tool.full_path(),
+            check: true,
+        )
+        _chem_lines = _chem_probe.stdout().strip().split('\n')
+        if _chem_lines.length() != 2 or _chem_lines[0] == '' or _chem_lines[1] == ''
+            error('vendored chemfiles SONAME probe returned no library name')
+        endif
+        custom_target(
+            'bundle-seams-chemfiles',
+            output: _chem_lines[1],
+            command: ['cp', _chem_lines[0], '@OUTPUT@'],
+            install: true,
+            install_dir: get_option('libdir'),
+            install_tag: 'runtime',
+            install_mode: 'rwxr-xr-x',
+            build_by_default: true,
+        )
+    endif
 endif
 
 py = import('python').find_installation(pure: false)
@@ -438,6 +562,7 @@ if not use_installed_engine
 
     # docs_science_tutorials: the engine checkout and its build tree.
     _science_env = environment()
+    _science_env.set('CC', meson.get_compiler('c').cmd_array()[0])
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)
     _science_env.set(

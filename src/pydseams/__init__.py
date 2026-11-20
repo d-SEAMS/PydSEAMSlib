@@ -42,9 +42,15 @@ from .frame import (
     IceCounts,
     read,
 )
-from .io import available_readers
+from .io import available_readers, has_chemfiles, has_readcon
 
+# [[[cog
+# import tomllib
+# version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+# cog.outl(f'__version__ = "{version}"')
+# ]]]
 __version__ = "2.14.1"
+# [[[end]]]
 
 # Drop-in name used in the 2.0 docs and tests
 Trajectory = Frame
@@ -245,6 +251,8 @@ __all__ = [
     "from_chemfiles",
     "from_con",
     "from_xyz",
+    "has_chemfiles",
+    "has_readcon",
     "read",
     "to_solvis",
     "yoda",

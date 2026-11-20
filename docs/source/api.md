@@ -13,6 +13,9 @@ The public constructors live on the {mod}`pydseams` package:
 {func}`~pydseams.from_ase`, {func}`~pydseams.from_arrays`,
 {func}`~pydseams.from_xyz`, {func}`~pydseams.from_chemfiles`,
 {func}`~pydseams.from_con`, and {func}`~pydseams.to_solvis`.
+{func}`~pydseams.has_chemfiles` and {func}`~pydseams.has_readcon`
+report whether the PDB, GRO, and DCD reader and the eOn ``.con``
+reader are linked.
 {meth}`~pydseams.frame.Frame.to_ase` is the inverse of
 {func}`~pydseams.from_ase`.
 

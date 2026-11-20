@@ -1,0 +1,69 @@
+#+TITLE: Developer Guide
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+STARTUP: content
+
+* Developer Guide
+
+Day-to-day work on the Python bindings in this repository. The engine
+itself is [[https://github.com/d-SEAMS/seams-core][seams-core]]. Do not
+patch =subprojects/seams-core/= here.
+
+Reader pages stay under =docs/orgmode/= outside this directory. This
+directory is the maintainer path. =docs/export.el= does not publish it
+into the reader site.
+
+** Environment
+
+A C++20 compiler, Python 3.11 or newer, Meson 1.3 or newer, Ninja,
+pkg-config, and cargo with Rust 1.88 or newer. Eigen comes from its
+wrap (=--force-fallback-for=eigen3=). =environment.yml= is the conda
+set used by CI.
+
+#+begin_src bash
+meson setup bbdir --force-fallback-for=eigen3
+meson compile -C bbdir
+meson test -C bbdir --suite pydseamslib --print-errorlogs
+#+end_src
+
+=with_chemfiles= and =with_readcon= are feature options (=auto= by
+default) forwarded to the seams-core subproject. seams-core detects
+the libraries and defines =SEAMS_HAS_CHEMFILES= and =SEAMS_HAS_READCON=
+on =yds_dep= when they are linked. =auto= leaves the build on LAMMPS
+and XYZ when a library cannot be found. =enabled= fails configuration
+instead. =disabled= does not look.
+
+#+begin_src bash
+meson setup bbdir --force-fallback-for=eigen3 \
+  -Dwith_chemfiles=enabled -Dwith_readcon=enabled
+#+end_src
+
+** Common tasks
+
+| Task | Command |
+|------+---------|
+| Preview the changelog | =python -m towncrier build --draft= |
+| Regenerate version copies | =python3 -m cogapp -I ci/version -r @ci/version/files.txt= |
+| Check version copies | =python3 -m cogapp --check -I ci/version -r @ci/version/files.txt= |
+| Conventional-commit check | =cog check --ignore-merge-commits v2.14.0..HEAD= |
+| Dry-run the next tag | =cog bump --auto --dry-run= |
+| Reader tests | =python -m pytest -vvv tests/python/test_readers.py= |
+| Docs | =sphinx-build -b html docs/source html= |
+| Cut a release | see [[file:release.org][release.org]] |
+
+** Documentation
+
+Org under =docs/orgmode/= is the source for the reader site.
+=docs/export.el= writes reStructuredText under =docs/source/=.
+=docs/source/api.md= and =docs/source/history.md= are written by hand.
+Build the site with Sphinx from =docs/source/=. Pages CI does not run
+the Emacs export; it builds the committed reStructuredText.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 2
+   :caption: Details
+
+   testing
+   release
+   faq
+#+end_export

@@ -51,17 +51,24 @@ jobs:
         run: |
           # patchelf is a meson-python backend dependency on Linux. --no-index
           # cannot fetch it later, so it has to be in buildreqs.
+          # cmake and zlib vendor chemfiles when with_chemfiles=enabled.
+          sudo apt-get update
+          sudo apt-get install -y cmake pkg-config zlib1g-dev
           python -m pip download -d buildreqs "meson-python>=0.18" "meson>=1.3" ninja numpy pytest hypothesis ase patchelf
           python -m venv "$RUNNER_TEMP/sdist-venv"
           # nodownload: a subproject missing from the sdist fails the build
           # instead of being fetched; --no-index keeps pip offline too.
+          # enabled: a release install must link readcon and chemfiles.
           "$RUNNER_TEMP/sdist-venv"/bin/python -m pip install --no-index --find-links buildreqs \
             --config-settings=setup-args=--wrap-mode=nodownload \
+            --config-settings=setup-args=-Dwith_chemfiles=enabled \
+            --config-settings=setup-args=-Dwith_readcon=enabled \
             dist/pydseamslib-*.tar.gz pytest hypothesis ase
       - name: Test the sdist install
         working-directory: ${{ runner.temp }}
         run: |
           "$RUNNER_TEMP/sdist-venv"/bin/python -c 'import dseams, pydseams; print(dseams.__version__, pydseams.__version__)'
+          "$RUNNER_TEMP/sdist-venv"/bin/python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'
           "$RUNNER_TEMP/sdist-venv"/bin/python "$GITHUB_WORKSPACE/scripts/check_installed_api.py"
           "$RUNNER_TEMP/sdist-venv"/bin/python -m pytest -q -p no:cacheprovider \
             --rootdir "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/tests/python"
@@ -140,6 +147,7 @@ jobs:
           test -n "$wheel"
           python -m pip install "$wheel"
           python -c "import dseams, pydseams, pydseamslib; from dseams import userframe; print(dseams.__version__)"
+          python -c "import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)"
           python - <<'PY'
           import dseams
           a = 2.75 * 4 / 3**0.5

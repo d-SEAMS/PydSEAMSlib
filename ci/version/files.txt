@@ -1,0 +1,4 @@
+meson.build
+src/pydseams/__init__.py
+tests/python/test_bindings.py
+CITATION.cff

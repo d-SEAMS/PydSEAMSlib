@@ -84,14 +84,14 @@ dump containing hydrogen, or set ``bonded="cutoff"``.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Reading ``.pdb``, ``.gro``, or ``.dcd`` directly requires a build linked
-against chemfiles (``available_readers()["chemfiles"]`` is ``True``).
+against chemfiles (``has_chemfiles()`` is ``True``).
 Convert the trajectory to LAMMPS or XYZ (for example via ASE), or
 build from source with chemfiles enabled.
 
 ``RuntimeError: readcon-core is not linked``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Reading ``.con`` requires ``available_readers()["readcon"]`` to be ``True``.
+Reading ``.con`` requires ``has_readcon()`` to be ``True``.
 
 ``RuntimeError: this build has no readXYZ``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

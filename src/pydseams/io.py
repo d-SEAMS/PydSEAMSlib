@@ -59,6 +59,16 @@ def read(path, frame=1, **kwargs):
     return Frame.from_file(path, frame=frame, **kwargs)
 
 
+def has_chemfiles():
+    """True when this build can read PDB, GRO, and DCD through chemfiles."""
+    return bool(available_readers()["chemfiles"])
+
+
+def has_readcon():
+    """True when this build can read an eOn ``.con`` file through readcon-core."""
+    return bool(available_readers()["readcon"])
+
+
 def available_readers():
     """Report which compiled I/O readers this build linked.
 

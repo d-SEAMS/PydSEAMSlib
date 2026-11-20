@@ -31,7 +31,7 @@ project = "pydseams"
 with (Path(__file__).resolve().parents[2] / "pyproject.toml").open("rb") as _fh:
     release = tomllib.load(_fh)["project"]["version"]
 copyright = "2023\u2013present, d-SEAMS developers"
-author = "Ruhila S"
+author = "Ruhila S (https://orcid.org/0000-0002-5443-9356)"
 
 
 # -- General configuration ---------------------------------------------------

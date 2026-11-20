@@ -1,0 +1,12 @@
+option(
+    'with_chemfiles',
+    type: 'feature',
+    value: 'auto',
+    description: 'PDB, GRO and DCD readers via chemfiles, detected as seams-core detects them',
+)
+option(
+    'with_readcon',
+    type: 'feature',
+    value: 'auto',
+    description: 'eOn .con reader via readcon-core, detected as seams-core detects it',
+)

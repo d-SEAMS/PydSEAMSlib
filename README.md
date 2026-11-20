@@ -61,7 +61,7 @@ on Odysee.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")  # release wheels also read .xyz and .con
+frame = ds.read("water.lammpstrj")  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -82,8 +82,11 @@ system = frame.to_solvis()  # optional extra
 surface. Helpers (`Frame`, `io`, ASE, solvis) stay in Python.
 `_core` and `cyoda` still name the same module.
 `ds.available_readers()` reports the readers compiled into a wheel. The
-2.14.1 PyPI wheels do not link chemfiles, so `.pdb`, `.gro`, and `.dcd`
-inputs raise `RuntimeError`.
+2.14.1 PyPI wheels link chemfiles and readcon-core, so `.pdb`, `.gro`,
+`.dcd`, and eOn `.con` all read directly next to LAMMPS and `.xyz`. Only
+a source build left on the default `auto` detection, with one of those
+libraries unavailable, raises `RuntimeError` for the suffixes that
+library would have read.
 
 `Frame.density`, `Frame.pairs`, and `Frame.domain` expose the same
 site-resolved density, ion-pair, and connected-domain analyses as the CLI.
@@ -171,21 +174,13 @@ meson setup --wipe bbdir --force-fallback-for=eigen3
 The tests that read seams-core inputs (`input/traj/...`) take them from
 `SEAMS_CORE_SRC`, else `subprojects/seams-core`.
 
-Release order:
-
-1. d-SEAMS/seams-core tags `vX.Y.Z`.
-2. `subprojects/seams-core.wrap` moves to that tag, and the version in
-   `pyproject.toml`, `meson.build`, `src/pydseams/__init__.py`,
-   `tests/python/test_bindings.py` and `CITATION.cff` becomes `X.Y.Z`.
-3. `towncrier build --version X.Y.Z`, then tag `vX.Y.Z` on
-   d-SEAMS/PydSEAMSlib.
-4. `build_wheels.yml` builds the sdist and the wheels and publishes them
-   to PyPI through trusted publishing from d-SEAMS/PydSEAMSlib.
+The release path is
+`docs/orgmode/contributing/developer/release.org`.
 
 `llms.txt` at the repository root, also served at the docs site root,
 lists the documentation pages.
 
-Primary author: Ruhila S. The project started as PSF GSoC 2023 (`pyseams`).
+Primary author: Ruhila S (https://orcid.org/0000-0002-5443-9356). The project started as PSF GSoC 2023 (`pyseams`).
 
 Requires Python 3.11+. CPython 3.11 has a version-specific wheel. Python 3.12 and newer use
 the CPython 3.12 stable ABI (one `abi3` wheel per platform). Free-threaded CPython has no
