@@ -94,7 +94,10 @@ def from_ase(atoms, select="O", cutoff=None, bonded="auto"):
     )
 
 
-def from_arrays(positions, cell, numbers=None, cutoff=None, bonded="cutoff"):
+def from_arrays(
+    positions, cell, numbers=None, cutoff=None, bonded="cutoff", *,
+    mol_ids=None, hydrogen_positions=None, hydrogen_mol_ids=None, box_low=None,
+):
     """Build a :class:`~pydseams.frame.Frame` from coordinates and box lengths.
 
     Parameters
@@ -110,8 +113,15 @@ def from_arrays(positions, cell, numbers=None, cutoff=None, bonded="cutoff"):
     cutoff : float, optional
         Neighbour cutoff in Angstroms. Default ``SEAMS_CUTOFF`` or ``3.5``.
     bonded : {"auto", "hbond", "cutoff"}, optional
-        Graph for rings. Default ``"cutoff"`` because this constructor
-        does not attach a hydrogen cloud.
+        Graph for rings. Default ``"cutoff"``.
+    box_low : sequence of float, optional
+        Box origin. Default ``(0, 0, 0)``.
+    mol_ids : sequence of int, optional
+        Molecule ID for each analysed atom. Defaults to 1 through N.
+    hydrogen_positions : sequence of (x, y, z), optional
+        Hydrogen coordinates in the same Cartesian frame as positions.
+    hydrogen_mol_ids : sequence of int, optional
+        Parent molecule IDs, one per hydrogen. Required with hydrogen_positions.
 
     Returns
     -------
@@ -128,6 +138,10 @@ def from_arrays(positions, cell, numbers=None, cutoff=None, bonded="cutoff"):
         numbers=numbers,
         cutoff=config.cutoff() if cutoff is None else cutoff,
         bonded=bonded,
+        box_low=box_low,
+        mol_ids=mol_ids,
+        hydrogen_positions=hydrogen_positions,
+        hydrogen_mol_ids=hydrogen_mol_ids,
     )
 
 

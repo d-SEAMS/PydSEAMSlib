@@ -598,3 +598,18 @@ def test_from_ase_rejects_unsupported_periodicity(cell, pbc, match):
     atoms = Atoms("O", positions=[[0.0, 0.0, 0.0]], cell=cell, pbc=pbc)
     with pytest.raises(ValueError, match=match):
         from_ase(atoms, bonded="cutoff")
+
+
+def test_from_arrays_separate_hydrogens_use_topology_ids():
+    frame = from_arrays(
+        [[5, 5, 5], [7.8, 5, 5]],
+        [20, 20, 20],
+        numbers=[8, 8],
+        mol_ids=[10, 20],
+        hydrogen_positions=[[6, 5, 5], [5, 6, 5], [6.8, 5, 5], [7.8, 6, 5]],
+        hydrogen_mol_ids=[10, 10, 20, 20],
+        bonded="hbond",
+    )
+    assert [point.molID for point in frame.cloud.pts] == [10, 20]
+    assert [point.molID for point in frame._h_cloud.pts] == [10, 10, 20, 20]
+    assert 2 in list(frame.hbonds[0])[1:]
