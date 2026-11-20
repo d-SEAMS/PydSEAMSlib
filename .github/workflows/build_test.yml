@@ -33,4 +33,5 @@ jobs:
           python -m pytest -vvv tests/python
           python -m pytest -vvv --import-mode=importlib tests/dseams/test_dseams.py \
             tests/dseams/test_dseams_empty_frames.py \
+            tests/dseams/test_reference_signatures.py \
             tests/dseams/installed_package.py tests/dseams/docs tests/dseams/test_doc_snippets.py
