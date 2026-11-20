@@ -16,6 +16,7 @@ FIXTURES = Path(__file__).resolve().parents[1] / "data" / "readers"
 CON = FIXTURES / "tiny_multi_cuh2.con"
 PDB = FIXTURES / "water.pdb"
 GRO = FIXTURES / "water.gro"
+DCD = FIXTURES / "water.dcd"
 
 
 def test_feature_query_matches_reader_flags():
@@ -51,6 +52,17 @@ def test_read_gro_file():
     if not has_chemfiles():
         pytest.skip("chemfiles is not linked")
     frame = read(GRO)
+    assert frame.n_atoms == 3
+    oxygen = frame.positions[0]
+    assert oxygen[0] == pytest.approx(5.0)
+    assert oxygen[1] == pytest.approx(5.0)
+    assert oxygen[2] == pytest.approx(5.0)
+
+
+def test_read_dcd_file():
+    if not has_chemfiles():
+        pytest.skip("chemfiles is not linked")
+    frame = read(DCD)
     assert frame.n_atoms == 3
     oxygen = frame.positions[0]
     assert oxygen[0] == pytest.approx(5.0)

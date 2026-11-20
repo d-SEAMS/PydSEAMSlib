@@ -40,9 +40,9 @@ import one another. =tests/dseams= uses =--import-mode=importlib=.
 ** Readers
 
 =tests/python/test_readers.py= reads =tests/data/readers/tiny_multi_cuh2.con=
-(the seams-core eOn fixture), =water.pdb=, and =water.gro=. Each file
-test skips only when =has_readcon()= or =has_chemfiles()= is false. A
-build that linked the library runs the read.
+(the seams-core eOn fixture), =water.pdb=, =water.gro=, and =water.dcd=.
+Each file test skips only when =has_readcon()= or =has_chemfiles()= is
+false. A build that linked the library runs the read.
 
 The =readers= job in =.github/workflows/build_test.yml= configures
 =-Dwith_chemfiles=enabled -Dwith_readcon=enabled= and asserts both
