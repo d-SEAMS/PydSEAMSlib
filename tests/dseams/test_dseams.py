@@ -1,6 +1,7 @@
 # Copyright (c) d-SEAMS developers
 """The C API, reached through nanobind, on one cubic cell."""
 
+import inspect
 import math
 import unittest
 
@@ -80,6 +81,17 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(int(np.sum(sizes == 6)), int(hist[6]))
         self.assertGreater(fraction, 0.5)
         self.assertEqual(sym.shape, sizes.shape)
+
+    def test_q4q6_returns_two_local_arrays(self):
+        pos, length = diamond()
+        result = dseams.q4q6(pos, (length, length, length))
+        self.assertEqual(len(result), 2)
+        q4, q6 = result
+        self.assertEqual(q4.shape, (pos.shape[0],))
+        self.assertEqual(q6.shape, (pos.shape[0],))
+        doc = inspect.getdoc(dseams.q4q6)
+        self.assertIn("Local q4 and local q6", doc)
+        self.assertNotIn("Lechner-Dellago", doc)
 
     def test_ase_and_mdanalysis(self):
         pos, length = diamond()
