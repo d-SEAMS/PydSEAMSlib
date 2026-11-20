@@ -1264,6 +1264,15 @@ class Frame:
             ),
         )
 
+    def prism_counts(self, max_depth=6, shape_matching=False):
+        """Return (perfect, imperfect) prism counts by basal ring size.
+
+        Uses the frame's bonded graph and enumerates primitive rings through
+        max_depth. Shape matching enables recognition of deformed prisms.
+        Results stay in memory.
+        """
+        return yoda._prismCounts(self.cloud, self.bonds_by_index, max_depth, shape_matching)
+
     def find_prisms(self, output_dir="output/", max_depth=6, shape_matching=False):
         """Identify prism blocks and write engine output under ``output_dir``.
 

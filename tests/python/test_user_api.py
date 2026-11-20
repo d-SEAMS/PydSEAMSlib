@@ -613,3 +613,13 @@ def test_from_arrays_separate_hydrogens_use_topology_ids():
     assert [point.molID for point in frame.cloud.pts] == [10, 20]
     assert [point.molID for point in frame._h_cloud.pts] == [10, 10, 20, 20]
     assert 2 in list(frame.hbonds[0])[1:]
+
+
+def test_prism_counts_on_triangular_prism(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    xyz = [(x, y, z) for z in (5., 7.) for x, y in ((4., 4.), (6., 4.), (5., 5.73205080757))]
+    frame = from_arrays(xyz, [12., 12., 24.], cutoff=2.1)
+    counts = frame.prism_counts(max_depth=4)
+    assert counts[3] == (1, 0)
+    assert set(counts) == {3, 4}
+    assert list(tmp_path.iterdir()) == []
