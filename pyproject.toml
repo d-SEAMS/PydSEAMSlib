@@ -92,7 +92,7 @@ test-requires = ["pytest", "ase"]
 test-command = [
   "python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'",
   "python {project}/scripts/check_installed_api.py",
-  "python -m pytest -q -p no:cacheprovider --import-mode=importlib {project}/tests/dseams/test_dseams.py {project}/tests/dseams/test_dseams_empty_frames.py {project}/tests/dseams/installed_package.py {project}/tests/dseams/test_doc_snippets.py",
+  "python -m pytest -q -p no:cacheprovider --import-mode=importlib {project}/tests/dseams/test_dseams.py {project}/tests/dseams/test_dseams_empty_frames.py {project}/tests/dseams/test_reference_signatures.py {project}/tests/dseams/installed_package.py {project}/tests/dseams/test_doc_snippets.py",
 ]
 
 [[tool.cibuildwheel.overrides]]

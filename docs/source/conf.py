@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib.util
 import os
 import sys
 import tomllib
@@ -129,7 +130,22 @@ sitemap_url_scheme = "{link}"
 myst_enable_extensions = [
     "deflist",
     "fieldlist",
+    "substitution",
 ]
+
+_names_path = Path(__file__).resolve().parents[2] / "scripts" / "yoda_public_names.py"
+_names_spec = importlib.util.spec_from_file_location("yoda_public_names", _names_path)
+if _names_spec is None or _names_spec.loader is None:
+    raise RuntimeError(f"cannot load {_names_path}")
+_names_mod = importlib.util.module_from_spec(_names_spec)
+sys.modules[_names_spec.name] = _names_mod
+_names_spec.loader.exec_module(_names_mod)
+_yoda_names = _names_mod.public_names()
+myst_substitutions = {
+    "yoda_names": str(len(_yoda_names.exposed)),
+    "yoda_functions": str(len(_yoda_names.exposed_functions)),
+    "yoda_types": str(len(_yoda_names.exposed_types)),
+}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
