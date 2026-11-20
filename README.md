@@ -61,7 +61,7 @@ on Odysee.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")  # release wheels also read .xyz and .con
+frame = ds.read("water.lammpstrj")  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -82,8 +82,11 @@ system = frame.to_solvis()  # optional extra
 surface. Helpers (`Frame`, `io`, ASE, solvis) stay in Python.
 `_core` and `cyoda` still name the same module.
 `ds.available_readers()` reports the readers compiled into a wheel. The
-2.14.1 PyPI wheels do not link chemfiles, so `.pdb`, `.gro`, and `.dcd`
-inputs raise `RuntimeError`.
+2.14.1 PyPI wheels link chemfiles and readcon-core, so `.pdb`, `.gro`,
+`.dcd`, and eOn `.con` all read directly next to LAMMPS and `.xyz`. Only
+a source build left on the default `auto` detection, with one of those
+libraries unavailable, raises `RuntimeError` for the suffixes that
+library would have read.
 
 `Frame.density`, `Frame.pairs`, and `Frame.domain` expose the same
 site-resolved density, ion-pair, and connected-domain analyses as the CLI.
