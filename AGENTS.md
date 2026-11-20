@@ -25,7 +25,7 @@ this repository.
 The C++ engine, its C API and the CLI live in
 [d-SEAMS/seams-core](https://github.com/d-SEAMS/seams-core).
 `subprojects/seams-core.wrap` pins one engine revision, the tag
-`v2.14.0`.
+`v2.14.1`.
 The other wraps (`linkcell`, `minimage`, `readcon-*`, `vesin`, `gpulite`,
 `eigen`) carry the revisions and patches seams-core pins at that revision.
 
@@ -53,7 +53,8 @@ python -m build --sdist
 python -m pip install dist/pydseamslib-*.whl pytest hypothesis ase
 python -m pytest tests/python
 python -m pytest --import-mode=importlib tests/dseams/test_dseams.py \
-  tests/dseams/installed_package.py tests/dseams/docs tests/dseams/test_doc_snippets.py
+  tests/dseams/test_dseams_empty_frames.py tests/dseams/installed_package.py \
+  tests/dseams/docs tests/dseams/test_doc_snippets.py
 python scripts/check_installed_api.py
 ```
 

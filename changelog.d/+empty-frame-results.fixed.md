@@ -1,1 +1,0 @@
-A `dseams.userframe` frame with no atoms returns a `(0, 3)` coordinate array, a zero in-plane g(r), and zero prism rows. The coordinate property used to raise a null-pointer error, and the in-plane RDF and prism census crashed inside the engine.

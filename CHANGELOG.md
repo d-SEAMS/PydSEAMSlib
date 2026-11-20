@@ -10,6 +10,27 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.1] - 2026-11-19
+
+### Added
+
+- README and the docs landing page link the d-SEAMS book (Python, Python Frame) and the walkthrough video.
+
+### Changed
+
+- The documentation site moves to https://python.dseams.info/; the Lua links point at https://lua.dseams.info/.
+- With seams-core 2.14.1, `Frame.rdf_2d` returns zero-valued bins for a frame whose atoms are all coplanar, matching the engine's empty-shell convention.
+
+### Fixed
+
+- A `dseams.userframe` frame with no atoms returns a `(0, 3)` coordinate array, a zero in-plane g(r), and zero prism rows. The coordinate property used to raise a null-pointer error, and the in-plane RDF and prism census crashed inside the engine.
+- An all-liquid frame has no brine pockets or reservoir waters.
+- The `libseams_lang` mutual and union graph paths discard k-nearest candidates beyond the requested cutoff plus 1.5 instead of using that distance only as a search-cell hint.
+- Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through `dseams` instead of returning a frame with zero atoms.
+- Links between docs pages written as Org file links resolve to the built HTML pages instead of missing .rst and .md files.
+- The dseams reference matches the live signatures. `dseams.cages` takes `graph="seeded"`. `dseams.signature_cages` takes `graph="cutoff"` and defaults `spec` to `"512"`. `dseams.symmetry` takes `shell_rmsd` (default `0.12`).
+
+
 ## [2.14.0] - 2026-11-17
 
 ### Added
@@ -24,6 +45,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - The engine is seams-core 2.14.0. `FrameFingerprint.colored` and `KeyLibrary.colored` join the `coloured` names.
 - The engine wrap follows seams-core tag `v2.14.0`. That release builds the C API examples and fuzzers only with `with_tests`, adds `seams_rings_chordless`, and requires linkcell `v0.4.2`.
+- linkcell is v0.4.2, the release seams-core 2.14.0 pins. Meson takes a dependency both projects wrap from this project's wrap, so the v0.4.0 pin stopped the engine at its `linkcell >= 0.4.1` requirement once the engine moved past 0.4.0.
 - The package metadata states the licence as the SPDX expression `MIT` with `LICENSE` as its licence file (core metadata 2.4, PEP 639), replacing the free-text licence and the licence classifier.
 - This repository builds and publishes `pydseamslib` 2.14.0; seams-core no longer does. The sdist carries every subproject, the wheels are built from it on Linux (x86_64, aarch64) and macOS (arm64, x86_64), and PyPI trusted publishing runs from `build_wheels.yml` on a `v*` tag of d-SEAMS/PydSEAMSlib.
 - `pydseams` CHILL+ counts on cutoff neighbour lists change with the engine: seams-core 2.14.0 fixed the shell count, so `Frame.chill_plus()` on `tests/data/exampleTraj.lammpstrj` (oxygen, type 2) reports 9 interClathrate and 241 water where 2.11 reported 12 and 238.
@@ -35,6 +57,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The citation page lists the d-SEAMS paper in a bibliography so its `:cite:` resolves, and the ASE cross-references load from `https://docs.ase-lib.org/`, where the ASE inventory moved.
 - The documentation is regenerated from its Org sources: the stray `#skip_lint_start` and `#skip_lint_end` lines are gone from the quickstart, ASE and features pages, the Python surface tables render instead of failing on an over-wide cell, and the hand edits (the CPython 3.11 wheel, `hydration_shell_rings`, `guest_occupancy`, `classify_topology` and the tools page) now live in the Org sources.
 - The published API reference documents `dseams` and `pydseams.features` again; the documentation build installs NumPy, which autodoc needs to import them.
+- The README now pins the released package in its install examples and describes the import names and readers that the 2.14.0 wheel actually contains.
+- The macOS Nix build gives minimage, linkcell and readcon-core a store install name, so importing `pydseams.yoda` loads those libraries from the Nix store.
+- The macOS Nix build passes Cargo's rustc probe. The Darwin install-name flag is an argument to rustc, after cargo-auditable.
+- In exclude mode, `run_unittest.py` parses each selected module to find pytest-style tests, so a `test_*` function runs even when its module never imports pytest. A meson self-test covers the routing cases.
+- `meson test python_dseams_no_checkout` runs in both engine modes and covers every `tests/dseams/test_*.py` module except `test_seams_package.py` and `test_doc_snippets.py`. The checkout-dependent pair stays on the subproject-only `python_dseams` test.
+- `meson test` no longer kills `python_dseams` and `python_dseams_no_checkout` with signal 11 or 7 at random. Meson starts the two at once. Each runs `tests/dseams/run_unittest.py`, and that script copied `dseams._core` and the Python sources over the same files in `python-stage`. Rewriting a shared object in place corrupts any process that has it mapped, and `MALLOC_PERTURB_` played no part. The script now writes each file under a temporary name and renames it into place. The new `python_dseams_stage_concurrency` test starts twelve runs at once for ten rounds and checks that a published file gets a new inode.
 
 
 ## [2.11.1] - 2026-10-15

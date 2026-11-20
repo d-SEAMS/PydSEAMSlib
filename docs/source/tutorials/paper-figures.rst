@@ -13,7 +13,7 @@ Prerequisites
 
 .. code:: bash
 
-    pip install pydseamslib
+    pip install 'pydseamslib==2.14.1'
     mkdir -p input/traj
     curl -sLo input/traj/mW_cubic.lammpstrj \
       https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/mW_cubic.lammpstrj

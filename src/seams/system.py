@@ -1191,7 +1191,7 @@ def version() -> str:
     Returns
     -------
     str
-        For example ``"2.14.0"``. The caller does not free the C string.
+        For example ``"2.14.1"``. The caller does not free the C string.
         This function returns a Python copy.
     """
     return _lib.api().version()
