@@ -438,7 +438,8 @@ if not use_installed_engine
     )
 
     # docs_science_tutorials: the engine checkout and its build tree.
-    _science_env = environment()
+    # The C examples link against the engine with its compiler and OpenMP flags.
+    _science_env = seams.get_variable('_snippet_env')
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)
     _science_env.set(
