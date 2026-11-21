@@ -4,16 +4,6 @@ import linkcell
 import minimage
 import numpy as np
 
-from .frame import _dump_geometry
-
-
-def _geometry(frame):
-    if not frame.periodic:
-        raise ValueError("liquid order requires a three-dimensional periodic cell")
-    cell, origin = _dump_geometry(frame.box, frame.cloud.boxLow)
-    return np.asarray(frame.positions) - origin, np.asarray(cell)
-
-
 def _nearest(xyz, cell, k):
     indices, squared = linkcell.knearest(xyz, cell, k)
     return np.from_dlpack(indices), np.from_dlpack(squared)
@@ -27,7 +17,7 @@ def _check_cutoff(cutoff):
 def tetrahedral_q(frame, cutoff):
     if cutoff is not None:
         _check_cutoff(cutoff)
-    xyz, cell = _geometry(frame)
+    xyz, cell = frame._order_geometry()
     out = np.full(len(xyz), np.nan)
     if len(xyz) < 5:
         return out
@@ -59,7 +49,7 @@ def tetrahedral_q(frame, cutoff):
 
 def local_structure_index(frame, cutoff):
     _check_cutoff(cutoff)
-    xyz, cell = _geometry(frame)
+    xyz, cell = frame._order_geometry()
     out = np.full(len(xyz), np.nan)
     k = min(12, len(xyz) - 1)
     if k < 2:

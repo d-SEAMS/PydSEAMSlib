@@ -31,3 +31,18 @@ def test_lsi_includes_first_outside_neighbor():
     assert frame.local_structure_index()[0] == pytest.approx(np.var([1.0, 1.0, 1.4]))
     assert np.isnan(frame.local_structure_index(cutoff=0.9)).all()
     assert np.isnan(frame.local_structure_index(cutoff=6.0)).all()
+
+
+def test_c_api_frame_reuses_current_coordinates():
+    import dseams
+
+    frame = dseams.Frame()
+    xyz = np.array([[0,0,0],[1,0,0],[2,0,0],[3,0,0],[4.4,0,0]], dtype=float)
+    box = [1., -2., 3., 20., 20., 20., 5., 2., 4.]
+    frame.set_frame(xyz, box)
+    assert frame.local_structure_index()[0] == pytest.approx(np.var([1., 1., 1.4]))
+    xyz[4, 0] = 4.1
+    frame.set_frame(xyz, box)
+    assert frame.local_structure_index()[0] == pytest.approx(np.var([1., 1., 1.1]))
+    assert np.isnan(frame.tetrahedral_q()[0])
+    assert frame.tetrahedral_q(cutoff=None)[0] == pytest.approx(-3.)

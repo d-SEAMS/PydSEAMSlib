@@ -1611,6 +1611,14 @@ class Frame:
         )
         return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
 
+    def _order_geometry(self):
+        import numpy as np
+
+        if not self.periodic:
+            raise ValueError("liquid order requires a three-dimensional periodic cell")
+        cell, origin = _dump_geometry(self.box, self.cloud.boxLow)
+        return np.asarray(self.positions) - origin, np.asarray(cell)
+
     def tetrahedral_q(self, cutoff=3.5):
         """Per-site angular order of the four closest selected particles.
 

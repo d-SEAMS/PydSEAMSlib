@@ -131,6 +131,24 @@ class Frame(_core.Frame):
         pos = np.ascontiguousarray(positions, dtype=np.float64)
         super().set_frame(pos, _as_box(box))
 
+    def _order_geometry(self):
+        pos = np.empty((self.count(), 3), dtype=np.float64)
+        box = np.empty(9, dtype=np.float64)
+        self._copy_geometry(pos, box)
+        ox, oy, oz, lx, ly, lz, xy, xz, yz = box
+        cell = np.array([[lx, 0., 0.], [xy, ly, 0.], [xz, yz, lz]])
+        return pos - [ox, oy, oz], cell
+
+    def tetrahedral_q(self, cutoff=3.5):
+        """Angular order of four nearest sites, NaN when the cutoff excludes any."""
+        from pydseams.liquid_order import tetrahedral_q
+        return tetrahedral_q(self, cutoff)
+
+    def local_structure_index(self, cutoff=3.7):
+        """Variance in Å² of radial neighbour gaps through the first exterior site."""
+        from pydseams.liquid_order import local_structure_index
+        return local_structure_index(self, cutoff)
+
 
 def _chill_rule(rule):
     """paper is the four closest neighbours. ovito is the whole cutoff shell."""
