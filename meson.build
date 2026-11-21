@@ -202,6 +202,7 @@ py.install_sources(
         'src/pydseams/frame.py',
         'src/pydseams/aseio.py',
         'src/pydseams/io.py',
+        'src/pydseams/liquid_order.py',
         'src/pydseams/solvis.py',
         'src/pydseams/config.py',
     ],

@@ -1611,6 +1611,26 @@ class Frame:
         )
         return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
 
+    def tetrahedral_q(self, cutoff=3.5):
+        """Per-site angular order of the four closest selected particles.
+
+        Returns NaN for sites with fewer than four neighbours inside the
+        cutoff (angstroms) or a coincident neighbour. Pass None to use the
+        four closest sites at any distance. Requires the local-order extra.
+        """
+        from .liquid_order import tetrahedral_q
+        return tetrahedral_q(self, cutoff)
+
+    def local_structure_index(self, cutoff=3.7):
+        """Per-site variance of successive neighbour-distance gaps, in Å².
+
+        The last gap reaches the closest site outside the shell. Sites with
+        no interior or no exterior neighbour return NaN. Compute on water
+        oxygens for the Shiratani–Sasai LSI. Requires the local-order extra.
+        """
+        from .liquid_order import local_structure_index
+        return local_structure_index(self, cutoff)
+
     def steinhardt_voronoi(self, order_l=6, cutoff=None):
         """Voronoi facet-area weighted Steinhardt parameters.
 
