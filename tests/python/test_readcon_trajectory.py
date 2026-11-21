@@ -48,3 +48,13 @@ def test_xtc_selection_preserves_tilt_and_frame_numbers(tmp_path):
     assert all(f.n_atoms == 1 and f._h_cloud.nop == 2 for f in frames)
     assert np.allclose(frames[-1].positions, [[5.67, 5., 5.]])
     assert np.allclose(list(frames[-1].cloud.box)[3:], [4., 1., 2.])
+
+
+def test_incomplete_named_hydrogens(tmp_path):
+    sites = [(1, "O"), (1, "H1"), (1, "H2"), (2, "O"), (2, "H1")]
+    path = tmp_path / "incomplete.gro"
+    atoms = [f"{resid:5d}{'WAT':<5}{name:>5}{i:5d}{.5:8.3f}{.5:8.3f}{.5:8.3f}"
+             for i, (resid, name) in enumerate(sites, 1)]
+    path.write_text("\n".join(["incomplete WAT", "5", *atoms, "2 2 2", ""]))
+    with pytest.raises(ValueError, match="H2"):
+        list(iter_trajectory(path, atom_name="O", hydrogen_names=("H1", "H2")))

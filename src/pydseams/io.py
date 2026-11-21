@@ -61,10 +61,13 @@ def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
                     raise ValueError("selected atom name must identify one centre per residue")
                 centres.append(found[0])
                 centre_ids.append(ordinal)
-                for i in members:
-                    if sites[i].symbol in hydrogens:
-                        donors.append(i)
-                        donor_ids.append(ordinal)
+                selected = [i for i in members if sites[i].symbol in hydrogens]
+                missing = hydrogens.difference(sites[i].symbol for i in selected)
+                if missing:
+                    names = ", ".join(sorted(missing))
+                    raise ValueError(f"residue {ordinal} lacks requested hydrogen sites: {names}")
+                donors.extend(selected)
+                donor_ids.extend([ordinal] * len(selected))
             if not centres or (hydrogens and not donors):
                 raise ValueError("no matching sites; check the atom names and the labelled topology")
             if not all(raw.metadata.get("pbc", (False, False, False))):
