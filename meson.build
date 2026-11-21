@@ -564,6 +564,11 @@ if not use_installed_engine
     # docs_science_tutorials: the engine checkout and its build tree.
     # The C examples link against the engine with its compiler and OpenMP flags.
     _science_env = seams.get_variable('_snippet_env')
+    # The released engine's example driver accepts one compiler executable.
+    _cc_cmd = meson.get_compiler('c').cmd_array()
+    if _cc_cmd.length() > 1 and import('fs').name(_cc_cmd[0]) in ['sccache', 'ccache']
+        _science_env.set(seams.get_variable('_asan_wrap') ? 'REAL_CC' : 'CC', _cc_cmd[1])
+    endif
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)
     _science_env.set(
