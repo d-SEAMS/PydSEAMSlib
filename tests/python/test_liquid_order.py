@@ -37,12 +37,30 @@ def test_c_api_frame_reuses_current_coordinates():
     import dseams
 
     frame = dseams.Frame()
-    xyz = np.array([[0,0,0],[1,0,0],[2,0,0],[3,0,0],[4.4,0,0]], dtype=float)
-    box = [1., -2., 3., 20., 20., 20., 5., 2., 4.]
+    xyz = np.array(
+        [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4.4, 0, 0]], dtype=float
+    )
+    box = [1.0, -2.0, 3.0, 20.0, 20.0, 20.0, 5.0, 2.0, 4.0]
     frame.set_frame(xyz, box)
-    assert frame.local_structure_index()[0] == pytest.approx(np.var([1., 1., 1.4]))
+    assert frame.local_structure_index()[0] == pytest.approx(np.var([1.0, 1.0, 1.4]))
     xyz[4, 0] = 4.1
     frame.set_frame(xyz, box)
-    assert frame.local_structure_index()[0] == pytest.approx(np.var([1., 1., 1.1]))
+    assert frame.local_structure_index()[0] == pytest.approx(np.var([1.0, 1.0, 1.1]))
     assert np.isnan(frame.tetrahedral_q()[0])
-    assert frame.tetrahedral_q(cutoff=None)[0] == pytest.approx(-3.)
+    assert frame.tetrahedral_q(cutoff=None)[0] == pytest.approx(-3.0)
+
+
+def test_angular_order_uses_euclidean_image_in_oblique_cell():
+    from itertools import product
+
+    cell = np.array([[12.0, 0.0, 0.0], [5.9, 10.0, 0.0], [0.0, 0.0, 12.0]])
+    far = np.array([0.49, 0.49, 0.2]) @ cell
+    points = np.vstack(([0.0, 0.0, 0.0], far, np.eye(3)))
+    candidates = far + np.array(list(product(range(-1, 2), repeat=3))) @ cell
+    nearest = candidates[np.argmin(np.linalg.norm(candidates, axis=1))]
+    assert np.linalg.norm(nearest) < np.linalg.norm(far)
+    unit = np.vstack((nearest / np.linalg.norm(nearest), np.eye(3)))
+    cosines = (unit @ unit.T)[np.triu_indices(4, 1)]
+    expected = 1 - (3 / 8) * np.sum((cosines + 1 / 3) ** 2)
+    frame = Frame.from_arrays(points, [17.9, 10.0, 12.0, 5.9, 0.0, 0.0])
+    assert frame.tetrahedral_q(cutoff=None)[0] == pytest.approx(expected)
