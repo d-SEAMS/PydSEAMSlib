@@ -790,7 +790,7 @@ class Frame:
     def hbonds(self):
         """Hydrogen-bond neighbour list.
 
-        Uses :func:`pydseams.yoda.populateHbondsWithInputClouds` when
+        Uses :meth:`hbonds_from_donors` when
         an ASE hydrogen cloud is attached, otherwise
         :func:`pydseams.yoda.populateHbonds` on the LAMMPS dump.
 
@@ -802,11 +802,7 @@ class Frame:
         """
         if self._hbonds is None:
             if self._h_cloud is not None:
-                self._hbonds = yoda.populateHbondsWithInputClouds(
-                    yCloud=self.cloud,
-                    hCloud=self._h_cloud,
-                    nList=self.neighbor_list,
-                )
+                self._hbonds = self.hbonds_from_donors(range(self._h_cloud.nop))
             elif self.filename is not None:
                 self._hbonds = yoda.populateHbonds(
                     filename=self.filename,

@@ -83,7 +83,7 @@ build-frontend = "build"
 build-verbosity = 1
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
-test-requires = ["pytest", "ase"]
+test-requires = ["pytest", "ase", "readcon-chemfiles>=0.23.2"]
 test-command = [
   "python {project}/scripts/check_installed_api.py",
   "python -m pytest -q -p no:cacheprovider --import-mode=importlib {project}/tests/dseams/test_dseams.py {project}/tests/dseams/test_dseams_empty_frames.py {project}/tests/dseams/installed_package.py {project}/tests/dseams/test_doc_snippets.py",
