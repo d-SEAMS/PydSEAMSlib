@@ -42,7 +42,7 @@ from .frame import (
     IceCounts,
     read,
 )
-from .io import available_readers
+from .io import available_readers, iter_trajectory
 
 __version__ = "2.14.1"
 
