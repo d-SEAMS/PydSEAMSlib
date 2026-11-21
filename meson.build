@@ -564,6 +564,10 @@ if not use_installed_engine
     # docs_science_tutorials: the engine checkout and its build tree.
     # The C examples link against the engine with its compiler and OpenMP flags.
     _science_env = seams.get_variable('_snippet_env')
+    if seams.get_variable('_chem_vendored')
+        _loader_path = host_machine.system() == 'darwin' ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH'
+        _science_env.prepend(_loader_path, seams.get_variable('chemfiles_libdir'))
+    endif
     # The released engine's example driver accepts one compiler executable.
     _cc_cmd = meson.get_compiler('c').cmd_array()
     if _cc_cmd.length() > 1 and import('fs').name(_cc_cmd[0]) in ['sccache', 'ccache']
