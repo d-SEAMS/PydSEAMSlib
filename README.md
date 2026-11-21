@@ -189,3 +189,14 @@ limited ABI and is not a target.
 # License
 
 [MIT](LICENSE).
+
+Install the `readcon` extra to stream labelled trajectory frames. Coordinate-only
+formats such as XTC and TRR require a topology with matching atom order.
+
+```python
+from pydseams import iter_trajectory
+
+for frame in iter_trajectory("water.xtc", topology="water.gro", residue_name="SOL",
+                             atom_name="OW", hydrogen_names=("HW1", "HW2")):
+    print(frame.frame, len(frame.rings))
+```

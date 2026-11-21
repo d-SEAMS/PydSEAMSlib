@@ -326,6 +326,7 @@ py.install_sources(
         'src/pydseams/frame.py',
         'src/pydseams/aseio.py',
         'src/pydseams/io.py',
+        'src/pydseams/liquid_order.py',
         'src/pydseams/solvis.py',
         'src/pydseams/config.py',
     ],
@@ -561,8 +562,8 @@ if not use_installed_engine
     )
 
     # docs_science_tutorials: the engine checkout and its build tree.
-    _science_env = environment()
-    _science_env.set('CC', meson.get_compiler('c').cmd_array()[0])
+    # The C examples link against the engine with its compiler and OpenMP flags.
+    _science_env = seams.get_variable('_snippet_env')
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)
     _science_env.set(

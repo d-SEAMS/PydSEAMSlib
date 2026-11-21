@@ -83,6 +83,18 @@ NB_MODULE(_core, m) {
                                               nullptr,
                                               nullptr));
              })
+        .def("_copy_geometry",
+             [](const Frame &frame,
+                nb::ndarray<nb::numpy, double, nb::ndim<2>, nb::c_contig> positions,
+                nb::ndarray<nb::numpy, double, nb::ndim<1>, nb::c_contig> box) {
+                 const auto n = static_cast<std::size_t>(seams_system_count(frame.sys));
+                 if (positions.shape(0) != n || positions.shape(1) != 3 || box.shape(0) != 9) {
+                     throw std::invalid_argument("geometry buffers require N by 3 positions and 9 cell entries");
+                 }
+                 check(seams_system_box(frame.sys, box.data(), box.size()));
+                 check(seams_system_positions(frame.sys, positions.data(), positions.size()));
+             },
+             nb::arg("positions").noconvert(), nb::arg("box").noconvert())
         .def("count", [](const Frame &frame) { return seams_system_count(frame.sys); })
         .def(
             "chill_plus",

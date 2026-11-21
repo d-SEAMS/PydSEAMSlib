@@ -456,7 +456,8 @@ class Frame:
 
     @classmethod
     def from_arrays(
-        cls, positions, cell, numbers=None, cutoff=None, bonded="cutoff", box_low=None
+        cls, positions, cell, numbers=None, cutoff=None, bonded="cutoff", box_low=None,
+        *, mol_ids=None, hydrogen_positions=None, hydrogen_mol_ids=None,
     ):
         """Build a frame from ``(N, 3)`` positions and a periodic box.
 
@@ -476,6 +477,13 @@ class Frame:
         box_low : sequence of float, optional
             Box origin. Default ``(0, 0, 0)``.
 
+        mol_ids : sequence of int, optional
+            Molecule ID for each analysed atom. Defaults to 1 through N.
+        hydrogen_positions : sequence of (x, y, z), optional
+            Hydrogen coordinates in the same Cartesian frame as positions.
+        hydrogen_mol_ids : sequence of int, optional
+            Parent molecule IDs, one per hydrogen. Required with hydrogen_positions.
+
         Returns
         -------
         Frame
@@ -489,12 +497,25 @@ class Frame:
         nums = list(numbers) if numbers is not None else [1] * n
         types = sorted({int(x) for x in nums})
         atom_type = types[0] if len(types) == 1 else 1
-        cloud = _cloud_from_positions(positions, cell, nums, box_low)
+        if len(nums) != n or (mol_ids is not None and len(mol_ids) != n):
+            raise ValueError("numbers and mol_ids must match positions")
+        if (hydrogen_positions is None) != (hydrogen_mol_ids is None):
+            raise ValueError("hydrogen_positions and hydrogen_mol_ids must be supplied together")
+        h_cloud = None
+        if hydrogen_positions is not None:
+            if len(hydrogen_positions) != len(hydrogen_mol_ids):
+                raise ValueError("hydrogen_mol_ids must match hydrogen_positions")
+            if len(hydrogen_positions):
+                h_cloud = _cloud_from_positions(
+                    hydrogen_positions, cell, None, box_low, hydrogen_mol_ids
+                )
+        cloud = _cloud_from_positions(positions, cell, nums, box_low, mol_ids)
         return cls(
             atom_type=atom_type,
             cutoff=cutoff,
             bonded=bonded,
             cloud=cloud,
+            h_cloud=h_cloud,
         )
 
     @classmethod
@@ -769,7 +790,7 @@ class Frame:
     def hbonds(self):
         """Hydrogen-bond neighbour list.
 
-        Uses :func:`pydseams.yoda.populateHbondsWithInputClouds` when
+        Uses :meth:`hbonds_from_donors` when
         an ASE hydrogen cloud is attached, otherwise
         :func:`pydseams.yoda.populateHbonds` on the LAMMPS dump.
 
@@ -781,11 +802,7 @@ class Frame:
         """
         if self._hbonds is None:
             if self._h_cloud is not None:
-                self._hbonds = yoda.populateHbondsWithInputClouds(
-                    yCloud=self.cloud,
-                    hCloud=self._h_cloud,
-                    nList=self.neighbor_list,
-                )
+                self._hbonds = self.hbonds_from_donors(range(self._h_cloud.nop))
             elif self.filename is not None:
                 self._hbonds = yoda.populateHbonds(
                     filename=self.filename,
@@ -1243,6 +1260,15 @@ class Frame:
             ),
         )
 
+    def prism_counts(self, max_depth=6, shape_matching=False):
+        """Return (perfect, imperfect) prism counts by basal ring size.
+
+        Uses the frame's bonded graph and enumerates primitive rings through
+        max_depth. Shape matching enables recognition of deformed prisms.
+        Results stay in memory.
+        """
+        return yoda._prismCounts(self.cloud, self.bonds_by_index, max_depth, shape_matching)
+
     def find_prisms(self, output_dir="output/", max_depth=6, shape_matching=False):
         """Identify prism blocks and write engine output under ``output_dir``.
 
@@ -1584,6 +1610,34 @@ class Frame:
             yCloud=self.cloud, nList=self.neighbor_list, orderL=order_l
         )
         return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
+
+    def _order_geometry(self):
+        import numpy as np
+
+        if not self.periodic:
+            raise ValueError("liquid order requires a three-dimensional periodic cell")
+        cell, origin = _dump_geometry(self.box, self.cloud.boxLow)
+        return np.asarray(self.positions) - origin, np.asarray(cell)
+
+    def tetrahedral_q(self, cutoff=3.5):
+        """Per-site angular order of the four closest selected particles.
+
+        Returns NaN for sites with fewer than four neighbours inside the
+        cutoff (angstroms) or a coincident neighbour. Pass None to use the
+        four closest sites at any distance. Requires the local-order extra.
+        """
+        from .liquid_order import tetrahedral_q
+        return tetrahedral_q(self, cutoff)
+
+    def local_structure_index(self, cutoff=3.7):
+        """Per-site variance of successive neighbour-distance gaps, in Å².
+
+        The last gap reaches the closest site outside the shell. Sites with
+        no interior or no exterior neighbour return NaN. Compute on water
+        oxygens for the Shiratani–Sasai LSI. Requires the local-order extra.
+        """
+        from .liquid_order import local_structure_index
+        return local_structure_index(self, cutoff)
 
     def steinhardt_voronoi(self, order_l=6, cutoff=None):
         """Voronoi facet-area weighted Steinhardt parameters.

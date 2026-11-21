@@ -43,7 +43,9 @@ Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-test = ["pytest>=8.0", "hypothesis>=6.0"]
+local-order = ["linkcell>=0.4.2", "minimage>=0.2.3"]
+test = ["linkcell>=0.4.2", "minimage>=0.2.3", "pytest>=8.0", "hypothesis>=6.0", "readcon-chemfiles>=0.23.2", "ase>=3.23"]
+readcon = ["readcon-chemfiles>=0.23.2", "ase>=3.23"]
 ase = ["ase>=3.23"]
 mdanalysis = ["MDAnalysis>=2.7"]
 solvis = ["ase>=3.23", "solvis-tools>=0.1"]
@@ -88,11 +90,11 @@ config-settings = { "setup-args" = [
   "-Dwith_chemfiles=enabled",
   "-Dwith_readcon=enabled",
 ] }
-test-requires = ["pytest", "ase"]
+test-requires = ["pytest", "ase", "minimage>=0.2.3", "linkcell>=0.4.2", "readcon-chemfiles>=0.23.2"]
 test-command = [
   "python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'",
   "python {project}/scripts/check_installed_api.py",
-  "python -m pytest -q -p no:cacheprovider --import-mode=importlib {project}/tests/dseams/test_dseams.py {project}/tests/dseams/test_dseams_empty_frames.py {project}/tests/dseams/installed_package.py {project}/tests/dseams/test_doc_snippets.py",
+  "python -m pytest -q -p no:cacheprovider --import-mode=importlib {project}/tests/dseams/test_dseams.py {project}/tests/dseams/test_dseams_empty_frames.py {project}/tests/dseams/installed_package.py {project}/tests/dseams/test_doc_snippets.py {project}/tests/python/test_readcon_trajectory.py {project}/tests/python/test_liquid_order.py",
 ]
 
 [[tool.cibuildwheel.overrides]]
