@@ -43,7 +43,8 @@ Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-test = ["pytest>=8.0", "hypothesis>=6.0"]
+test = ["pytest>=8.0", "hypothesis>=6.0", "readcon-chemfiles>=0.23.2", "ase>=3.23"]
+readcon = ["readcon-chemfiles>=0.23.2", "ase>=3.23"]
 ase = ["ase>=3.23"]
 mdanalysis = ["MDAnalysis>=2.7"]
 solvis = ["ase>=3.23", "solvis-tools>=0.1"]

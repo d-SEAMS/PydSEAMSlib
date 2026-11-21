@@ -255,6 +255,7 @@ __all__ = [
     "available_readers",
     "cyoda",
     "from_arrays",
+    "iter_trajectory",
     "from_ase",
     "from_chemfiles",
     "from_con",

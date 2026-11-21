@@ -11,8 +11,77 @@ from pathlib import Path
 
 from .frame import Frame
 
-_CHEMFILES = {".pdb", ".gro", ".dcd"}
+_CHEMFILES = {".pdb", ".gro", ".dcd", ".xtc", ".trr"}
 _LAMMPS = {".lammpstrj", ".dump", ".lammps"}
+
+
+def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
+                    hydrogen_names=(), start=0, stop=None, stride=1,
+                    cutoff=None, bonded="auto"):
+    """Yield frames selected by atom and residue names through readcon.
+
+    Coordinate-only formats such as XTC and TRR take a labelled topology
+    with the same atom count and order. Indices follow Python slicing.
+    Each selected residue contributes one centre and its named hydrogens.
+    Coordinates are in angstroms. Frames retain the full periodic cell.
+    Install the readcon extra to use this reader.
+    """
+    import numpy as np
+    import readcon
+    from ase.cell import Cell
+    from ase.geometry import wrap_positions
+    from .aseio import _dump_box
+
+    if start < 0 or stride < 1 or (stop is not None and stop < 0):
+        raise ValueError("start and stop must be nonnegative and stride must be positive")
+    if isinstance(hydrogen_names, str):
+        hydrogen_names = (hydrogen_names,)
+    hydrogens = set(hydrogen_names)
+    if atom_name in hydrogens:
+        raise ValueError("centre and hydrogen names must be distinct")
+    filename = str(path)
+    total = readcon.read_chemfiles_nsteps(filename)
+    limit = total if stop is None else min(stop, total)
+    source = None if topology is None else str(topology)
+    for first in range(start, limit, stride * 32):
+        batch = readcon.read_chemfiles(filename, topology=source, skip=first,
+                                       step=stride, stop=min(first + stride * 32, limit))
+        for offset, raw in enumerate(batch):
+            residues = raw.metadata.get("chemfiles_residues", [])
+            sites = raw.atoms
+            centres, donors, centre_ids, donor_ids = [], [], [], []
+            for ordinal, residue in enumerate(residues, 1):
+                if residue_name is not None and residue["name"] != residue_name:
+                    continue
+                members = residue["atoms"]
+                found = [i for i in members if sites[i].symbol == atom_name]
+                if not found:
+                    continue
+                if len(found) != 1:
+                    raise ValueError("selected atom name must identify one centre per residue")
+                centres.append(found[0])
+                centre_ids.append(ordinal)
+                for i in members:
+                    if sites[i].symbol in hydrogens:
+                        donors.append(i)
+                        donor_ids.append(ordinal)
+            if not centres or (hydrogens and not donors):
+                raise ValueError("no matching sites; check the atom names and the labelled topology")
+            if not all(raw.metadata.get("pbc", (False, False, False))):
+                raise ValueError("trajectory analysis needs a three-dimensional periodic cell")
+            lattice = Cell(np.asarray(raw.metadata["lattice_vectors"]).T)
+            restricted, rotation = lattice.standard_form("lower")
+            if np.any(np.diag(restricted) < 0):
+                restricted, rotation = -restricted, -rotation
+            xyz = wrap_positions(raw.coords_array(), lattice) @ rotation.T
+            box, low = _dump_box(restricted, (0., 0., 0.))
+            frame = Frame.from_arrays(xyz[centres], box, box_low=low,
+                                      mol_ids=centre_ids, hydrogen_positions=xyz[donors] if donors else None,
+                                      hydrogen_mol_ids=donor_ids if donors else None, cutoff=cutoff, bonded=bonded)
+            frame.frame = first + offset * stride + 1
+            frame.cloud.currentFrame = frame.frame
+            frame._cell_rotation = rotation
+            yield frame
 
 
 def read(path, frame=1, **kwargs):
@@ -49,6 +118,13 @@ def read(path, frame=1, **kwargs):
     Builds without chemfiles or readcon raise ``RuntimeError`` when
     those suffixes are used.
     """
+    if "atom_name" in kwargs:
+        if frame < 1:
+            raise ValueError("frame is one-indexed")
+        result = next(iter_trajectory(path, start=frame - 1, stop=frame, **kwargs), None)
+        if result is None:
+            raise IndexError("frame index outside trajectory")
+        return result
     suffix = Path(path).suffix.lower()
     if suffix == ".xyz":
         return Frame.from_xyz(path, **kwargs)
