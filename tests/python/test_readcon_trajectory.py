@@ -23,3 +23,28 @@ def test_topologized_water_sites(tmp_path):
     assert [p.molID for p in frames[0].cloud.pts] == [1, 2]
     assert 2 in list(frames[0].hbonds[0])[1:]
     assert read(gro, frame=2, **options).positions == frames[1].positions
+
+
+def test_xtc_selection_preserves_tilt_and_frame_numbers(tmp_path):
+    import struct
+    import numpy as np
+
+    # XTC stores at most nine sites as uncompressed XDR coordinate triples.
+    # Both off-diagonal terms and the raw atom ordering must survive selection.
+    cell = [2., 0., 0., .4, 2., 0., .1, .2, 2.]
+    sites = [("SOLX", "OW"), ("SOL", "OW"), ("SOL", "HW1"), ("SOL", "HW2")]
+    gro = tmp_path / "water.gro"
+    records = [f"{1 if r == 'SOLX' else 2:5d}{r:<5}{a:>5}{i:5d}{.2:8.3f}{.2:8.3f}{.2:8.3f}"
+               for i, (r, a) in enumerate(sites, 1)]
+    gro.write_text("\n".join(["labelled sites", "4", *records, "2 2 2 0 0 .4 0 .1 .2", ""]))
+    xtc = tmp_path / "water.xtc"
+    with xtc.open("wb") as stream:
+        for i in range(68):
+            xyz = [.9, .9, .9, .5+i*.001, .5, .5, .6, .5, .5, .5, .6, .5]
+            stream.write(struct.pack(">3if9fi12f", 1995, 4, i, i*.5, *cell, 4, *xyz))
+    opts = dict(topology=gro, residue_name="SOL", atom_name="OW", hydrogen_names=("HW1", "HW2"))
+    frames = list(iter_trajectory(xtc, start=1, stop=68, stride=2, **opts))
+    assert [f.frame for f in frames] == list(range(2, 69, 2))
+    assert all(f.n_atoms == 1 and f._h_cloud.nop == 2 for f in frames)
+    assert np.allclose(frames[-1].positions, [[5.67, 5., 5.]])
+    assert np.allclose(list(frames[-1].cloud.box)[3:], [4., 1., 2.])
