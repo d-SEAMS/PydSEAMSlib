@@ -3,6 +3,7 @@
 
 import argparse
 import ast
+import fcntl
 import fnmatch
 import os
 import re
@@ -56,27 +57,31 @@ def publish(source, dest):
         partial.unlink(missing_ok=True)
 
 
-pkg = stage / "dseams"
-package = src / "src" / "dseams"
-for name in ("__init__.py", "__main__.py", "frames.py", "userframe.py"):
-    publish(package / name, pkg / name)
-for so in cores:
-    publish(so, pkg / so.name)
-
-# Doc snippets import pydseams.yoda. The extension is built at the top of
-# the build tree; put it next to a copy of the package so that import works.
-front = stage / "pydseams"
-source_front = src / "src" / "pydseams"
-for path in source_front.rglob("*.py"):
-    publish(path, front / path.relative_to(source_front))
-for pattern in ("yoda*.so", "yoda*.pyd", "yoda*.dylib"):
-    for shared in build.glob(pattern):
-        publish(shared, front / shared.name)
-
+# FileFinder builds a directory index while importing a package. Readers
+# need a stable listing even when each individual file is replaced atomically.
+stage_lock = (build / "python-stage.lock").open("a")
 if os.environ.get("SEAMS_LIB") and not os.environ.get("SEAMS_LIBDIR"):
     os.environ["SEAMS_LIBDIR"] = str(Path(os.environ["SEAMS_LIB"]).resolve().parent)
 
 if os.environ.get("DSEAMS_PY_READY") != "1":
+    fcntl.flock(stage_lock, fcntl.LOCK_EX)
+    pkg = stage / "dseams"
+    package = src / "src" / "dseams"
+    for name in ("__init__.py", "__main__.py", "frames.py", "userframe.py"):
+        publish(package / name, pkg / name)
+    for so in cores:
+        publish(so, pkg / so.name)
+
+    # Doc snippets import pydseams.yoda. The extension is built at the top of
+    # the build tree; put it next to a copy of the package so that import works.
+    front = stage / "pydseams"
+    source_front = src / "src" / "pydseams"
+    for path in source_front.rglob("*.py"):
+        publish(path, front / path.relative_to(source_front))
+    for pattern in ("yoda*.so", "yoda*.pyd", "yoda*.dylib"):
+        for shared in build.glob(pattern):
+            publish(shared, front / shared.name)
+
     env = os.environ.copy()
     libdirs = []
     for name in ("SEAMS_LIB", "SEAMS_LANG_LIB", "SEAMS_CORE_LIB"):
@@ -100,6 +105,10 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
     )
     env["DSEAMS_PY_READY"] = "1"
     os.execve(sys.executable, [sys.executable, __file__, *sys.argv[1:]], env)
+
+# exec closes the writer's descriptor. Imports, including those performed
+# by pytest children, share the stage for the duration of this runner.
+fcntl.flock(stage_lock, fcntl.LOCK_SH)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--include", nargs="*", default=[])
