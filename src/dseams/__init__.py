@@ -189,8 +189,8 @@ def q4q6(positions, box, cutoff=3.5):
 
     Returns
     -------
-    tuple
-        Local q4, local q6, and the Lechner-Dellago averages.
+    tuple of numpy.ndarray
+        Local q4 and local q6, each of shape ``(n,)``.
     """
     pos = np.ascontiguousarray(positions, dtype=np.float64)
     frame = Frame()

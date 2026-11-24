@@ -96,11 +96,14 @@ Implementation of {func}`~pydseams.to_solvis` and
 ## Compiled module (`pydseams.yoda`)
 
 `pydseams.yoda` is the compiled nanobind extension module. The tables
-below list every public symbol registered by the module: 134 names
-(113 functions, 19 types, and the `Kind` / `Family` type aliases). Four
-functions are compile-gated and absent from builds without the
-corresponding optional engine dependency: `readChemfiles` (chemfiles),
-`readCon` (readcon-core), `ira_match` and `sofi_point_group` (libira).
+below list every public symbol the bindings register. This package's
+build exposes {{ yoda_names }} of them ({{ yoda_functions }} functions,
+{{ yoda_types }} types, and the `Kind` / `Family` type aliases). The
+counts are taken from `src/bindings.cpp` and the seams-core options in
+`meson.build`. Four functions are compile-gated and absent from builds
+without the corresponding optional engine dependency: `readChemfiles`
+(chemfiles), `readCon` (readcon-core), `ira_match` and `sofi_point_group`
+(libira).
 
 Application code normally calls {class}`~pydseams.frame.Frame`,
 {func}`~pydseams.io.read`, or {func}`~pydseams.from_ase`. Call
@@ -127,6 +130,8 @@ Application code normally calls {class}`~pydseams.frame.Frame`,
 | `clearNeighbourList` | Free memory for a neighbour list. |
 | `getNewNeighbourListByIndex` | Build a neighbour list by index using a distance cutoff. |
 | `kNearestNeighbourList` | Exact k-nearest bonded graph, union- or mutually-symmetrized. |
+| `kNearestNeighbourPair` | Mutual and union k-nearest graphs from one candidate search. Returns `(mutual, union)`. |
+| `periodicDistance` | Minimum Euclidean distance between cloud-indexed atoms in the periodic cell. |
 | `shellSeparation` | Certificate pair (max k-th distance, min (k+1)-th distance) for the exact reduction of the k-nearest graph to a cutoff graph. |
 | `halfNeighList` | Build a half neighbour list (each pair stored once) for one atom type. |
 | `neighbourListByIndex` | Convert an atom-ID neighbour list to an index-based neighbour list. |
@@ -276,9 +281,27 @@ wrap `coordinationNumber`, `runningCN`, `ionCloud`, and
 | `recenterClusterCloud` | Recenter a cluster point cloud for visualisation. |
 | `rdf2Danalysis_AA` | 2D radial distribution function for identical atom types. |
 | `partialRdf` | Partial 3D RDF `g_IJ(r)`. Returns `(r, g)`. |
+| `firstMinimumBin` | Bin index of the first minimum of g after the first peak, or -1. |
 | `runningCN` | Running CN `4 pi rho_J int s^2 g ds`. Returns a list. |
 | `densityZ` | Cartesian number-density histogram by particle type or mapped site kind and axis. |
 | `largestDomain` | Size and fraction of the largest connected component in a selected subset. |
+
+### Sites, guests, and local topology
+
+| name | role |
+|------|------|
+| `ionEnvironment` | Class each ion by its first water shell against an ice flag. |
+| `shellRingCensus` | Census, by size, of rings with at least one vertex in an ion's first shell. |
+| `localTopologyKey` | Isomorphism-class key of one atom's rooted neighbourhood within `hops` bonds. |
+| `topologyFingerprint` | Per-atom topology keys, their histogram, the primitive ring census, and a frame key. |
+| `addToLibrary` | Add every distinct key of a fingerprint under a label. |
+| `writeLibrary` | Text form of a key library. |
+| `readLibrary` | Key library from its text form. |
+| `matchLibrary` | Name every atom of a fingerprint by one key library. |
+| `matchLibraries` | Name every atom by key libraries at several hop counts. |
+| `guestOccupancy` | Assign each guest to the nearest cage centroid within a radius. |
+| `guestOccupancyInside` | Assign each guest to a cage whose faces contain it. |
+| `periodicCentroid` | Centroid of a set of atoms, each unwrapped to its minimum image about the first. |
 
 ### Types
 
@@ -296,3 +319,12 @@ wrap `coordinationNumber`, `runningCN`, `ionCloud`, and
 | `VoronoiWeights` | Facet-sharing neighbours and facet-area weights of one particle. |
 | `DensityZ` | Number-density result: bin centres `z`, values `rho`, and selected `type`. |
 | `Domain` | Connected-domain result: subset size, largest component, and percolation fraction. |
+| `SiteKind` | Per-atom site chemistry. Type 1 is not a kind. |
+| `SiteFamily` | Input family. It is not inferred from types. |
+| `IonState` | An ion by its first water shell: `liquid`, `front`, or `ice`. |
+| `IonEnvironment` | Ions read against a per-atom ice assignment. |
+| `LocalKey` | Key of one atom's rooted bonded neighbourhood. |
+| `FrameFingerprint` | Local keys of every atom, their histogram, the ring census, and one frame key. |
+| `KeyLibrary` | Local keys of reference structures with their labels. |
+| `LibraryMatch` | Atoms named by a key library. |
+| `GuestOccupancy` | Guests placed in enumerated cages by their periodic centroids. |
