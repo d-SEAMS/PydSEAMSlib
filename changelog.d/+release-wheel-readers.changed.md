@@ -1,1 +1,0 @@
-Release wheels and the sdist install enable chemfiles and readcon-core. The wheel tests require `has_chemfiles()` and `has_readcon()` to be true. The vendored chemfiles library is installed under the SONAME or install name reported by patchelf, otool, or objdump. Configure fails when that tool or the library is missing.

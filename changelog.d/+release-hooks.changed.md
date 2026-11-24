@@ -1,1 +1,0 @@
-A release bump runs `python3 -m cogapp -I ci/version -r @ci/version/files.txt` and then `towncrier build --yes --version {{version}}`. The version copies read `pyproject.toml` directly. `ci/version/` holds only `files.txt`.
