@@ -58,6 +58,24 @@ namespace nb = nanobind;
 NB_MODULE(yoda, m) {
     m.doc() = "d-SEAMS compiled surface (yoda)";
 
+    nb::dict build_features;
+#ifdef SEAMS_HAS_CHEMFILES
+    build_features["with_chemfiles"] = true;
+#else
+    build_features["with_chemfiles"] = false;
+#endif
+#ifdef SEAMS_HAS_READCON
+    build_features["with_readcon"] = true;
+#else
+    build_features["with_readcon"] = false;
+#endif
+#ifdef SEAMS_HAS_IRA
+    build_features["with_ira"] = true;
+#else
+    build_features["with_ira"] = false;
+#endif
+    m.attr("_build_features") = build_features;
+
     nb::class_<molSys::Point<double>>(
         m, "PointDouble", "Per-particle data: coordinates, type, molecule ID, ice classification.")
         .def(nb::init<>())

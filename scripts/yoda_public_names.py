@@ -2,13 +2,13 @@
 """Public names registered by ``src/bindings.cpp``.
 
 The tables on the compiled-module page and the documentation build read
-these sets. A name inside a compile gate is part of this package's build
-only when ``meson.build`` enables that seams-core option.
+these sets. The documentation counts refer to the published wheels.
 """
 
 from __future__ import annotations
 
 import re
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,7 +30,7 @@ _SUBPROJECT = re.compile(
     r"subproject\(\s*'seams-core'.*?default_options:\s*\[(.*?)\]",
     re.DOTALL,
 )
-_OPTION = re.compile(r"'(with_[A-Za-z0-9_]+)=(enabled|disabled|true|false)'")
+_OPTION = re.compile(r"^(?:-D|')(with_[A-Za-z0-9_]+)=(enabled|disabled|true|false)'?$")
 
 
 @dataclass(frozen=True)
@@ -57,41 +57,44 @@ def _unique(names: list[str]) -> tuple[str, ...]:
     seen: set[str] = set()
     ordered: list[str] = []
     for name in names:
-        if name not in seen:
+        if not name.startswith("_") and name not in seen:
             seen.add(name)
             ordered.append(name)
     return tuple(ordered)
 
 
-def subproject_options(meson_text: str) -> dict[str, str]:
-    """``with_*`` values from the seams-core ``subproject()`` call."""
+def wheel_features(root: Path) -> dict[str, bool]:
+    """Resolve literal features from the wheel and engine build settings."""
+    meson_text = (root / "meson.build").read_text(encoding="utf-8")
     found = _SUBPROJECT.search(meson_text)
     if found is None:
         raise ValueError("meson.build has no seams-core subproject() options")
-    options = dict(_OPTION.findall(found.group(1)))
+    wheel = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    setup_args = wheel["tool"]["cibuildwheel"]["config-settings"]["setup-args"]
+    settings = [entry.strip() for entry in found.group(1).split(",")]
+    options = dict(
+        match.groups()
+        for setting in [*settings, *setup_args]
+        if (match := _OPTION.fullmatch(setting))
+    )
     missing = sorted(set(_GATED.values()) - set(options))
     if missing:
         raise ValueError(f"seams-core subproject options missing {missing}")
-    return options
+    return {option: value in {"enabled", "true"} for option, value in options.items()}
 
 
-def _enabled(option: str, options: dict[str, str]) -> bool:
-    return options[option] in {"enabled", "true"}
+def _exposed(names: tuple[str, ...], features: dict[str, bool]) -> tuple[str, ...]:
+    return tuple(name for name in names if name not in _GATED or features[_GATED[name]])
 
 
-def _exposed(names: tuple[str, ...], options: dict[str, str]) -> tuple[str, ...]:
-    return tuple(
-        name
-        for name in names
-        if _GATED.get(name) is None or _enabled(_GATED[name], options)
-    )
-
-
-def public_names(root: Path | None = None) -> YodaNames:
-    """Names in ``src/bindings.cpp``, and the subset this package builds."""
+def public_names(
+    root: Path | None = None, *, features: dict[str, bool] | None = None
+) -> YodaNames:
+    """Binding names and the subset compiled with the specified features."""
     root = Path(root) if root is not None else Path(__file__).resolve().parents[1]
     bindings = (root / "src" / "bindings.cpp").read_text(encoding="utf-8")
-    options = subproject_options((root / "meson.build").read_text(encoding="utf-8"))
+    if features is None:
+        features = wheel_features(root)
     functions = _unique(_FUNCTION.findall(bindings))
     types = _unique(_TYPE.findall(bindings))
     aliases = _unique(_ALIAS.findall(bindings))
@@ -99,7 +102,7 @@ def public_names(root: Path | None = None) -> YodaNames:
         functions=functions,
         types=types,
         aliases=aliases,
-        exposed_functions=_exposed(functions, options),
-        exposed_types=_exposed(types, options),
-        exposed_aliases=_exposed(aliases, options),
+        exposed_functions=_exposed(functions, features),
+        exposed_types=_exposed(types, features),
+        exposed_aliases=_exposed(aliases, features),
     )

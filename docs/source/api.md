@@ -96,11 +96,11 @@ Implementation of {func}`~pydseams.to_solvis` and
 ## Compiled module (`pydseams.yoda`)
 
 `pydseams.yoda` is the compiled nanobind extension module. The tables
-below list every public symbol the bindings register. This package's
-build exposes {{ yoda_names }} of them ({{ yoda_functions }} functions,
+below list every public symbol the bindings register. The published
+wheels expose {{ yoda_names }} of them ({{ yoda_functions }} functions,
 {{ yoda_types }} types, and the `Kind` / `Family` type aliases). The
-counts are taken from `src/bindings.cpp` and the seams-core options in
-`meson.build`. Four functions are compile-gated and absent from builds
+counts use `src/bindings.cpp` and the build options for the wheels.
+Four functions are compile-gated and absent from builds
 without the corresponding optional engine dependency: `readChemfiles`
 (chemfiles), `readCon` (readcon-core), `ira_match` and `sofi_point_group`
 (libira).
