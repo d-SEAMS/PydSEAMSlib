@@ -44,7 +44,14 @@ Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 local-order = ["linkcell>=0.4.2", "minimage>=0.2.3"]
-test = ["linkcell>=0.4.2", "minimage>=0.2.3", "pytest>=8.0", "hypothesis>=6.0", "readcon-chemfiles>=0.23.2", "ase>=3.23"]
+test = [
+  "linkcell>=0.4.2; python_version >= '3.12'",
+  "minimage>=0.2.3",
+  "pytest>=8.0",
+  "hypothesis>=6.0",
+  "readcon-chemfiles>=0.23.2",
+  "ase>=3.23",
+]
 readcon = ["readcon-chemfiles>=0.23.2", "ase>=3.23"]
 ase = ["ase>=3.23"]
 mdanalysis = ["MDAnalysis>=2.7"]
