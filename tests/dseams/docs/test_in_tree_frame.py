@@ -15,7 +15,7 @@ def test_frame_is_the_in_tree_214_package():
     import pydseams
     from dseams import userframe
 
-    assert dseams.__version__ == "2.14.1"
-    assert pydseams.__version__ == "2.14.1"
+    assert dseams.__version__ == "2.14.2"
+    assert pydseams.__version__ == "2.14.2"
     assert "graph" in inspect.signature(userframe.Frame.chill_plus).parameters
     assert "edge" in inspect.signature(userframe.Frame.cages_by_signature).parameters

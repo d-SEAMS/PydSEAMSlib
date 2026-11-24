@@ -11,7 +11,7 @@ def test_version():
     # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
     # cog.outl(f'    assert pydseams.__version__ == "{version}"')
     # ]]]
-    assert pydseams.__version__ == "2.14.1"
+    assert pydseams.__version__ == "2.14.2"
     # [[[end]]]
 
 

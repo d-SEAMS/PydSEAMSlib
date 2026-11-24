@@ -126,6 +126,7 @@ let
       cargoBuildFlags = [ "--package" pname "--lib" ];
       cargoTestFlags = [ "--package" pname ];
       RAYON_NUM_THREADS = "8";
+      LINKCELL_OPENMP = "0";
       preBuild = darwinCdylibHook "lib${pname}.dylib";
       postInstall = ''
         mkdir -p "$out/include" "$out/lib/pkgconfig"
@@ -152,10 +153,10 @@ let
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
-    version = "0.4.2";
+    version = "0.6.0";
     owner = "d-SEAMS";
-    rev = "v0.4.2";
-    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+    rev = "v0.6.0";
+    hash = "sha256-C1RPSOQHsBjfYxsw5Si6Q4+B+YGlQjNHitinndAv8XA=";
   };
   # seams-core reads .con frames through readcon-core. The binding
   # option with_readcon defaults to auto and finds this library by
@@ -312,7 +313,6 @@ python3.pkgs.buildPythonPackage {
     mkdir -p subprojects
     cp -r ${seams-core-src} subprojects/seams-core
     chmod -R u+w subprojects/seams-core
-    rm -rf subprojects/seams-core/subprojects
 
     cp -r ${nanobindSrc} subprojects/nanobind-2.14.0
     chmod -R u+w subprojects/nanobind-2.14.0

@@ -49,7 +49,7 @@ from .io import available_readers, has_chemfiles, has_readcon, iter_trajectory
 # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
 # cog.outl(f'__version__ = "{version}"')
 # ]]]
-__version__ = "2.14.1"
+__version__ = "2.14.2"
 # [[[end]]]
 
 # Drop-in name used in the 2.0 docs and tests
