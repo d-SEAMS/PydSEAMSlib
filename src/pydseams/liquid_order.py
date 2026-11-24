@@ -1,12 +1,33 @@
 """Local water order from periodic neighbour distances and bond angles."""
 
-import linkcell
 import minimage
 import numpy as np
 
+try:
+    import linkcell
+except ModuleNotFoundError as error:
+    if error.name != "linkcell":
+        raise
+    linkcell = None
+
+
 def _nearest(xyz, cell, k):
-    indices, squared = linkcell.knearest(xyz, cell, k)
-    return np.from_dlpack(indices), np.from_dlpack(squared)
+    if linkcell is not None:
+        indices, squared = linkcell.knearest(xyz, cell, k)
+        return np.from_dlpack(indices), np.from_dlpack(squared)
+
+    # Exact, row-wise search with bounded memory when Linkcell is unavailable.
+    xyz = np.ascontiguousarray(xyz)
+    mic = minimage.Cell.from_vectors(*cell)
+    indices = np.empty((len(xyz), k), dtype=np.intp)
+    squared = np.empty((len(xyz), k))
+    for row, centre in enumerate(xyz):
+        distances = np.array(mic.dist2_euclidean_many(centre, xyz))
+        distances[row] = np.inf
+        nearest = np.argsort(distances, kind="stable")[:k]
+        indices[row] = nearest
+        squared[row] = distances[nearest]
+    return indices, squared
 
 
 def _check_cutoff(cutoff):

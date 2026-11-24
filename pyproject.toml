@@ -43,7 +43,7 @@ Engine = "https://github.com/d-SEAMS/seams-core"
 Changelog = "https://github.com/d-SEAMS/PydSEAMSlib/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-local-order = ["linkcell>=0.4.2", "minimage>=0.2.3"]
+local-order = ["linkcell>=0.4.2; python_version >= '3.12'", "minimage>=0.2.3"]
 test = [
   "linkcell>=0.4.2; python_version >= '3.12'",
   "minimage>=0.2.3",
@@ -97,7 +97,7 @@ config-settings = { "setup-args" = [
   "-Dwith_chemfiles=enabled",
   "-Dwith_readcon=enabled",
 ] }
-test-requires = ["pytest", "ase", "minimage>=0.2.3", "linkcell>=0.4.2", "readcon-chemfiles>=0.23.2"]
+test-extras = ["test"]
 test-command = [
   "python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'",
   "python {project}/scripts/check_installed_api.py",
