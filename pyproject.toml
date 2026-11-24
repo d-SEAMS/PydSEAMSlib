@@ -116,7 +116,10 @@ inherit.config-settings = "append"
 
 [tool.cibuildwheel.linux]
 # linkcell is a Rust crate; the manylinux image has no toolchain.
-before-all = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal"
+before-all = """
+dnf -y install sqlite-devel
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+"""
 environment = { PATH = "$HOME/.cargo/bin:$PATH" }
 
 [tool.cibuildwheel.macos]

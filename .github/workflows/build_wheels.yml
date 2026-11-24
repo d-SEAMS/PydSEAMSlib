@@ -51,9 +51,9 @@ jobs:
         run: |
           # patchelf is a meson-python backend dependency on Linux. --no-index
           # cannot fetch it later, so it has to be in buildreqs.
-          # cmake and zlib vendor chemfiles when with_chemfiles=enabled.
+          # The vendored Chemfiles build uses CMake, zlib and SQLite.
           sudo apt-get update
-          sudo apt-get install -y cmake pkg-config zlib1g-dev
+          sudo apt-get install -y cmake pkg-config zlib1g-dev libsqlite3-dev
           mapfile -t test_reqs < <(python -c 'import tomllib; print(*tomllib.load(open("pyproject.toml", "rb"))["project"]["optional-dependencies"]["test"], sep="\n")')
           python -m pip download -d buildreqs "meson-python>=0.18" "meson>=1.3" ninja numpy patchelf "${test_reqs[@]}"
           python -m venv "$RUNNER_TEMP/sdist-venv"
