@@ -4,6 +4,7 @@
   meson,
   ninja,
   pkg-config,
+  cmake,
   eigen,
   blas,
   lapack,
@@ -11,6 +12,7 @@
   llvmPackages,
   stdenv,
   fetchFromGitHub,
+  fetchPypi,
   rustPlatform,
   seams-core-src,
 }:
@@ -187,6 +189,39 @@ let
       EOF
     '' + assertDarwinInstallName "libreadcon_core.dylib";
   };
+  minimagePython = python3.pkgs.buildPythonPackage rec {
+    pname = "minimage";
+    version = "0.2.3";
+    pyproject = true;
+    src = fetchPypi {
+      inherit pname version;
+      hash = "sha256-n5COD6ACMagZdmMAGKNJz9ID3k9GV681XkrM5VuvJM8=";
+    };
+    cargoDeps = rustPlatform.fetchCargoVendor {
+      inherit pname version src;
+      hash = "sha256-VIQGbCeIuxZTAO/3GMImJ6Ot1VWoJzwMCefGkG4zkaM=";
+    };
+    build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
+    pythonImportsCheck = [ "minimage" ];
+  };
+  readconPython = python3.pkgs.buildPythonPackage rec {
+    pname = "readcon-chemfiles";
+    version = "0.23.2";
+    pyproject = true;
+    src = fetchPypi {
+      pname = "readcon_chemfiles";
+      inherit version;
+      hash = "sha256-OOstinvqcBgu9XvjWe8EYuHJki9UnXeMH5LLMM4vrDc=";
+    };
+    cargoDeps = rustPlatform.fetchCargoVendor {
+      inherit pname version src;
+      hash = "sha256-elG4RKHcPFoXgw+UOBypvi49BfACTXiYaq17LnQnAH0=";
+    };
+    build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
+    nativeBuildInputs = [ cmake ];
+    dontUseCmakeConfigure = true;
+    pythonImportsCheck = [ "readcon" ];
+  };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
     repo = "nanobind";
@@ -256,6 +291,8 @@ python3.pkgs.buildPythonPackage {
     python3.pkgs.pytestCheckHook
     python3.pkgs.hypothesis
     python3.pkgs.ase
+    minimagePython
+    readconPython
   ];
 
   # meson-python drives configure. The meson setup hook would leave
