@@ -46,8 +46,8 @@ def test_package_exposes_the_bindings_this_build_registers():
         + 2 * int(features["with_ira"])
     )
     assert live == set(names.exposed)
-    assert len(live) == 153 + n_optional
-    assert len(names.exposed_functions) == 125 + n_optional
+    assert len(live) == 152 + n_optional
+    assert len(names.exposed_functions) == 124 + n_optional
     assert len(names.exposed_types) == 26
     assert names.exposed_aliases == ("Kind", "Family")
 
@@ -56,7 +56,7 @@ def test_compiled_module_page_lists_every_registered_name():
     names = _public_names()
     text = PAGE.read_text(encoding="utf-8")
     assert _table_names(text) == set(names.registered)
-    assert len(names.exposed) == 155
+    assert len(names.exposed) == 154
     assert "{{ yoda_names }}" in text
     assert "{{ yoda_functions }}" in text
     assert "{{ yoda_types }}" in text
