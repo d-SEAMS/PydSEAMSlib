@@ -220,11 +220,12 @@ let
     build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
     nativeBuildInputs = [ cmake ];
     dontUseCmakeConfigure = true;
-    # readcon's C++ bridge looks for the chemfiles headers in Cargo's
-    # registry layout. Make the existing offline sources visible there.
-    preBuild = ''
-      mkdir -p "$CARGO_HOME/registry/src"
-      ln -s "${cargoDeps}/source-registry-0" "$CARGO_HOME/registry/src/nix-vendor"
+    # readcon's C++ bridge scans Cargo's registry for the headers. Nix
+    # stores those same crates under the fixed-output vendor directory.
+    postPatch = ''
+      substituteInPlace build.rs --replace-fail \
+        'let mut roots = Vec::new();' \
+        'let mut roots = vec![PathBuf::from("${cargoDeps}")];'
     '';
     pythonImportsCheck = [ "readcon" ];
   };
