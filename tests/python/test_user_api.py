@@ -617,8 +617,12 @@ def test_from_arrays_separate_hydrogens_use_topology_ids():
 
 def test_prism_counts_on_triangular_prism(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    xyz = [(x, y, z) for z in (5., 7.) for x, y in ((4., 4.), (6., 4.), (5., 5.73205080757))]
-    frame = from_arrays(xyz, [12., 12., 24.], cutoff=2.1)
+    xyz = [
+        (x, y, z)
+        for z in (5.0, 7.0)
+        for x, y in ((4.0, 4.0), (6.0, 4.0), (5.0, 5.73205080757))
+    ]
+    frame = from_arrays(xyz, [12.0, 12.0, 24.0], cutoff=2.1)
     counts = frame.prism_counts(max_depth=4)
     assert counts[3] == (1, 0)
     assert set(counts) == {3, 4}

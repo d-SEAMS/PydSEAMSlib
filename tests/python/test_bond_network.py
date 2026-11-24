@@ -1,4 +1,5 @@
 """Check graph components and sampled residence counts."""
+
 import numpy as np
 import pytest
 

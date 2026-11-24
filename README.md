@@ -61,7 +61,9 @@ on Odysee.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
+frame = ds.read(
+    "water.lammpstrj"
+)  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -196,7 +198,12 @@ formats such as XTC and TRR require a topology with matching atom order.
 ```python
 from pydseams import iter_trajectory
 
-for frame in iter_trajectory("water.xtc", topology="water.gro", residue_name="SOL",
-                             atom_name="OW", hydrogen_names=("HW1", "HW2")):
+for frame in iter_trajectory(
+    "water.xtc",
+    topology="water.gro",
+    residue_name="SOL",
+    atom_name="OW",
+    hydrogen_names=("HW1", "HW2"),
+):
     print(frame.frame, len(frame.rings))
 ```

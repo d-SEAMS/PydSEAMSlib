@@ -101,8 +101,16 @@ def from_ase(atoms, select="O", cutoff=None, bonded="auto"):
 
 
 def from_arrays(
-    positions, cell, numbers=None, cutoff=None, bonded="cutoff", *,
-    mol_ids=None, hydrogen_positions=None, hydrogen_mol_ids=None, box_low=None,
+    positions,
+    cell,
+    numbers=None,
+    cutoff=None,
+    bonded="cutoff",
+    *,
+    mol_ids=None,
+    hydrogen_positions=None,
+    hydrogen_mol_ids=None,
+    box_low=None,
 ):
     """Build a :class:`~pydseams.frame.Frame` from coordinates and box lengths.
 
@@ -261,13 +269,13 @@ __all__ = [
     "available_readers",
     "cyoda",
     "from_arrays",
-    "iter_trajectory",
     "from_ase",
     "from_chemfiles",
     "from_con",
     "from_xyz",
     "has_chemfiles",
     "has_readcon",
+    "iter_trajectory",
     "read",
     "to_solvis",
     "yoda",
