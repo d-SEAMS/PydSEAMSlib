@@ -209,12 +209,15 @@ python3.pkgs.buildPythonPackage {
     root = ./..;
     fileset = lib.fileset.unions [
       ../meson.build
+      ../meson.options
       ../pyproject.toml
       ../README.md
       ../LICENSE
       ../examples
+      ../docs/source/api.md
       ../scripts/stage_nanobind.py
       ../scripts/dist_subprojects.py
+      ../scripts/yoda_public_names.py
       ../src
       ../tests
       ../subprojects/nanobind.wrap
