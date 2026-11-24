@@ -322,6 +322,7 @@ py.install_sources(
     [
         'src/pydseams/__init__.py',
         'src/pydseams/band.py',
+        'src/pydseams/bond_network.py',
         'src/pydseams/features.py',
         'src/pydseams/frame.py',
         'src/pydseams/aseio.py',
