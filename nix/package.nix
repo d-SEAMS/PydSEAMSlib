@@ -308,6 +308,12 @@ python3.pkgs.buildPythonPackage {
   dontUseMesonConfigure = true;
   dontUseMesonInstall = true;
   mesonAutoFeatures = "disabled";
+  # The wheel default uses the Eigen wrap. The sandbox supplies Eigen
+  # in buildInputs and resolves the native dependencies without downloads.
+  pypaBuildFlags = [
+    "--config-setting=setup-args=--force-fallback-for="
+    "--config-setting=setup-args=--wrap-mode=nodownload"
+  ];
 
   postPatch = ''
     mkdir -p subprojects
