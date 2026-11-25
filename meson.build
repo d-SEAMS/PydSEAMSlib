@@ -6,7 +6,7 @@ project(
     # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
     # cog.outl(f"    version: '{version}',")
     # ]]]
-    version: '2.14.2',
+    version: '2.14.3',
     # [[[end]]]
     default_options: [
         'warning_level=1',

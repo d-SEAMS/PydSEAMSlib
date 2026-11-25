@@ -9,10 +9,10 @@ distribution function (~Frame.rdf_2d~).
 * Prerequisites
 
 #+begin_src bash
-pip install 'pydseamslib==2.14.2'
+pip install 'pydseamslib==2.14.3'
 mkdir -p input/traj
 curl -sLo input/traj/exampleTraj.lammpstrj \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/traj/exampleTraj.lammpstrj
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/exampleTraj.lammpstrj
 #+end_src
 
 * Run confined-water analyses
