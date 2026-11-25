@@ -1,1 +1,0 @@
-The bulk-ice and paper-figures tutorials fetch `mW_cubic.lammpstrj` with the seams-core v2.14.3 `input/fetch.py` in their Python code, so the pages run without a separate shell step. seams-core 2.14.3 keeps that trajectory in its Hugging Face dataset instead of its repository.

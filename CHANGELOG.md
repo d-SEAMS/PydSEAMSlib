@@ -10,6 +10,20 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.3] - 2026-11-25
+
+### Changed
+
+- An installed engine (pkg-config `seams-core`, `seams`, and `seams-lang`) is used only at 2.14.3 or newer. An older one is ignored and the build uses the seams-core 2.14.3 subproject.
+- Build against seams-core 2.14.3. The linkcell wrap follows that tag at 0bc73576, which already contains the macOS OpenMP fixes, so the wrap applies no linkcell patch.
+- With seams-core 2.14.2, the brine pocket census of a frame with no ice counts every liquid water as reservoir. Three isolated waters give no pockets and `reservoir_waters == 3`, not 0.
+
+### Fixed
+
+- The bulk-ice and paper-figures tutorials fetch `mW_cubic.lammpstrj` with the seams-core v2.14.3 `input/fetch.py` in their Python code, so the pages run without a separate shell step. seams-core 2.14.3 keeps that trajectory in its Hugging Face dataset instead of its repository.
+- The tutorials and the ice-classification notebook download `fetch.py`, `exampleTraj.lammpstrj`, and `genice_sI.lammpstrj` from the seams-core v2.14.3 tag instead of from `main` or an earlier commit.
+
+
 ## [2.14.2] - 2026-11-24
 
 ### Added
