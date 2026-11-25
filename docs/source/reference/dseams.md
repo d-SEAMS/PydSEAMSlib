@@ -44,7 +44,7 @@ with System() as sys:
 `examples/python/seams_ctypes_quick.py` runs that cell against a local `libseams` shared library. The program prints:
 
 ```
-version 2.14.2
+version 2.14.3
 n 8
 cubic 8
 q6 0.628539

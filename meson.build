@@ -6,7 +6,7 @@ project(
     # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
     # cog.outl(f"    version: '{version}',")
     # ]]]
-    version: '2.14.2',
+    version: '2.14.3',
     # [[[end]]]
     default_options: [
         'warning_level=1',
@@ -39,9 +39,9 @@ endif
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
 # the subproject, and libyodaLib plus the Rust crates are static inside
 # the shared libraries that the wheel ships.
-seams_core_dep = dependency('seams-core', version: '>=2.14.2', required: false)
-seams_dep = dependency('seams', version: '>=2.14.2', required: false)
-seams_lang_dep = dependency('seams-lang', version: '>=2.14.2', required: false)
+seams_core_dep = dependency('seams-core', version: '>=2.14.3', required: false)
+seams_dep = dependency('seams', version: '>=2.14.3', required: false)
+seams_lang_dep = dependency('seams-lang', version: '>=2.14.3', required: false)
 use_installed_engine = (
     seams_core_dep.found()
     and seams_dep.found()
@@ -355,7 +355,7 @@ py.install_sources(
 # The 2.14 API: import dseams.
 subdir('src/dseams')
 
-# The sdist keeps the patched linkcell and the vesin and gpulite overlays.
+# The sdist keeps wrap-git patches and the vesin and gpulite overlays.
 meson.add_dist_script(py, files('scripts/dist_subprojects.py'))
 
 # Shared-library paths. A build target has full_path(); an installed

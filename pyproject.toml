@@ -4,7 +4,7 @@ build-backend = "mesonpy"
 
 [project]
 name = "pydseamslib"
-version = "2.14.2"
+version = "2.14.3"
 description = "Python bindings for d-SEAMS molecular trajectory analysis, including ice classification, structural order, rings, cages, and hydrogen-bond networks."
 readme = "README.md"
 license = "MIT"

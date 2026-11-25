@@ -155,8 +155,8 @@ let
     pname = "linkcell";
     version = "0.6.0";
     owner = "d-SEAMS";
-    rev = "v0.6.0";
-    hash = "sha256-C1RPSOQHsBjfYxsw5Si6Q4+B+YGlQjNHitinndAv8XA=";
+    rev = "0bc73576ceb4ea79909a3ad7a7931275b59a9fe4";
+    hash = "sha256-hvvSe2mZW4OuCz/HJUMpv8n7rmWZxQ67JaUO1Cy7Rbo=";
     cargoHash = "sha256-2QscNVUPmCrwO1cAHWnDZAtU8Hsr6Bl/WTO65WwDsC8=";
   };
   # seams-core reads .con frames through readcon-core. The binding
