@@ -118,11 +118,10 @@ let
         exit 1
       fi
     '';
-  geometryLibrary = { pname, version, owner, rev, hash }:
+  geometryLibrary = { pname, version, owner, rev, hash, cargoHash }:
     rustPlatform.buildRustPackage rec {
-      inherit pname version;
+      inherit pname version cargoHash;
       src = fetchFromGitHub { inherit owner rev hash; repo = pname; };
-      cargoLock.lockFile = "${src}/Cargo.lock";
       cargoBuildFlags = [ "--package" pname "--lib" ];
       cargoTestFlags = [ "--package" pname ];
       RAYON_NUM_THREADS = "8";
@@ -150,6 +149,7 @@ let
     owner = "lode-org";
     rev = "ce6dfb175f32459de1ee06dfeb70e8a718f61876";
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
+    cargoHash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
@@ -157,6 +157,7 @@ let
     owner = "d-SEAMS";
     rev = "v0.6.0";
     hash = "sha256-C1RPSOQHsBjfYxsw5Si6Q4+B+YGlQjNHitinndAv8XA=";
+    cargoHash = "sha256-2QscNVUPmCrwO1cAHWnDZAtU8Hsr6Bl/WTO65WwDsC8=";
   };
   # seams-core reads .con frames through readcon-core. The binding
   # option with_readcon defaults to auto and finds this library by
@@ -170,7 +171,7 @@ let
       rev = "9e12ea9727d5f3c85d8eeb4d927beb634e1bdb59";
       hash = "sha256-N3dH/eGnulSuq2aV0ghRul0v/OZZE5UBUUc/sUgnUB4=";
     };
-    cargoLock.lockFile = "${src}/Cargo.lock";
+    cargoHash = "sha256-VB5P5YC6JpXTy4cxAZc6kdiEUIw5WquMOlyfhn2NS3I=";
     cargoBuildFlags = [ "--lib" ];
     cargoTestFlags = [ "--lib" ];
     preBuild = darwinCdylibHook "libreadcon_core.dylib";
