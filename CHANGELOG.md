@@ -30,6 +30,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- The Nix flake uses Nixpkgs 26.05 on Intel macOS and fetches the pinned Rust dependencies without building a dependency during evaluation.
 - Configure fails when a bundled chemfiles library cannot be named. patchelf (or objdump) on Linux and otool on macOS are required for that build, so a wheel no longer omits `libseams-chemfiles`.
 - README.md said the 2.14.1 PyPI wheels do not link chemfiles and that `.pdb`, `.gro`, and `.dcd` reads raise `RuntimeError`. The wheel build config (`pyproject.toml`, `build_wheels.yml`) enables both chemfiles and readcon-core for every release wheel and the sdist install, and a real wheel build confirms `has_chemfiles()` and `has_readcon()` are both `True`. The README now says release wheels link both libraries and read every documented suffix (LAMMPS, `.xyz`, `.con`, `.pdb`, `.gro`, `.dcd`) directly.
 - Tetrahedral order and the Local Structure Index also work on Python 3.11. They use Minimage's exact periodic distances when the Linkcell Python package is unavailable.
