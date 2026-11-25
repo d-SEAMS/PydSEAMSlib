@@ -222,6 +222,9 @@ let
     build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
     nativeBuildInputs = [ cmake ];
     dontUseCmakeConfigure = true;
+    # Darwin provides fdopen. Mark it as available so Chemfiles' bundled zlib
+    # keeps the SDK function instead of defining its classic Mac fallback.
+    env.NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isDarwin "-Dfdopen=fdopen";
     # readcon's C++ bridge scans Cargo's registry for the headers. Nix
     # stores those same crates under the fixed-output vendor directory.
     postPatch = ''
