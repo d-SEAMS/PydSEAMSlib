@@ -19,7 +19,6 @@ curl -sLo input/traj/exampleTraj.lammpstrj \
   https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/traj/exampleTraj.lammpstrj
 curl -fsSL -o input/fetch.py \
   https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/fetch.py
-python3 input/fetch.py mW_cubic.lammpstrj
 #+end_src
 
 * Learning goals
@@ -134,9 +133,19 @@ order without cage closure remains water.
 
 On the 4096-molecule cubic mW crystal (~mW_cubic.lammpstrj~, type 1),
 every molecule has four staggered bonds and sits inside a complete DDC,
-so CHILL+ and cage membership both classify all 4096 atoms as cubic:
+so CHILL+ and cage membership both classify all 4096 atoms as cubic.
+~input/fetch.py~ downloads the copy that seams-core v2.14.2 pins and
+checks its SHA-256; a verified local copy is reused:
 
 #+begin_src python
+import subprocess
+import sys
+
+subprocess.run(
+    [sys.executable, "input/fetch.py", "mW_cubic.lammpstrj"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
 cubic = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
 cubic_chill = cubic.chill_plus()
 cubic_cages = cubic.cages()
