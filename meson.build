@@ -355,7 +355,7 @@ py.install_sources(
 # The 2.14 API: import dseams.
 subdir('src/dseams')
 
-# The sdist keeps the patched linkcell and the vesin and gpulite overlays.
+# The sdist keeps wrap-git patches and the vesin and gpulite overlays.
 meson.add_dist_script(py, files('scripts/dist_subprojects.py'))
 
 # Shared-library paths. A build target has full_path(); an installed

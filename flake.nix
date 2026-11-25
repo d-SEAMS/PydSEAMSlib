@@ -7,7 +7,7 @@
     # Source only: meson builds seams-core as a subproject. Same tag as
     # subprojects/seams-core.wrap.
     seams-core = {
-      url = "github:d-SEAMS/seams-core/v2.14.2";
+      url = "github:d-SEAMS/seams-core/v2.14.3";
       flake = false;
     };
   };
