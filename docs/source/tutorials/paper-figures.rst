@@ -15,8 +15,9 @@ Prerequisites
 
     pip install 'pydseamslib==2.14.2'
     mkdir -p input/traj
-    curl -sLo input/traj/mW_cubic.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/mW_cubic.lammpstrj
+    curl -fsSL -o input/fetch.py \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/5aecb1031b10d0978e24aea20bfe300a5fa83e46/input/fetch.py
+    python3 input/fetch.py mW_cubic.lammpstrj
     curl -sLo input/traj/genice_sI.lammpstrj \
       https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/genice_sI.lammpstrj
 
