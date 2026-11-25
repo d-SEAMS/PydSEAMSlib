@@ -98,6 +98,7 @@ config-settings = { "setup-args" = [
   "-Dwith_readcon=enabled",
 ] }
 test-extras = ["test"]
+before-test = "python {project}/subprojects/seams-core/input/fetch.py mW_cubic.lammpstrj"
 test-command = [
   "python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'",
   "python {project}/scripts/check_installed_api.py",
