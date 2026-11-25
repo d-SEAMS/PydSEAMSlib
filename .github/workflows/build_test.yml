@@ -29,6 +29,7 @@ jobs:
         shell: bash -el {0}
         run: |
           pip install -v '.[test,ase]'
+          python subprojects/seams-core/input/fetch.py mW_cubic.lammpstrj
           python -c 'import pydseamslib as ds; print(ds.__version__); print(ds.cyoda)'
           python -c 'import dseams; print(dseams.__version__)'
           python -m pytest -vvv tests/python

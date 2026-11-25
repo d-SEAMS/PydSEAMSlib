@@ -69,6 +69,7 @@ jobs:
       - name: Test the sdist install
         working-directory: ${{ runner.temp }}
         run: |
+          python "$GITHUB_WORKSPACE/subprojects/seams-core/input/fetch.py" mW_cubic.lammpstrj
           "$RUNNER_TEMP/sdist-venv"/bin/python -c 'import dseams, pydseams; print(dseams.__version__, pydseams.__version__)'
           "$RUNNER_TEMP/sdist-venv"/bin/python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'
           "$RUNNER_TEMP/sdist-venv"/bin/python "$GITHUB_WORKSPACE/scripts/check_installed_api.py"
