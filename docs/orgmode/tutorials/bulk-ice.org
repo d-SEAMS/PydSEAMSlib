@@ -16,9 +16,9 @@ crystal shows why the two scores can disagree.
 #+begin_src bash
 mkdir -p input/traj
 curl -sLo input/traj/exampleTraj.lammpstrj \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/traj/exampleTraj.lammpstrj
 curl -fsSL -o input/fetch.py \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/5aecb1031b10d0978e24aea20bfe300a5fa83e46/input/fetch.py
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/fetch.py
 python3 input/fetch.py mW_cubic.lammpstrj
 #+end_src
 
