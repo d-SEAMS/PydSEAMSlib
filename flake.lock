@@ -42,16 +42,16 @@
     "seams-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1795581453,
-        "narHash": "sha256-vvpeEwrGheW1GueEc/3rMpQh1nzQOCIbqyDovKx4ynI=",
+        "lastModified": 1795612539,
+        "narHash": "sha256-iZt0F2s0i9uRQfncfp+61XJMsSBTj3dFqxtc4Nfv9Qw=",
         "owner": "d-SEAMS",
         "repo": "seams-core",
-        "rev": "58edd1d826bf3925d61956681c2b9c086a7b649c",
+        "rev": "ae19e21dcfc34f97e4a4b0f013d5a8a2e468ac77",
         "type": "github"
       },
       "original": {
         "owner": "d-SEAMS",
-        "ref": "v2.14.2",
+        "ref": "v2.14.3",
         "repo": "seams-core",
         "type": "github"
       }
