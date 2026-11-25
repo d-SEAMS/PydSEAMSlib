@@ -1,7 +1,7 @@
 name: Build wheels
 # pydseamslib on PyPI: the sdist, then wheels built from that sdist.
-# Publishing runs only for a v* tag on d-SEAMS/PydSEAMSlib, through PyPI
-# trusted publishing.
+# Publishing uses PyPI trusted publishing for a version tag or a manual
+# metadata correction to that tag on d-SEAMS/PydSEAMSlib main.
 #
 # The engine links the linkcell, minimage and readcon Rust crates, so
 # every build host needs cargo.
@@ -21,28 +21,74 @@ on:
       - scripts/check_installed_api.py
       - .github/workflows/build_wheels.yml
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Rebuild an existing release with a corrected PyPI summary
+        type: string
+        required: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: wheels-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  group: wheels-${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+  cancel-in-progress: ${{ !inputs.release_tag && !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag || (startsWith(github.ref, 'refs/tags/v') && github.ref_name) || '' }}
 
 jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ inputs.release_tag && '0' || '1' }}
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Tag matches the package version
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Check the package summary and release tag
         run: |
-          version=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
-          test "v${version}" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} is not v${version}"; exit 1; }
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+
+          project = tomllib.loads(Path("pyproject.toml").read_text())["project"]
+          if not 1 <= len(project["description"]) <= 512:
+              raise SystemExit("PyPI requires a package summary of at most 512 characters")
+          tag = os.environ["RELEASE_TAG"]
+          if tag and tag != f"v{project['version']}":
+              raise SystemExit(f"{tag} does not match package version {project['version']}")
+          PY
+      - name: Verify the summary correction against the existing tag
+        if: inputs.release_tag
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          ref="refs/tags/$RELEASE_TAG"
+          git merge-base --is-ancestor "$ref" HEAD
+          python - <<'PY'
+          import os
+          import subprocess
+          import tomllib
+          from pathlib import Path
+
+          ref = "refs/tags/" + os.environ["RELEASE_TAG"]
+          changed = subprocess.check_output(
+              ["git", "diff", "--name-only", "-z", ref, "HEAD"], text=True
+          ).rstrip("\0").split("\0")
+          if set(changed) != {"pyproject.toml", ".github/workflows/build_wheels.yml"}:
+              raise SystemExit(f"Unexpected changes since {ref}: {', '.join(changed)}")
+          released = tomllib.loads(subprocess.check_output(
+              ["git", "show", f"{ref}:pyproject.toml"], text=True
+          ))
+          candidate = tomllib.loads(Path("pyproject.toml").read_text())
+          old_summary = released["project"].pop("description")
+          new_summary = candidate["project"].pop("description")
+          if released != candidate or old_summary == new_summary:
+              raise SystemExit("The package summary must be the only metadata change")
+          PY
       - name: Build the sdist
         run: |
           python -m pip install build
@@ -180,7 +226,10 @@ jobs:
 
   publish:
     needs: [sdist, wheels, clean-install]
-    if: github.repository == 'd-SEAMS/PydSEAMSlib' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      github.repository == 'd-SEAMS/PydSEAMSlib' &&
+      ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.release_tag))
     runs-on: ubuntu-latest
     # The trusted publisher on
     # https://pypi.org/manage/project/pydseamslib/settings/publishing/
