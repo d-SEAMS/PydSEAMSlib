@@ -14,9 +14,9 @@ Prerequisites
     pip install 'pydseamslib==2.14.2'
     mkdir -p input/traj
     curl -sLo input/traj/exampleTraj.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/traj/exampleTraj.lammpstrj
     curl -sLo input/traj/genice_sI.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/genice_sI.lammpstrj
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.2/input/traj/genice_sI.lammpstrj
 
 The mixed TIP4P frame
 ---------------------
