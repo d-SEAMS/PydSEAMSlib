@@ -15,7 +15,7 @@ Prerequisites
     pip install pydseamslib
     mkdir -p input/traj
     curl -sLo input/traj/exampleTraj.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/exampleTraj.lammpstrj
 
 Hydrogen-bond vs cutoff ring census
 -----------------------------------

@@ -175,6 +175,6 @@ def test_seams_isolated_atoms_have_an_empty_cutoff_graph():
             _f64(profile.molality, (4,))
             _f64(profile.ice_fraction, (4,))
             pockets = brine.pockets()
-            # An all-liquid frame has no brine pockets or reservoir waters.
+            # seams-core 2.14.2 counts every water of an all-liquid frame as reservoir.
             assert pockets.n_pockets == 0
-            assert pockets.reservoir_waters == 0
+            assert pockets.reservoir_waters == 3

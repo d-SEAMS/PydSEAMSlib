@@ -1,6 +1,5 @@
 [wrap-git]
 directory = seams-core
 url = https://github.com/d-SEAMS/seams-core.git
-revision = v2.14.1
+revision = v2.14.3
 depth = 1
-diff_files = seams-core-chemfiles-install.patch

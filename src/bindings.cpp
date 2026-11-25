@@ -58,6 +58,24 @@ namespace nb = nanobind;
 NB_MODULE(yoda, m) {
     m.doc() = "d-SEAMS compiled surface (yoda)";
 
+    nb::dict build_features;
+#ifdef SEAMS_HAS_CHEMFILES
+    build_features["with_chemfiles"] = true;
+#else
+    build_features["with_chemfiles"] = false;
+#endif
+#ifdef SEAMS_HAS_READCON
+    build_features["with_readcon"] = true;
+#else
+    build_features["with_readcon"] = false;
+#endif
+#ifdef SEAMS_HAS_IRA
+    build_features["with_ira"] = true;
+#else
+    build_features["with_ira"] = false;
+#endif
+    m.attr("_build_features") = build_features;
+
     nb::class_<molSys::Point<double>>(
         m, "PointDouble", "Per-particle data: coordinates, type, molecule ID, ice classification.")
         .def(nb::init<>())
@@ -654,34 +672,41 @@ NB_MODULE(yoda, m) {
           nb::arg("yCloud"),
           nb::arg("maxDepth"),
           nb::arg("firstFrame"));
-    m.def("_prismCounts",
-          [](Cloud &cloud, const std::vector<std::vector<int>> &graph, int depth,
-             bool shapeMatching) {
-              if (depth < 3 || graph.size() != cloud.pts.size()) {
-                  throw std::invalid_argument("prism counts need max_depth >= 3 and a row per atom");
-              }
-              for (const auto &row : graph) {
-                  for (const int atom : row) {
-                      if (atom < 0 || static_cast<std::size_t>(atom) >= graph.size()) {
-                          throw std::invalid_argument("prism graph has an invalid atom index");
-                      }
-                  }
-              }
-              const auto rings = primitive::ringNetwork(graph, depth);
-              std::vector<double> rmsd(cloud.pts.size(), -1.0);
-              nb::dict counts;
-              for (int size = 3; size <= depth; ++size) {
-                  const auto basal = ring::getSingleRingSize(rings, size);
-                  std::vector<ring::strucType> types(basal.size());
-                  int perfect = 0, imperfect = 0;
-                  if (!basal.empty()) {
-                      ring::findPrisms(basal, types, perfect, imperfect, graph, cloud, rmsd, shapeMatching);
-                  }
-                  counts[nb::int_(size)] = nb::make_tuple(perfect, imperfect);
-              }
-              return counts;
-          },
-          nb::arg("cloud"), nb::arg("graph"), nb::arg("depth"), nb::arg("shape_matching"));
+    m.def(
+        "_prismCounts",
+        [](Cloud &cloud,
+           const std::vector<std::vector<int>> &graph,
+           int depth,
+           bool shapeMatching) {
+            if (depth < 3 || graph.size() != cloud.pts.size()) {
+                throw std::invalid_argument("prism counts need max_depth >= 3 and a row per atom");
+            }
+            for (const auto &row : graph) {
+                for (const int atom : row) {
+                    if (atom < 0 || static_cast<std::size_t>(atom) >= graph.size()) {
+                        throw std::invalid_argument("prism graph has an invalid atom index");
+                    }
+                }
+            }
+            const auto rings = primitive::ringNetwork(graph, depth);
+            std::vector<double> rmsd(cloud.pts.size(), -1.0);
+            nb::dict counts;
+            for (int size = 3; size <= depth; ++size) {
+                const auto basal = ring::getSingleRingSize(rings, size);
+                std::vector<ring::strucType> types(basal.size());
+                int perfect = 0, imperfect = 0;
+                if (!basal.empty()) {
+                    ring::findPrisms(
+                        basal, types, perfect, imperfect, graph, cloud, rmsd, shapeMatching);
+                }
+                counts[nb::int_(size)] = nb::make_tuple(perfect, imperfect);
+            }
+            return counts;
+        },
+        nb::arg("cloud"),
+        nb::arg("graph"),
+        nb::arg("depth"),
+        nb::arg("shape_matching"));
     m.def("prismAnalysis",
           &ring::prismAnalysis,
           "Run prism identification on rings up to maxDepth and write output.",

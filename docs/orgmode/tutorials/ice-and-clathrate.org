@@ -7,12 +7,12 @@ clathrate polyhedra by ring-face signature on an sI clathrate crystal.
 * Prerequisites
 
 #+begin_src bash
-pip install 'pydseamslib==2.14.1'
+pip install 'pydseamslib==2.14.3'
 mkdir -p input/traj
 curl -sLo input/traj/exampleTraj.lammpstrj \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/exampleTraj.lammpstrj
 curl -sLo input/traj/genice_sI.lammpstrj \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/genice_sI.lammpstrj
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/genice_sI.lammpstrj
 #+end_src
 
 * The mixed TIP4P frame

@@ -4,8 +4,8 @@ build-backend = "mesonpy"
 
 [project]
 name = "pydseamslib"
-version = "2.14.1"
-description = "Python bindings for the d-SEAMS engine (import pydseams, import pydseamslib, import dseams). Analyses: CHILL and CHILL+ ice labels, q4 and q6 Steinhardt parameters, symmetry, primitive rings, hexagonal and double-diamond cages, cage signatures, topological fingerprints, ion environments, hydration-shell rings, guest occupancy, prisms, monolayer rings, radial distribution functions, coordination numbers, density profiles, ion clouds, contact pairs, connected domains, SOAP, Voronoi features, and hydrogen-bond networks. Readers: LAMMPS dumps, XYZ, eOn .con when readcon-core is linked, and PDB, GRO, and DCD when chemfiles is linked."
+version = "2.14.3"
+description = "Python bindings for d-SEAMS molecular trajectory analysis, including ice classification, structural order, rings, cages, and hydrogen-bond networks."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -98,6 +98,7 @@ config-settings = { "setup-args" = [
   "-Dwith_readcon=enabled",
 ] }
 test-extras = ["test"]
+before-test = "python {project}/subprojects/seams-core/input/fetch.py mW_cubic.lammpstrj"
 test-command = [
   "python -c 'import pydseams as ds; readers = ds.available_readers(); assert ds.has_chemfiles() is True and ds.has_readcon() is True, readers; print(readers)'",
   "python {project}/scripts/check_installed_api.py",
@@ -116,7 +117,10 @@ inherit.config-settings = "append"
 
 [tool.cibuildwheel.linux]
 # linkcell is a Rust crate; the manylinux image has no toolchain.
-before-all = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal"
+before-all = """
+dnf -y install sqlite-devel
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+"""
 environment = { PATH = "$HOME/.cargo/bin:$PATH" }
 
 [tool.cibuildwheel.macos]

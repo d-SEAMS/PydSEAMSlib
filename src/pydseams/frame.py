@@ -456,8 +456,17 @@ class Frame:
 
     @classmethod
     def from_arrays(
-        cls, positions, cell, numbers=None, cutoff=None, bonded="cutoff", box_low=None,
-        *, mol_ids=None, hydrogen_positions=None, hydrogen_mol_ids=None,
+        cls,
+        positions,
+        cell,
+        numbers=None,
+        cutoff=None,
+        bonded="cutoff",
+        box_low=None,
+        *,
+        mol_ids=None,
+        hydrogen_positions=None,
+        hydrogen_mol_ids=None,
     ):
         """Build a frame from ``(N, 3)`` positions and a periodic box.
 
@@ -500,7 +509,9 @@ class Frame:
         if len(nums) != n or (mol_ids is not None and len(mol_ids) != n):
             raise ValueError("numbers and mol_ids must match positions")
         if (hydrogen_positions is None) != (hydrogen_mol_ids is None):
-            raise ValueError("hydrogen_positions and hydrogen_mol_ids must be supplied together")
+            raise ValueError(
+                "hydrogen_positions and hydrogen_mol_ids must be supplied together"
+            )
         h_cloud = None
         if hydrogen_positions is not None:
             if len(hydrogen_positions) != len(hydrogen_mol_ids):
@@ -1267,7 +1278,9 @@ class Frame:
         max_depth. Shape matching enables recognition of deformed prisms.
         Results stay in memory.
         """
-        return yoda._prismCounts(self.cloud, self.bonds_by_index, max_depth, shape_matching)
+        return yoda._prismCounts(
+            self.cloud, self.bonds_by_index, max_depth, shape_matching
+        )
 
     def find_prisms(self, output_dir="output/", max_depth=6, shape_matching=False):
         """Identify prism blocks and write engine output under ``output_dir``.
@@ -1627,6 +1640,7 @@ class Frame:
         four closest sites at any distance. Requires the local-order extra.
         """
         from .liquid_order import tetrahedral_q
+
         return tetrahedral_q(self, cutoff)
 
     def local_structure_index(self, cutoff=3.7):
@@ -1637,6 +1651,7 @@ class Frame:
         oxygens for the Shiratani–Sasai LSI. Requires the local-order extra.
         """
         from .liquid_order import local_structure_index
+
         return local_structure_index(self, cutoff)
 
     def steinhardt_voronoi(self, order_l=6, cutoff=None):

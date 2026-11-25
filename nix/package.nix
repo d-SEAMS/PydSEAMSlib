@@ -4,6 +4,7 @@
   meson,
   ninja,
   pkg-config,
+  cmake,
   eigen,
   blas,
   lapack,
@@ -11,6 +12,7 @@
   llvmPackages,
   stdenv,
   fetchFromGitHub,
+  fetchPypi,
   rustPlatform,
   seams-core-src,
 }:
@@ -116,14 +118,14 @@ let
         exit 1
       fi
     '';
-  geometryLibrary = { pname, version, owner, rev, hash }:
+  geometryLibrary = { pname, version, owner, rev, hash, cargoHash }:
     rustPlatform.buildRustPackage rec {
-      inherit pname version;
+      inherit pname version cargoHash;
       src = fetchFromGitHub { inherit owner rev hash; repo = pname; };
-      cargoLock.lockFile = "${src}/Cargo.lock";
       cargoBuildFlags = [ "--package" pname "--lib" ];
       cargoTestFlags = [ "--package" pname ];
       RAYON_NUM_THREADS = "8";
+      LINKCELL_OPENMP = "0";
       preBuild = darwinCdylibHook "lib${pname}.dylib";
       postInstall = ''
         mkdir -p "$out/include" "$out/lib/pkgconfig"
@@ -147,13 +149,15 @@ let
     owner = "lode-org";
     rev = "ce6dfb175f32459de1ee06dfeb70e8a718f61876";
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
+    cargoHash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
   };
   linkcell = geometryLibrary {
     pname = "linkcell";
-    version = "0.4.2";
+    version = "0.6.0";
     owner = "d-SEAMS";
-    rev = "v0.4.2";
-    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+    rev = "0bc73576ceb4ea79909a3ad7a7931275b59a9fe4";
+    hash = "sha256-hvvSe2mZW4OuCz/HJUMpv8n7rmWZxQ67JaUO1Cy7Rbo=";
+    cargoHash = "sha256-2QscNVUPmCrwO1cAHWnDZAtU8Hsr6Bl/WTO65WwDsC8=";
   };
   # seams-core reads .con frames through readcon-core. The binding
   # option with_readcon defaults to auto and finds this library by
@@ -167,7 +171,7 @@ let
       rev = "9e12ea9727d5f3c85d8eeb4d927beb634e1bdb59";
       hash = "sha256-N3dH/eGnulSuq2aV0ghRul0v/OZZE5UBUUc/sUgnUB4=";
     };
-    cargoLock.lockFile = "${src}/Cargo.lock";
+    cargoHash = "sha256-VB5P5YC6JpXTy4cxAZc6kdiEUIw5WquMOlyfhn2NS3I=";
     cargoBuildFlags = [ "--lib" ];
     cargoTestFlags = [ "--lib" ];
     preBuild = darwinCdylibHook "libreadcon_core.dylib";
@@ -186,6 +190,49 @@ let
       Cflags: -I$out/include
       EOF
     '' + assertDarwinInstallName "libreadcon_core.dylib";
+  };
+  minimagePython = python3.pkgs.buildPythonPackage rec {
+    pname = "minimage";
+    version = "0.2.3";
+    pyproject = true;
+    src = fetchPypi {
+      inherit pname version;
+      hash = "sha256-n5COD6ACMagZdmMAGKNJz9ID3k9GV681XkrM5VuvJM8=";
+    };
+    cargoDeps = rustPlatform.fetchCargoVendor {
+      inherit pname version src;
+      hash = "sha256-VIQGbCeIuxZTAO/3GMImJ6Ot1VWoJzwMCefGkG4zkaM=";
+    };
+    build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
+    pythonImportsCheck = [ "minimage" ];
+  };
+  readconPython = python3.pkgs.buildPythonPackage rec {
+    pname = "readcon-chemfiles";
+    version = "0.23.2";
+    pyproject = true;
+    src = fetchPypi {
+      pname = "readcon_chemfiles";
+      inherit version;
+      hash = "sha256-OOstinvqcBgu9XvjWe8EYuHJki9UnXeMH5LLMM4vrDc=";
+    };
+    cargoDeps = rustPlatform.fetchCargoVendor {
+      inherit pname version src;
+      hash = "sha256-elG4RKHcPFoXgw+UOBypvi49BfACTXiYaq17LnQnAH0=";
+    };
+    build-system = with rustPlatform; [ cargoSetupHook maturinBuildHook ];
+    nativeBuildInputs = [ cmake ];
+    dontUseCmakeConfigure = true;
+    # Darwin provides fdopen. Mark it as available so Chemfiles' bundled zlib
+    # keeps the SDK function instead of defining its classic Mac fallback.
+    env.NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isDarwin "-Dfdopen=fdopen";
+    # readcon's C++ bridge scans Cargo's registry for the headers. Nix
+    # stores those same crates under the fixed-output vendor directory.
+    postPatch = ''
+      substituteInPlace build.rs --replace-fail \
+        'let mut roots = Vec::new();' \
+        'let mut roots = vec![PathBuf::from("${cargoDeps}")];'
+    '';
+    pythonImportsCheck = [ "readcon" ];
   };
   nanobindSrc = fetchFromGitHub {
     owner = "wjakob";
@@ -209,12 +256,15 @@ python3.pkgs.buildPythonPackage {
     root = ./..;
     fileset = lib.fileset.unions [
       ../meson.build
+      ../meson.options
       ../pyproject.toml
       ../README.md
       ../LICENSE
       ../examples
+      ../docs/source/api.md
       ../scripts/stage_nanobind.py
       ../scripts/dist_subprojects.py
+      ../scripts/yoda_public_names.py
       ../src
       ../tests
       ../subprojects/nanobind.wrap
@@ -253,6 +303,8 @@ python3.pkgs.buildPythonPackage {
     python3.pkgs.pytestCheckHook
     python3.pkgs.hypothesis
     python3.pkgs.ase
+    minimagePython
+    readconPython
   ];
 
   # meson-python drives configure. The meson setup hook would leave
@@ -260,12 +312,17 @@ python3.pkgs.buildPythonPackage {
   dontUseMesonConfigure = true;
   dontUseMesonInstall = true;
   mesonAutoFeatures = "disabled";
+  # The wheel default uses the Eigen wrap. The sandbox supplies Eigen
+  # in buildInputs and resolves the native dependencies without downloads.
+  pypaBuildFlags = [
+    "--config-setting=setup-args=--force-fallback-for="
+    "--config-setting=setup-args=--wrap-mode=nodownload"
+  ];
 
   postPatch = ''
     mkdir -p subprojects
     cp -r ${seams-core-src} subprojects/seams-core
     chmod -R u+w subprojects/seams-core
-    rm -rf subprojects/seams-core/subprojects
 
     cp -r ${nanobindSrc} subprojects/nanobind-2.14.0
     chmod -R u+w subprojects/nanobind-2.14.0

@@ -53,7 +53,7 @@ Install with `pip install pydseamslib`; extras are `[ase]`, `[mdanalysis]` and `
 ## Engine
 
 - [d-SEAMS/seams-core](https://github.com/d-SEAMS/seams-core): The C++ engine, the libseams C API, the language-front ABI and the CLI.
-- [seams.h](https://github.com/d-SEAMS/seams-core/blob/v2.14.1/include/seams.h): The C API header `dseams` and the `seams` ctypes package wrap.
+- [seams.h](https://github.com/d-SEAMS/seams-core/blob/v2.14.3/include/seams.h): The C API header `dseams` and the `seams` ctypes package wrap.
 - [docs.dseams.info](https://docs.dseams.info): d-SEAMS documentation: analyses, C API reference and every language front.
 
 ## Other language bindings

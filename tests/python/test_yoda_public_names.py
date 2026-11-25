@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGE = ROOT / "docs" / "source" / "api.md"
 
 
-def _public_names():
+def _public_names(*, features=None):
     path = ROOT / "scripts" / "yoda_public_names.py"
     spec = importlib.util.spec_from_file_location("yoda_public_names", path)
     if spec is None or spec.loader is None:
@@ -22,7 +22,7 @@ def _public_names():
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
-    return module.public_names(ROOT)
+    return module.public_names(ROOT, features=features)
 
 
 def _table_names(text: str) -> set[str]:
@@ -37,11 +37,17 @@ def _table_names(text: str) -> set[str]:
 
 
 def test_package_exposes_the_bindings_this_build_registers():
-    names = _public_names()
+    features = yoda._build_features
+    names = _public_names(features=features)
     live = {name for name in dir(yoda) if not name.startswith("_")}
+    n_optional = (
+        int(features["with_chemfiles"])
+        + int(features["with_readcon"])
+        + 2 * int(features["with_ira"])
+    )
     assert live == set(names.exposed)
-    assert len(live) == 153
-    assert len(names.exposed_functions) == 125
+    assert len(live) == 152 + n_optional
+    assert len(names.exposed_functions) == 124 + n_optional
     assert len(names.exposed_types) == 26
     assert names.exposed_aliases == ("Kind", "Family")
 
@@ -50,6 +56,7 @@ def test_compiled_module_page_lists_every_registered_name():
     names = _public_names()
     text = PAGE.read_text(encoding="utf-8")
     assert _table_names(text) == set(names.registered)
+    assert len(names.exposed) == 154
     assert "{{ yoda_names }}" in text
     assert "{{ yoda_functions }}" in text
     assert "{{ yoda_types }}" in text

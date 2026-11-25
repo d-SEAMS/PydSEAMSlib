@@ -13,12 +13,12 @@ Prerequisites
 
 .. code:: bash
 
-    pip install 'pydseamslib==2.14.1'
+    pip install 'pydseamslib==2.14.3'
     mkdir -p input/traj
-    curl -sLo input/traj/mW_cubic.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/mW_cubic.lammpstrj
+    curl -fsSL -o input/fetch.py \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/fetch.py
     curl -sLo input/traj/genice_sI.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/genice_sI.lammpstrj
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/genice_sI.lammpstrj
 
 Reference summary
 -----------------
@@ -42,13 +42,23 @@ Run the bulk and clathrate checks
 
 ``Frame.chill_plus`` and ``Frame.cages`` run on the cubic mW cell, while
 ``dseams.userframe.Frame.cages_by_signature`` counts the sI :math:`5^{12}`
-cages and their distinct vertex atoms:
+cages and their distinct vertex atoms. ``input/fetch.py`` downloads the
+cubic mW cell that seams-core v2.14.3 pins and checks its SHA-256; a
+verified local copy is reused:
 
 .. code:: python
+
+    import subprocess
+    import sys
 
     import pydseams as ds
     from dseams import userframe
 
+    subprocess.run(
+        [sys.executable, "input/fetch.py", "mW_cubic.lammpstrj"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
     ice = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
     print("cubic:", ice.chill_plus().cubic, "ddc:", ice.cages().n_ic)
     assert ice.chill_plus().cubic == 4096 and ice.cages().n_ic == 4096

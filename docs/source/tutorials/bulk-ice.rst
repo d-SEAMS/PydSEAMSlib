@@ -11,7 +11,7 @@ crystal shows why the two scores can disagree.
 Prerequisites
 -------------
 
-- Python 3.11+ with ``pydseamslib`` installed (``pip install 'pydseamslib==2.14.1'``)
+- Python 3.11+ with ``pydseamslib`` installed (``pip install 'pydseamslib==2.14.3'``)
 
 - Sample trajectories ``exampleTraj.lammpstrj`` (250 TIP4P waters;
   LAMMPS type 2 oxygen, type 1 hydrogen) and ``mW_cubic.lammpstrj``
@@ -21,9 +21,9 @@ Prerequisites
 
     mkdir -p input/traj
     curl -sLo input/traj/exampleTraj.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
-    curl -sLo input/traj/mW_cubic.lammpstrj \
-      https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/mW_cubic.lammpstrj
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/exampleTraj.lammpstrj
+    curl -fsSL -o input/fetch.py \
+      https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/fetch.py
 
 Learning goals
 --------------
@@ -161,10 +161,20 @@ Step 5: Contrast with a cubic crystal
 
 On the 4096-molecule cubic mW crystal (``mW_cubic.lammpstrj``, type 1),
 every molecule has four staggered bonds and sits inside a complete DDC,
-so CHILL+ and cage membership both classify all 4096 atoms as cubic:
+so CHILL+ and cage membership both classify all 4096 atoms as cubic.
+``input/fetch.py`` downloads the copy that seams-core v2.14.3 pins and
+checks its SHA-256; a verified local copy is reused:
 
 .. code:: python
 
+    import subprocess
+    import sys
+
+    subprocess.run(
+        [sys.executable, "input/fetch.py", "mW_cubic.lammpstrj"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
     cubic = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
     cubic_chill = cubic.chill_plus()
     cubic_cages = cubic.cages()

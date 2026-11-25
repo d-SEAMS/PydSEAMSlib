@@ -16,25 +16,42 @@
         "type": "github"
       }
     },
+    "nixpkgsIntelDarwin": {
+      "locked": {
+        "lastModified": 1795387764,
+        "narHash": "sha256-c2VS34FJxgjfNbfKgh837LzPzx9S2FXTez+Th1iKDZ8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f0b41a99f28c34ffeaff61d4b419afff0516a923",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "nixpkgsIntelDarwin": "nixpkgsIntelDarwin",
         "seams-core": "seams-core"
       }
     },
     "seams-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1795024142,
-        "narHash": "sha256-X+Fub33bx+a0utNUbEQQ4tEx8M2ri25GBqoHWTEnHNM=",
+        "lastModified": 1795612539,
+        "narHash": "sha256-iZt0F2s0i9uRQfncfp+61XJMsSBTj3dFqxtc4Nfv9Qw=",
         "owner": "d-SEAMS",
         "repo": "seams-core",
-        "rev": "0f6c82810f5c1e61a70c363cca50fe8148b3ff21",
+        "rev": "ae19e21dcfc34f97e4a4b0f013d5a8a2e468ac77",
         "type": "github"
       },
       "original": {
         "owner": "d-SEAMS",
-        "ref": "v2.14.1",
+        "ref": "v2.14.3",
         "repo": "seams-core",
         "type": "github"
       }

@@ -10,6 +10,51 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.3] - 2026-11-25
+
+### Changed
+
+- An installed engine (pkg-config `seams-core`, `seams`, and `seams-lang`) is used only at 2.14.3 or newer. An older one is ignored and the build uses the seams-core 2.14.3 subproject.
+- Build against seams-core 2.14.3. The linkcell wrap follows that tag at 0bc73576, which already contains the macOS OpenMP fixes, so the wrap applies no linkcell patch.
+- With seams-core 2.14.2, the brine pocket census of a frame with no ice counts every liquid water as reservoir. Three isolated waters give no pockets and `reservoir_waters == 3`, not 0.
+
+### Fixed
+
+- The bulk-ice and paper-figures tutorials fetch `mW_cubic.lammpstrj` with the seams-core v2.14.3 `input/fetch.py` in their Python code, so the pages run without a separate shell step. seams-core 2.14.3 keeps that trajectory in its Hugging Face dataset instead of its repository.
+- The tutorials and the ice-classification notebook download `fetch.py`, `exampleTraj.lammpstrj`, and `genice_sI.lammpstrj` from the seams-core v2.14.3 tag instead of from `main` or an earlier commit.
+
+
+## [2.14.2] - 2026-11-24
+
+### Added
+
+- Accept separate hydrogen coordinates and explicit molecule IDs in `from_arrays` for hydrogen-bond analysis.
+- Count perfect and imperfect prisms in memory with `Frame.prism_counts()`.
+- Developer and release notes are Org mode pages under `docs/orgmode/contributing/developer/`. A release is cut with cocogitto and towncrier.
+- Measure per-site tetrahedral order and the local structure index on periodic frames with the `local-order` extra.
+- Read selected sites and their hydrogens from labelled XTC, TRR and GRO trajectories with `iter_trajectory` and the `readcon` extra.
+- Source builds detect chemfiles and readcon-core the way seams-core does. PDB, GRO, and DCD are read when chemfiles is linked, and eOn `.con` when readcon-core is linked. A build without either library still succeeds and keeps the LAMMPS and XYZ readers. `has_chemfiles()`, `has_readcon()`, and `available_readers()` report which readers the loaded engine has. A wheel that vendors chemfiles installs that library with the other bundled libraries so the installed module can load it.
+
+### Changed
+
+- A release bump runs `python3 -m cogapp -I ci/version -r @ci/version/files.txt` and then `towncrier build --yes --version {{version}}`. The version copies read `pyproject.toml` directly. `ci/version/` holds only `files.txt`.
+- Build against seams-core 2.14.2, including the required Linkcell backend and the patched Chemfiles runtime.
+- Release wheels and the sdist install enable chemfiles and readcon-core. The wheel tests require `has_chemfiles()` and `has_readcon()` to be true. The vendored chemfiles library is installed under the SONAME or install name reported by patchelf, otool, or objdump. Configure fails when that tool or the library is missing.
+- The package description names the analyses and the trajectory readers the bindings expose.
+
+### Fixed
+
+- The Nix flake uses Nixpkgs 26.05 on Intel macOS and fetches the pinned Rust dependencies without building a dependency during evaluation.
+- Configure fails when a bundled chemfiles library cannot be named. patchelf (or objdump) on Linux and otool on macOS are required for that build, so a wheel no longer omits `libseams-chemfiles`.
+- README.md said the 2.14.1 PyPI wheels do not link chemfiles and that `.pdb`, `.gro`, and `.dcd` reads raise `RuntimeError`. The wheel build config (`pyproject.toml`, `build_wheels.yml`) enables both chemfiles and readcon-core for every release wheel and the sdist install, and a real wheel build confirms `has_chemfiles()` and `has_readcon()` are both `True`. The README now says release wheels link both libraries and read every documented suffix (LAMMPS, `.xyz`, `.con`, `.pdb`, `.gro`, `.dcd`) directly.
+- Tetrahedral order and the Local Structure Index also work on Python 3.11. They use Minimage's exact periodic distances when the Linkcell Python package is unavailable.
+- The compiled-module page counts public `pydseams.yoda` names from the bindings and from the seams-core options this package builds with.
+- The science tutorial builds its C examples with the same compiler and linker flags as the bundled engine.
+- The science tutorial no longer writes a stand-in png when Tachyon is missing, so the contact-sheet check fails instead of accepting that picture. The docs workflow installs OVITO and renders `interface.png`, `brine.png`, `sii.png`, and `sh.png`.
+- The test extra installs on Python 3.11. It requests the optional linkcell Python package on versions that linkcell supports.
+- `dseams.q4q6` documents the two arrays it returns, local q4 and local q6.
+
+
 ## [2.14.1] - 2026-11-19
 
 ### Added

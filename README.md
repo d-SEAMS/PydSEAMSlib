@@ -33,9 +33,9 @@ Unreleased notes are files under `changelog.d/`. The cut is
 `towncrier build --version X.Y.Z`.
 
 ```bash
-python -m pip install 'pydseamslib==2.14.1'
-python -m pip install 'pydseamslib[ase]==2.14.1'      # ASE Atoms
-python -m pip install 'pydseamslib[solvis]==2.14.1'   # solvis / PyVista
+python -m pip install 'pydseamslib==2.14.3'
+python -m pip install 'pydseamslib[ase]==2.14.3'      # ASE Atoms
+python -m pip install 'pydseamslib[solvis]==2.14.3'   # solvis / PyVista
 ```
 
 Each command installs a wheel containing the bundled engine and all three
@@ -61,7 +61,9 @@ on Odysee.
 ```python
 import pydseams as ds
 
-frame = ds.read("water.lammpstrj")  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
+frame = ds.read(
+    "water.lammpstrj"
+)  # release wheels also read .xyz, .con, .pdb, .gro, and .dcd
 print(frame.chill_plus())
 print(frame.cages())
 print(frame.density(bins=100, axis="z"))
@@ -82,7 +84,7 @@ system = frame.to_solvis()  # optional extra
 surface. Helpers (`Frame`, `io`, ASE, solvis) stay in Python.
 `_core` and `cyoda` still name the same module.
 `ds.available_readers()` reports the readers compiled into a wheel. The
-2.14.1 PyPI wheels link chemfiles and readcon-core, so `.pdb`, `.gro`,
+2.14.3 PyPI wheels link chemfiles and readcon-core, so `.pdb`, `.gro`,
 `.dcd`, and eOn `.con` all read directly next to LAMMPS and `.xyz`. Only
 a source build left on the default `auto` detection, with one of those
 libraries unavailable, raises `RuntimeError` for the suffixes that
@@ -145,7 +147,7 @@ lengths or the nine LAMMPS numbers `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
 ## Development
 
 The engine is [seams-core](https://github.com/d-SEAMS/seams-core), a
-Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.1`,
+Meson subproject here. `subprojects/seams-core.wrap` pins tag `v2.14.3`,
 and the other wraps carry the revisions that tag pins. Engine changes
 go to d-SEAMS/seams-core, not to this repository.
 The contributing guide at the repository root has the layout, the test
@@ -196,7 +198,12 @@ formats such as XTC and TRR require a topology with matching atom order.
 ```python
 from pydseams import iter_trajectory
 
-for frame in iter_trajectory("water.xtc", topology="water.gro", residue_name="SOL",
-                             atom_name="OW", hydrogen_names=("HW1", "HW2")):
+for frame in iter_trajectory(
+    "water.xtc",
+    topology="water.gro",
+    residue_name="SOL",
+    atom_name="OW",
+    hydrogen_names=("HW1", "HW2"),
+):
     print(frame.frame, len(frame.rings))
 ```

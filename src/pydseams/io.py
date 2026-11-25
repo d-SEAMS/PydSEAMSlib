@@ -15,9 +15,19 @@ _CHEMFILES = {".pdb", ".gro", ".dcd", ".xtc", ".trr"}
 _LAMMPS = {".lammpstrj", ".dump", ".lammps"}
 
 
-def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
-                    hydrogen_names=(), start=0, stop=None, stride=1,
-                    cutoff=None, bonded="auto"):
+def iter_trajectory(
+    path,
+    *,
+    atom_name,
+    topology=None,
+    residue_name=None,
+    hydrogen_names=(),
+    start=0,
+    stop=None,
+    stride=1,
+    cutoff=None,
+    bonded="auto",
+):
     """Yield frames selected by atom and residue names through readcon.
 
     Coordinate-only formats such as XTC and TRR take a labelled topology
@@ -30,10 +40,13 @@ def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
     import readcon
     from ase.cell import Cell
     from ase.geometry import wrap_positions
+
     from .aseio import _dump_box
 
     if start < 0 or stride < 1 or (stop is not None and stop < 0):
-        raise ValueError("start and stop must be nonnegative and stride must be positive")
+        raise ValueError(
+            "start and stop must be nonnegative and stride must be positive"
+        )
     if isinstance(hydrogen_names, str):
         hydrogen_names = (hydrogen_names,)
     hydrogens = set(hydrogen_names)
@@ -44,8 +57,13 @@ def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
     limit = total if stop is None else min(stop, total)
     source = None if topology is None else str(topology)
     for first in range(start, limit, stride * 32):
-        batch = readcon.read_chemfiles(filename, topology=source, skip=first,
-                                       step=stride, stop=min(first + stride * 32, limit))
+        batch = readcon.read_chemfiles(
+            filename,
+            topology=source,
+            skip=first,
+            step=stride,
+            stop=min(first + stride * 32, limit),
+        )
         for offset, raw in enumerate(batch):
             residues = raw.metadata.get("chemfiles_residues", [])
             sites = raw.atoms
@@ -58,29 +76,44 @@ def iter_trajectory(path, *, atom_name, topology=None, residue_name=None,
                 if not found:
                     continue
                 if len(found) != 1:
-                    raise ValueError("selected atom name must identify one centre per residue")
+                    raise ValueError(
+                        "selected atom name must identify one centre per residue"
+                    )
                 centres.append(found[0])
                 centre_ids.append(ordinal)
                 selected = [i for i in members if sites[i].symbol in hydrogens]
                 missing = hydrogens.difference(sites[i].symbol for i in selected)
                 if missing:
                     names = ", ".join(sorted(missing))
-                    raise ValueError(f"residue {ordinal} lacks requested hydrogen sites: {names}")
+                    raise ValueError(
+                        f"residue {ordinal} lacks requested hydrogen sites: {names}"
+                    )
                 donors.extend(selected)
                 donor_ids.extend([ordinal] * len(selected))
             if not centres or (hydrogens and not donors):
-                raise ValueError("no matching sites; check the atom names and the labelled topology")
+                raise ValueError(
+                    "no matching sites; check the atom names and the labelled topology"
+                )
             if not all(raw.metadata.get("pbc", (False, False, False))):
-                raise ValueError("trajectory analysis needs a three-dimensional periodic cell")
+                raise ValueError(
+                    "trajectory analysis needs a three-dimensional periodic cell"
+                )
             lattice = Cell(np.asarray(raw.metadata["lattice_vectors"]).T)
             restricted, rotation = lattice.standard_form("lower")
             if np.any(np.diag(restricted) < 0):
                 restricted, rotation = -restricted, -rotation
             xyz = wrap_positions(raw.coords_array(), lattice) @ rotation.T
-            box, low = _dump_box(restricted, (0., 0., 0.))
-            frame = Frame.from_arrays(xyz[centres], box, box_low=low,
-                                      mol_ids=centre_ids, hydrogen_positions=xyz[donors] if donors else None,
-                                      hydrogen_mol_ids=donor_ids if donors else None, cutoff=cutoff, bonded=bonded)
+            box, low = _dump_box(restricted, (0.0, 0.0, 0.0))
+            frame = Frame.from_arrays(
+                xyz[centres],
+                box,
+                box_low=low,
+                mol_ids=centre_ids,
+                hydrogen_positions=xyz[donors] if donors else None,
+                hydrogen_mol_ids=donor_ids if donors else None,
+                cutoff=cutoff,
+                bonded=bonded,
+            )
             frame.frame = first + offset * stride + 1
             frame.cloud.currentFrame = frame.frame
             frame._cell_rotation = rotation
@@ -124,7 +157,9 @@ def read(path, frame=1, **kwargs):
     if "atom_name" in kwargs:
         if frame < 1:
             raise ValueError("frame is one-indexed")
-        result = next(iter_trajectory(path, start=frame - 1, stop=frame, **kwargs), None)
+        result = next(
+            iter_trajectory(path, start=frame - 1, stop=frame, **kwargs), None
+        )
         if result is None:
             raise IndexError("frame index outside trajectory")
         return result

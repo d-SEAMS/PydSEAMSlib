@@ -6,7 +6,7 @@ project(
     # version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
     # cog.outl(f"    version: '{version}',")
     # ]]]
-    version: '2.14.1',
+    version: '2.14.3',
     # [[[end]]]
     default_options: [
         'warning_level=1',
@@ -39,9 +39,9 @@ endif
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
 # the subproject, and libyodaLib plus the Rust crates are static inside
 # the shared libraries that the wheel ships.
-seams_core_dep = dependency('seams-core', version: '>=2.14.1', required: false)
-seams_dep = dependency('seams', version: '>=2.14.1', required: false)
-seams_lang_dep = dependency('seams-lang', version: '>=2.14.1', required: false)
+seams_core_dep = dependency('seams-core', version: '>=2.14.3', required: false)
+seams_dep = dependency('seams', version: '>=2.14.3', required: false)
+seams_lang_dep = dependency('seams-lang', version: '>=2.14.3', required: false)
 use_installed_engine = (
     seams_core_dep.found()
     and seams_dep.found()
@@ -355,7 +355,7 @@ py.install_sources(
 # The 2.14 API: import dseams.
 subdir('src/dseams')
 
-# The sdist keeps the patched linkcell and the vesin and gpulite overlays.
+# The sdist keeps wrap-git patches and the vesin and gpulite overlays.
 meson.add_dist_script(py, files('scripts/dist_subprojects.py'))
 
 # Shared-library paths. A build target has full_path(); an installed
@@ -567,12 +567,21 @@ if not use_installed_engine
     _science_env = seams.get_variable('_snippet_env')
     if seams.get_variable('_chem_vendored')
         _loader_path = host_machine.system() == 'darwin' ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH'
-        _science_env.prepend(_loader_path, seams.get_variable('chemfiles_libdir'))
+        _science_env.prepend(
+            _loader_path,
+            seams.get_variable('chemfiles_libdir'),
+        )
     endif
     # The released engine's example driver accepts one compiler executable.
     _cc_cmd = meson.get_compiler('c').cmd_array()
-    if _cc_cmd.length() > 1 and import('fs').name(_cc_cmd[0]) in ['sccache', 'ccache']
-        _science_env.set(seams.get_variable('_asan_wrap') ? 'REAL_CC' : 'CC', _cc_cmd[1])
+    if _cc_cmd.length() > 1 and import('fs').name(_cc_cmd[0]) in [
+        'sccache',
+        'ccache',
+    ]
+        _science_env.set(
+            seams.get_variable('_asan_wrap') ? 'REAL_CC' : 'CC',
+            _cc_cmd[1],
+        )
     endif
     _science_env.set('SEAMS_CORE_SRC', _engine_src)
     _science_env.set('SEAMS_LIBDIR', _sub_libdir)

@@ -1,1 +1,0 @@
-The science tutorial no longer writes a stand-in png when Tachyon is missing, so the contact-sheet check fails instead of accepting that picture. The docs workflow installs OVITO and renders `interface.png`, `brine.png`, `sii.png`, and `sh.png`.
