@@ -39,9 +39,9 @@ endif
 # seams-lang) is used when it is on the prefix. Otherwise seams-core is
 # the subproject, and libyodaLib plus the Rust crates are static inside
 # the shared libraries that the wheel ships.
-seams_core_dep = dependency('seams-core', version: '>=2.14.1', required: false)
-seams_dep = dependency('seams', version: '>=2.14.1', required: false)
-seams_lang_dep = dependency('seams-lang', version: '>=2.14.1', required: false)
+seams_core_dep = dependency('seams-core', version: '>=2.14.2', required: false)
+seams_dep = dependency('seams', version: '>=2.14.2', required: false)
+seams_lang_dep = dependency('seams-lang', version: '>=2.14.2', required: false)
 use_installed_engine = (
     seams_core_dep.found()
     and seams_dep.found()
