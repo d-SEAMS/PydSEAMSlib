@@ -9,6 +9,7 @@ tree on this process's import path.
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -39,6 +40,11 @@ def _oracle():
     exe = os.environ.get("PYDSEAMS211_PYTHON", "")
     if not root or not exe:
         pytest.skip("PYDSEAMS211 and PYDSEAMS211_PYTHON name the 2.11.1 tree")
+    subprocess.run(
+        [sys.executable, str(ROOT / "input" / "fetch.py"), "mW_cubic.lammpstrj"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
     script = r"""
 import json, os, tempfile
 from pathlib import Path

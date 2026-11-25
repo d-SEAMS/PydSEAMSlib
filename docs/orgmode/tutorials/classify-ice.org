@@ -38,7 +38,7 @@ atoms: 250 oxygens of type 2 and 500 hydrogens of type 1):
 #+begin_src bash
 mkdir -p input/traj
 curl -sLo input/traj/exampleTraj.lammpstrj \
-  https://raw.githubusercontent.com/d-SEAMS/seams-core/main/input/traj/exampleTraj.lammpstrj
+  https://raw.githubusercontent.com/d-SEAMS/seams-core/v2.14.3/input/traj/exampleTraj.lammpstrj
 #+end_src
 
 * Step 3: Load the frame
